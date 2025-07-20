@@ -157,9 +157,8 @@
 	        .style("text-align", "center")
 	        .node();
 	      
-	      input.focus()
 
-	      // Handle text input
+	      // Handle text input width resizing
 	      input.addEventListener("input", function() {
 		          const text = this.value || "New";
 		          const width = Math.max(getTextWidth(text) + 30, 60); // Min width 60px
@@ -172,10 +171,10 @@
 		             .attr("x", -width/2 + 5);
 		        });
 	      
-	      // Finalize node creation
-	    input.addEventListener("keydown", function(e) {
-		    if (e.key === "Enter" && this.value.trim()) {
-			    let item = this.value.trim()
+	    // Finalize node creation
+	    function createNode( e ) {
+		    if (e.key === "Enter" && e.target.value.trim()) {
+			    let item = e.target.value.trim()
 			    item = item.charAt(0).toUpperCase() + item.slice(1).toLowerCase();
 			    nodes.push({
 				    id: nodes.length + 1,
@@ -188,8 +187,12 @@
 		    } else if (e.key === "Escape") {
 			    inputGroup.remove();
 		    }
-	    });
+	    }
+
+	    input.addEventListener("keydown", createNode )
+	    input.addEventListener("blur", function( e ){ e.key="Enter"; createNode( e ) })
 	      
+	    input.focus()
     });
 		      
 </script>
