@@ -21,6 +21,8 @@
     @keyframes blinker { 50% { opacity: 0; } }
 
     #graph { width: 100vw; height: 100vh; }
+
+    .nodes-layer {z-index: 2; }
     .node-label { 
       cursor: move;
       fill: white;
@@ -34,6 +36,8 @@
       /* fill: white; */
       pointer-events: none; /* Prevent text from blocking drag */
     }
+
+    .links-layer { z-index: 1; }
     .link { stroke: #ededed; stroke-width: 1px; }
 
     .input-node rect {
@@ -47,7 +51,8 @@
 </head>
 <body>
 	<instructions class=unselectable style=position:absolute;top:1em;width:100vw;text-align:center;font-size:small; >
-	| double tap to add | select thing(s) to <loading>craft</loading> | drag to position |
+	double tap to add | select thing(s) to <loading>craft</loading> | drag to position
+	<!-- drag to edge to delete -->
 	</instructions>
 
   <svg id="graph" class=unselectable ></svg>
@@ -89,15 +94,14 @@
 	      return context.measureText(text).width;
     }
 
-    // Layering
-    svg.append( "g" ).attr( "class" , "links-layer" )
-    svg.append( "g" ).attr( "class" , "nodes-layer" )
+    svg.append("g").attr("class", "links-layer")
+    svg.append("g").attr("class", "nodes-layer")
 
     // MAIN LOOP
     function updateGraph() {
 
       // Update links (lines)
-      const linkElements = svg.selectAll(".link")
+      const linkElements = svg.select(".links-layer").selectAll(".link")
         .data(links)
         .join("line")
         .attr("class", "link")
@@ -107,7 +111,7 @@
         .attr("y2", d => nodes.find(n => n.id === d.target).y);
 
       // Update nodes (rectangles + text)
-      const nodeGroups = svg.selectAll(".node-group")
+      const nodeGroups = svg.select(".nodes-layer").selectAll(".node-group")
         .data(nodes)
         .join("g")
         .attr("class", "node-group")
@@ -133,6 +137,7 @@
         .attr("text-anchor", "middle")
         .text(d => d.name);
 
+    // Select Things
     nodeGroups.on("click", function(event, d) {
 	    event.stopPropagation();
 
@@ -148,7 +153,8 @@
 		    selectedNodes.push(d); // Add by reference
 	    }
 
-	    resetSelectionTimer(); // Reset 3-second clear
+	    if( selectedNodes.length < 1 ) clearTimeout(selectionTimer) // remove all selections
+	    else resetSelectionTimer(); // Reset 3-second clear
     });
 
     }  // updateGraph
@@ -249,7 +255,7 @@
 
 		      console.log( items )
 
-		      fetch( 'http://192.168.1.2:3030/' , {
+		      fetch( 'https://craft.functional.limited/' , {
 			      method: 'POST' ,
 			      headers: {
 				      'Content-Type' : 'application/json' ,
@@ -270,11 +276,15 @@
 				      r.result.forEach( ( item , i ) => {
 
 					      const newID = nodes.length + 1
+					      let cordx = selectedLast.x + ( i + 1 ) * 10 + ( i * i ) * 10
+					      if( cordx > window.innerWidth ) cordx = window.innerWidth - 50
+					      let cordy = selectedLast.y + ( i + 1 ) * 40
+					      if( cordy > window.innerHeight ) cordy = window.innerHeight - 50
 
 					      nodes.push({
 						      id: newID ,
-						      x: selectedLast.x + ( i + 1 ) * 12 ,
-						      y: selectedLast.y + ( i + 1 ) * 40 ,
+						      x: cordx ,
+						      y: cordy ,
 						      name: item
 					      });
 
