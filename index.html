@@ -51,8 +51,7 @@
 </head>
 <body>
 	<instructions class=unselectable style=position:absolute;top:1em;width:100vw;text-align:center;font-size:small; >
-	double tap to add | select thing(s) to <loading>craft</loading> | drag to position
-	<!-- drag to edge to delete -->
+	double tap to add &emsp; select to <loading>craft</loading> &emsp; drag out to delete
 	</instructions>
 
   <svg id="graph" class=unselectable ></svg>
@@ -65,12 +64,12 @@
     svg.attr("width", width).attr("height", height);
 
     // Sample data: nodes and links
-    const nodes = [
+    let nodes = [
       { id: 1, x: 100, y: 100, name: "Orange peel" },
       { id: 2, x: 300, y: 100, name: "Oil" },
       { id: 3, x: 200, y: 300, name: "Steam" }
     ];
-    const links = [
+    let links = [
       { source: 1, target: 2, result: [ "Orange peel" , "Oil" ] }
     ];
 
@@ -80,11 +79,16 @@
 
     // Drag functionality
     const drag = d3.drag()
-      .on("drag", (event, d) => {
-        d.x = event.x;
-        d.y = event.y;
-        updateGraph();
-      });
+	    .on("drag", (event, d) => {
+		    d.x = event.x;
+		    d.y = event.y;
+		    // drag outside to delete
+		    if( d.x < 20 || d.x > window.innerWidth || d.y < 20 || d.y > window.innerHeight ){
+			    nodes = nodes.filter(n => n !== d)
+			    links = links.filter(n => n.target != d.id && n.source != d.id )
+		    }
+		    updateGraph();
+	    });
 
     // Scaling text labels
     function getTextWidth(text, fontSize = "12px", fontFamily = "Arial") {
@@ -94,6 +98,7 @@
 	      return context.measureText(text).width;
     }
 
+    // Layering
     svg.append("g").attr("class", "links-layer")
     svg.append("g").attr("class", "nodes-layer")
 
@@ -218,16 +223,18 @@
 	      
 	    // Finalize node creation
 	    function createNode( e ) {
-		    if (e.key === "Enter" && e.target.value.trim()) {
-			    let item = e.target.value.trim()
-			    item = item.charAt(0).toUpperCase() + item.slice(1).toLowerCase();
-			    nodes.push({
-				    id: nodes.length + 1,
-				    x: x,
-				    y: y,
-				    name: item
-			    });
-			    updateGraph();
+		    if (e.key === "Enter" ){
+			    if( e.target.value.trim() ) {
+				    let item = e.target.value.trim()
+				    item = item.charAt(0).toUpperCase() + item.slice(1).toLowerCase();
+				    nodes.push({
+					    id: nodes.length + 1,
+					    x: x,
+					    y: y,
+					    name: item
+				    });
+				    updateGraph();
+			    }
 			    inputGroup.remove();
 		    } else if (e.key === "Escape") {
 			    inputGroup.remove();
