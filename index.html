@@ -15,6 +15,7 @@
 <head>
   <style>
     body { margin: 0; overflow: hidden; }
+    .unselectable { user-select:none; }
     #graph { width: 100vw; height: 100vh; }
     .node-label { 
       cursor: move;
@@ -34,14 +35,18 @@
     .input-node rect {
 	    stroke-dasharray: 3; /* Dashed border to indicate editing */
     }
+
+    .selected > .node-label { fill: #333 !important; }
+    .selected > .node-text { fill: white !important; }
+
   </style>
 </head>
 <body>
-	<instructions style=position:absolute;top:1em;width:100vw;text-align:center;font-size:x-small;user-select:none;>
-	double click to add | click node(s) to create | drag to position
+	<instructions class=unselectable style=position:absolute;top:1em;width:100vw;text-align:center;font-size:x-small; >
+	double click to add | click node(s) to craft | drag to position
 	</instructions>
 
-  <svg id="graph"></svg>
+  <svg id="graph" class=unselectable ></svg>
   <script>
     // Initialize SVG and dimensions
     const svg = d3.select("#graph");
@@ -58,6 +63,10 @@
     const links = [
       // { source: 1, target: 2, result: "Steam" }
     ];
+
+    // Selection Management
+    let selectedNodes = [];       // Tracks currently selected nodes
+    let selectionTimer = null;    // Handles the 3-second auto-clear
 
     // Drag functionality
     const drag = d3.drag()
@@ -94,7 +103,7 @@
         .call(drag);
 
       // Draw label background (auto-width rectangle)
-    nodeGroups.selectAll(".node-label")
+      nodeGroups.selectAll(".node-label")
 	    .data(d => [d])
 	    .join("rect")
 	    .attr("class", "node-label")
@@ -112,7 +121,26 @@
         .attr("y", d => d.y + 5)
         .attr("text-anchor", "middle")
         .text(d => d.name);
-    }
+
+    nodeGroups.on("click", function(event, d) {
+	    event.stopPropagation();
+
+	    // Toggle selection directly via D3
+	    const nodeGroup = d3.select(this);
+	    const isSelected = nodeGroup.classed("selected");
+	    nodeGroup.classed("selected", !isSelected);
+
+	    // Update array (no ID needed - uses object reference)
+	    if (isSelected) {
+		    selectedNodes = selectedNodes.filter(n => n !== d); // Remove by reference
+	    } else {
+		    selectedNodes.push(d); // Add by reference
+	    }
+
+	    resetSelectionTimer(); // Reset 3-second clear
+    });
+
+    }  // updateGraph
 
     // Initialize
     updateGraph();
@@ -193,7 +221,35 @@
 	    input.addEventListener("blur", function( e ){ e.key="Enter"; createNode( e ) })
 	      
 	    input.focus()
-    });
+    }); // Create new node
+
+    // selection timer
+    function resetSelectionTimer() {
+	      clearTimeout(selectionTimer);
+	      selectionTimer = setTimeout(() => {
+		      let items = selectedNodes.map( n => n.name )
+		      console.log( items)
+
+		      fetch( 'http://192.168.1.2:3030/' , {
+			      method: 'POST' ,
+			      headers: {
+				      'Content-Type' : 'application/json' ,
+			      },
+			      body: JSON.stringify( items )
+		      }).then( response => {
+			      if( !response.ok) {
+				      console.error( 'Server error: ' , response.status )
+			      }
+			      response.result
+
+		      }).catch( error => {
+			      console.error( 'Network error: ' , error )
+		      })
+
+		      svg.selectAll(".node-group.selected").classed("selected", false);
+		      selectedNodes = [];
+	      }, 3000);
+    }
 		      
 </script>
 
