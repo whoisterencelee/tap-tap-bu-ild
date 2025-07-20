@@ -51,7 +51,7 @@
 </head>
 <body>
 	<instructions class=unselectable style=position:absolute;top:1em;width:100vw;text-align:center;font-size:small; >
-	double tap to add &emsp; select to <loading>craft</loading> &emsp; drag out to delete
+	double tap adds &emsp; select <loading>crafts</loading> &emsp; drag out deletes &emsp; type reset clears
 	</instructions>
 
   <svg id="graph" class=unselectable ></svg>
@@ -65,13 +65,34 @@
 
     // Sample data: nodes and links
     let nodes = [
-      { id: 1, x: 100, y: 100, name: "Orange peel" },
-      { id: 2, x: 300, y: 100, name: "Oil" },
-      { id: 3, x: 200, y: 300, name: "Steam" }
+      //{ id: 1, x: 100, y: 100, name: "Orange peel" },
+      //{ id: 2, x: 300, y: 100, name: "Oil" },
+      //{ id: 3, x: 200, y: 300, name: "Steam" }
     ];
     let links = [
-      { source: 1, target: 2, result: [ "Orange peel" , "Oil" ] }
+      //{ source: 1, target: 2, result: [ "Orange peel" , "Oil" ] }
     ];
+
+    // Data storage
+    function saveGraph(){ localStorage.setItem( 'sustainableCraft' , JSON.stringify( { nodes : nodes , links : links } ) ) }
+    function loadGraph( savedData ){
+    	    savedData? savedData : savedData = localStorage.getItem( 'sustainableCraft' )
+	    if( !savedData ) return false
+	    console.log( "used " + savedData.length + " / 5,000,000 of localStorage" )
+	    let graphData = JSON.parse( savedData )
+	    nodes = graphData.nodes
+	    links = graphData.links
+	    return true
+    }
+    function changeGraph(){
+	    updateGraph()
+	    saveGraph()
+    }
+    function clearGraph(){
+	    localStorage.removeItem( 'sustainableCraft')
+	    location.reload()
+    }
+    loadGraph()
 
     // Selection Management
     let selectedNodes = [];       // Tracks currently selected nodes
@@ -87,7 +108,7 @@
 			    nodes = nodes.filter(n => n !== d)
 			    links = links.filter(n => n.target != d.id && n.source != d.id )
 		    }
-		    updateGraph();
+		    changeGraph();
 	    });
 
     // Scaling text labels
@@ -226,6 +247,7 @@
 		    if (e.key === "Enter" ){
 			    if( e.target.value.trim() ) {
 				    let item = e.target.value.trim()
+				    if( item.toLowerCase() === "reset" ) return clearGraph()
 				    item = item.charAt(0).toUpperCase() + item.slice(1).toLowerCase();
 				    nodes.push({
 					    id: nodes.length + 1,
@@ -233,7 +255,7 @@
 					    y: y,
 					    name: item
 				    });
-				    updateGraph();
+				    changeGraph();
 			    }
 			    inputGroup.remove();
 		    } else if (e.key === "Escape") {
@@ -304,7 +326,7 @@
 						} )
 				      })
 
-				      updateGraph();
+				      changeGraph();
 
 				      if( --loadingCount < 1 ) for( var d = 0 ; d < loading.length ; d++ ){ loading[ d ].classList.remove( 'blink' ) }
 			      })
