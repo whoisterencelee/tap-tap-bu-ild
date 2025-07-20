@@ -15,7 +15,11 @@
 <head>
   <style>
     body { margin: 0; overflow: hidden; }
+
     .unselectable { user-select:none; }
+    .blink { animation: blinker 1s linear infinite; }
+    @keyframes blinker { 50% { opacity: 0; } }
+
     #graph { width: 100vw; height: 100vh; }
     .node-label { 
       cursor: move;
@@ -30,7 +34,7 @@
       /* fill: white; */
       pointer-events: none; /* Prevent text from blocking drag */
     }
-    .link { stroke: #999; stroke-width: 1px; }
+    .link { stroke: #ededed; stroke-width: 1px; }
 
     .input-node rect {
 	    stroke-dasharray: 3; /* Dashed border to indicate editing */
@@ -42,12 +46,13 @@
   </style>
 </head>
 <body>
-	<instructions class=unselectable style=position:absolute;top:1em;width:100vw;text-align:center;font-size:x-small; >
-	double click to add | click node(s) to craft | drag to position
+	<instructions class=unselectable style=position:absolute;top:1em;width:100vw;text-align:center;font-size:small; >
+	| double tap to add | select thing(s) to <loading>craft</loading> | drag to position |
 	</instructions>
 
   <svg id="graph" class=unselectable ></svg>
   <script>
+
     // Initialize SVG and dimensions
     const svg = d3.select("#graph");
     const width = window.innerWidth;
@@ -56,12 +61,12 @@
 
     // Sample data: nodes and links
     const nodes = [
-      // { id: 1, x: 100, y: 100, name: "Fire" },
-      // { id: 2, x: 300, y: 100, name: "Water Water Water" },
-      // { id: 3, x: 200, y: 300, name: "Steam" }
+      { id: 1, x: 100, y: 100, name: "Orange peel" },
+      { id: 2, x: 300, y: 100, name: "Oil" },
+      { id: 3, x: 200, y: 300, name: "Steam" }
     ];
     const links = [
-      // { source: 1, target: 2, result: "Steam" }
+      { source: 1, target: 2, result: [ "Orange peel" , "Oil" ] }
     ];
 
     // Selection Management
@@ -76,6 +81,7 @@
         updateGraph();
       });
 
+    // Scaling text labels
     function getTextWidth(text, fontSize = "12px", fontFamily = "Arial") {
 	      const canvas = document.createElement("canvas");
 	      const context = canvas.getContext("2d");
@@ -83,8 +89,13 @@
 	      return context.measureText(text).width;
     }
 
-    // Draw nodes (as labels) and links
+    // Layering
+    svg.append( "g" ).attr( "class" , "links-layer" )
+    svg.append( "g" ).attr( "class" , "nodes-layer" )
+
+    // MAIN LOOP
     function updateGraph() {
+
       // Update links (lines)
       const linkElements = svg.selectAll(".link")
         .data(links)
@@ -145,7 +156,7 @@
     // Initialize
     updateGraph();
 
-    // Create new node
+    // Double click create new node
     svg.on("dblclick", (event) => {
 
 	      // Remove any existing input nodes first
@@ -223,12 +234,20 @@
 	    input.focus()
     }); // Create new node
 
+    let loadingCount = 0
+
     // selection timer
     function resetSelectionTimer() {
 	      clearTimeout(selectionTimer);
 	      selectionTimer = setTimeout(() => {
-		      let items = selectedNodes.map( n => n.name )
-		      console.log( items)
+		      let selectedItems = Array.from( selectedNodes )
+		      let items = selectedItems.map( n => n.name )
+			
+		      loadingCount++
+		      let loading = document.getElementsByTagName( "loading" )
+		      for( var d = 0 ; d < loading.length ; d++ ){ loading[ d ].classList.add( 'blink' ) }
+
+		      console.log( items )
 
 		      fetch( 'http://192.168.1.2:3030/' , {
 			      method: 'POST' ,
@@ -240,7 +259,38 @@
 			      if( !response.ok) {
 				      console.error( 'Server error: ' , response.status )
 			      }
-			      response.result
+
+			      // take the last coordinates of the last selected node
+			      let selectedLast = selectedItems[ selectedItems.length - 1 ]
+
+			      response.json().then( r => {
+
+				      console.log( r.result )
+
+				      r.result.forEach( ( item , i ) => {
+
+					      const newID = nodes.length + 1
+
+					      nodes.push({
+						      id: newID ,
+						      x: selectedLast.x + ( i + 1 ) * 12 ,
+						      y: selectedLast.y + ( i + 1 ) * 40 ,
+						      name: item
+					      });
+
+					      selectedItems.forEach( prior => {
+						      links.push({
+							      source: prior.id ,
+							      target: newID ,
+							      result: [ prior.name , item ]
+						      } )
+						} )
+				      })
+
+				      updateGraph();
+
+				      if( --loadingCount < 1 ) for( var d = 0 ; d < loading.length ; d++ ){ loading[ d ].classList.remove( 'blink' ) }
+			      })
 
 		      }).catch( error => {
 			      console.error( 'Network error: ' , error )
