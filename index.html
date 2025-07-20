@@ -1,0 +1,198 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Sustainable Craft</title>
+  <script src="https://d3js.org/d3.v7.min.js"></script>
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <meta name="description" content="" />
+  <link rel="icon" href="favicon.png">
+  <link rel="manifest" href="manifest.webmanifest">
+</head>
+
+<body>
+
+<head>
+  <style>
+    body { margin: 0; overflow: hidden; }
+    #graph { width: 100vw; height: 100vh; }
+    .node-label { 
+      cursor: move;
+      fill: white;
+      stroke: #333;
+      stroke-width: 1px;
+      rx: 5px; /* Rounded corners */
+    }
+    .node-text {
+      font-family: Arial;
+      font-size: 12px;
+      /* fill: white; */
+      pointer-events: none; /* Prevent text from blocking drag */
+    }
+    .link { stroke: #999; stroke-width: 1px; }
+
+    .input-node rect {
+	    stroke-dasharray: 3; /* Dashed border to indicate editing */
+    }
+  </style>
+</head>
+<body>
+	<instructions style=position:absolute;top:1em;width:100vw;text-align:center;font-size:x-small;user-select:none;>
+	double click to add | click node(s) to create | drag to position
+	</instructions>
+
+  <svg id="graph"></svg>
+  <script>
+    // Initialize SVG and dimensions
+    const svg = d3.select("#graph");
+    const width = window.innerWidth;
+    const height = window.innerHeight;
+    svg.attr("width", width).attr("height", height);
+
+    // Sample data: nodes and links
+    const nodes = [
+      // { id: 1, x: 100, y: 100, name: "Fire" },
+      // { id: 2, x: 300, y: 100, name: "Water Water Water" },
+      // { id: 3, x: 200, y: 300, name: "Steam" }
+    ];
+    const links = [
+      // { source: 1, target: 2, result: "Steam" }
+    ];
+
+    // Drag functionality
+    const drag = d3.drag()
+      .on("drag", (event, d) => {
+        d.x = event.x;
+        d.y = event.y;
+        updateGraph();
+      });
+
+    function getTextWidth(text, fontSize = "12px", fontFamily = "Arial") {
+	      const canvas = document.createElement("canvas");
+	      const context = canvas.getContext("2d");
+	      context.font = `${fontSize} ${fontFamily}`;
+	      return context.measureText(text).width;
+    }
+
+    // Draw nodes (as labels) and links
+    function updateGraph() {
+      // Update links (lines)
+      const linkElements = svg.selectAll(".link")
+        .data(links)
+        .join("line")
+        .attr("class", "link")
+        .attr("x1", d => nodes.find(n => n.id === d.source).x)
+        .attr("y1", d => nodes.find(n => n.id === d.source).y)
+        .attr("x2", d => nodes.find(n => n.id === d.target).x)
+        .attr("y2", d => nodes.find(n => n.id === d.target).y);
+
+      // Update nodes (rectangles + text)
+      const nodeGroups = svg.selectAll(".node-group")
+        .data(nodes)
+        .join("g")
+        .attr("class", "node-group")
+        .call(drag);
+
+      // Draw label background (auto-width rectangle)
+    nodeGroups.selectAll(".node-label")
+	    .data(d => [d])
+	    .join("rect")
+	    .attr("class", "node-label")
+	    .attr("x", d => d.x - 15 - getTextWidth(d.name)/2) // Center based on text width
+	    .attr("y", d => d.y - 15)
+	    .attr("width", d => getTextWidth(d.name) + 30) // 15px padding each side
+	    .attr("height", 30);
+
+      // Draw text (centered inside rectangle)
+      nodeGroups.selectAll(".node-text")
+        .data(d => [d])
+        .join("text")
+        .attr("class", "node-text")
+        .attr("x", d => d.x)
+        .attr("y", d => d.y + 5)
+        .attr("text-anchor", "middle")
+        .text(d => d.name);
+    }
+
+    // Initialize
+    updateGraph();
+
+    // Create new node
+    svg.on("dblclick", (event) => {
+
+	      // Remove any existing input nodes first
+	      svg.selectAll(".input-node").remove();
+
+	      const x = event.offsetX;
+	      const y = event.offsetY;
+	      
+	      // Create temporary input group
+	      const inputGroup = svg.append("g")
+	        .attr("class", "input-node")
+	        .attr("transform", `translate(${x},${y})`);
+	      
+	      // Create expanding rectangle
+	      const rect = inputGroup.append("rect")
+	        .attr("class", "node-label")
+	    	.attr("x", -30)
+	        .attr("y", -15)
+	    	.attr("width", 60)
+	        .attr("height", 30);
+	      
+	      // Create input field
+	      const fo = inputGroup.append("foreignObject")
+	    	.attr("x", -30)
+	        .attr("y", -10)
+	    	.attr("width", 50)
+	        .attr("height", 20);
+	      
+	      const input = fo.append("xhtml:input")
+	        .attr("type", "text")
+	        .style("width", "100%")
+	        .style("height", "100%")
+	        .style("border", "none")
+	        .style("padding", "0")
+	    	.style("outline", "0")
+	        .style("font-size", "12px")
+	        .style("text-align", "center")
+	        .node();
+	      
+	      input.focus()
+
+	      // Handle text input
+	      input.addEventListener("input", function() {
+		          const text = this.value || "New";
+		          const width = Math.max(getTextWidth(text) + 30, 60); // Min width 60px
+		          
+		          // Update rectangle and input field
+		          rect.attr("width", width)
+		              .attr("x", -width/2);
+		          
+		          fo.attr("width", width - 10)
+		             .attr("x", -width/2 + 5);
+		        });
+	      
+	      // Finalize node creation
+	    input.addEventListener("keydown", function(e) {
+		    if (e.key === "Enter" && this.value.trim()) {
+			    let item = this.value.trim()
+			    item = item.charAt(0).toUpperCase() + item.slice(1).toLowerCase();
+			    nodes.push({
+				    id: nodes.length + 1,
+				    x: x,
+				    y: y,
+				    name: item
+			    });
+			    updateGraph();
+			    inputGroup.remove();
+		    } else if (e.key === "Escape") {
+			    inputGroup.remove();
+		    }
+	    });
+	      
+    });
+		      
+</script>
+
+</body>
+</html>
