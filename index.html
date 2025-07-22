@@ -50,8 +50,8 @@
   </style>
 </head>
 <body>
-	<instructions class=unselectable style=position:absolute;top:1em;width:100vw;text-align:center;font-size:small; >
-	double tap adds &emsp; select <loading>crafts</loading> &emsp; drag out deletes &emsp; type reset clears
+	<instructions class=unselectable style=position:absolute;top:1em;width:100vw;text-align:center;font-size:x-small; >
+	double tap adds &emsp; select <loading>craft items</loading> &emsp; learn hold &emsp; drag out deletes &emsp; type :reset clears
 	</instructions>
 
   <svg id="graph" class=unselectable ></svg>
@@ -95,21 +95,71 @@
     loadGraph()
 
     // Selection Management
-    let selectedNodes = [];       // Tracks currently selected nodes
-    let selectionTimer = null;    // Handles the 3-second auto-clear
+    let selectedNodes = [];     // Tracks currently selected nodes
+    let selectionTimer = null; 	// Handles the 3-second before submit to allow more selection
 
-    // Drag functionality
+    let holdTimer = null	// Handles the 2 second holding
+    let isHolding = false
+    let holdDrag = null
+
+    // User Interaction
     const drag = d3.drag()
+	    .on( "start" , ( event , d ) => {
+		    holdDrag = d3.select( this )
+		    startHoldTimer( d )
+	    } )
 	    .on("drag", (event, d) => {
+
+		    if( crafting > 0 ) return   // helps with UI stability
+		    if( isHolding ) return
+
 		    d.x = event.x;
 		    d.y = event.y;
+
+		    // really draggging
+		    // console.log( "dx " + Math.abs( event.dx ) + " dy " + Math.abs( event.dy ) )
+		    if( Math.abs( event.dx ) >= 1 || Math.abs( event.dy ) >= 1 ) cancelHold()
+
 		    // drag outside to delete
 		    if( d.x < 20 || d.x > window.innerWidth || d.y < 20 || d.y > window.innerHeight ){
 			    nodes = nodes.filter(n => n !== d)
 			    links = links.filter(n => n.target != d.id && n.source != d.id )
 		    }
+
 		    changeGraph();
-	    });
+	    } )
+	    .on( "end" , ( event , d ) => {
+		    cancelHold()
+		    isHolding = false
+	    } )
+
+    function startHoldTimer(nodeData) {
+	    isHolding = false
+	    if( !holdTimer ) {
+		    holdTimer = setTimeout(() => {
+			    isHolding = true
+			    if( holdDrag ) {
+				    holdDrag.interrupt()
+				    holdDrag = null
+			    }
+			    openWikipedia(nodeData.name);
+		    }, 2500 );
+	    }
+    }
+
+    function cancelHold() {
+	    if (holdTimer) {
+		    clearTimeout(holdTimer);
+		    holdTimer = null;
+	    }
+    }
+
+    function openWikipedia(searchTerm) {
+	    // Clean the search term (Wikipedia URLs don't like spaces)
+	    const encodedTerm = encodeURIComponent(searchTerm.replace(/\s+/g, '_'));
+	    const wikiUrl = `https://en.wikipedia.org/wiki/${encodedTerm}`;
+	    window.open(wikiUrl, '_blank', 'noopener,noreferrer');
+    }
 
     // Scaling text labels
     function getTextWidth(text, fontSize = "12px", fontFamily = "Arial") {
@@ -163,25 +213,25 @@
         .attr("text-anchor", "middle")
         .text(d => d.name);
 
-    // Select Things
-    nodeGroups.on("click", function(event, d) {
-	    event.stopPropagation();
+	    // Select Things
+	    nodeGroups.on("click", function(event, d) {
+		    event.stopPropagation();
 
-	    // Toggle selection directly via D3
-	    const nodeGroup = d3.select(this);
-	    const isSelected = nodeGroup.classed("selected");
-	    nodeGroup.classed("selected", !isSelected);
+		    // Toggle selection directly via D3
+		    const nodeGroup = d3.select(this);
+		    const isSelected = nodeGroup.classed("selected");
+		    nodeGroup.classed("selected", !isSelected);
 
-	    // Update array (no ID needed - uses object reference)
-	    if (isSelected) {
-		    selectedNodes = selectedNodes.filter(n => n !== d); // Remove by reference
-	    } else {
-		    selectedNodes.push(d); // Add by reference
-	    }
+		    // Update array (no ID needed - uses object reference)
+		    if (isSelected) {
+			    selectedNodes = selectedNodes.filter(n => n !== d); // Remove by reference
+		    } else {
+			    selectedNodes.push(d); // Add by reference
+		    }
 
-	    if( selectedNodes.length < 1 ) clearTimeout(selectionTimer) // remove all selections
-	    else resetSelectionTimer(); // Reset 3-second clear
-    });
+		    if( selectedNodes.length < 1 ) clearTimeout(selectionTimer) // all selections removed
+		    else resetSelectionTimer(); // Reset 3-second clear
+	    });
 
     }  // updateGraph
 
@@ -247,7 +297,7 @@
 		    if (e.key === "Enter" ){
 			    if( e.target.value.trim() ) {
 				    let item = e.target.value.trim()
-				    if( item.toLowerCase() === "reset" ) return clearGraph()
+				    if( item.toLowerCase() === ":reset" ) return clearGraph()
 				    item = item.charAt(0).toUpperCase() + item.slice(1).toLowerCase();
 				    nodes.push({
 					    id: nodes.length + 1,
@@ -269,21 +319,27 @@
 	    input.focus()
     }); // Create new node
 
-    let loadingCount = 0
+    let crafting = 0
 
     // selection timer
     function resetSelectionTimer() {
 	      clearTimeout(selectionTimer);
 	      selectionTimer = setTimeout(() => {
+
+		      if( selectedNodes.length < 1 ) return
+
 		      let selectedItems = Array.from( selectedNodes )
 		      let items = selectedItems.map( n => n.name )
+		      let selectedLast = selectedItems[ selectedItems.length - 1 ]
 			
-		      loadingCount++
+		      // loading
+		      crafting++
 		      let loading = document.getElementsByTagName( "loading" )
 		      for( var d = 0 ; d < loading.length ; d++ ){ loading[ d ].classList.add( 'blink' ) }
 
 		      console.log( items )
 
+		      // call server
 		      fetch( 'https://craft.functional.limited/' , {
 			      method: 'POST' ,
 			      headers: {
@@ -295,15 +351,13 @@
 				      console.error( 'Server error: ' , response.status )
 			      }
 
-			      // take the last coordinates of the last selected node
-			      let selectedLast = selectedItems[ selectedItems.length - 1 ]
-
 			      response.json().then( r => {
 
 				      console.log( r.result )
 
 				      r.result.forEach( ( item , i ) => {
 
+					      // set initial position avoid boundries
 					      const newID = nodes.length + 1
 					      let cordx = selectedLast.x + ( i + 1 ) * 10 + ( i * i ) * 10
 					      if( cordx > window.innerWidth ) cordx = window.innerWidth - 50
@@ -317,6 +371,7 @@
 						      name: item
 					      });
 
+					      // create links
 					      selectedItems.forEach( prior => {
 						      links.push({
 							      source: prior.id ,
@@ -328,7 +383,8 @@
 
 				      changeGraph();
 
-				      if( --loadingCount < 1 ) for( var d = 0 ; d < loading.length ; d++ ){ loading[ d ].classList.remove( 'blink' ) }
+				      // stop crafting
+				      if( --crafting < 1 ) for( var d = 0 ; d < loading.length ; d++ ){ loading[ d ].classList.remove( 'blink' ) }
 			      })
 
 		      }).catch( error => {
@@ -337,7 +393,7 @@
 
 		      svg.selectAll(".node-group.selected").classed("selected", false);
 		      selectedNodes = [];
-	      }, 3000);
+	      }, 4000);
     }
 		      
 </script>
