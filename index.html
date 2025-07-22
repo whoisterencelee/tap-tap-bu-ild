@@ -72,6 +72,7 @@
     let links = [
       //{ source: 1, target: 2, result: [ "Orange peel" , "Oil" ] }
     ];
+    let nodeID = 1978
 
     // Data storage
     function saveGraph(){ localStorage.setItem( 'sustainableCraft' , JSON.stringify( { nodes : nodes , links : links } ) ) }
@@ -110,20 +111,25 @@
 	    } )
 	    .on("drag", (event, d) => {
 
-		    if( crafting > 0 ) return   // helps with UI stability
-		    if( isHolding ) return
-
-		    d.x = event.x;
-		    d.y = event.y;
+		    if( isHolding ) return  // stop the first return from other tab
 
 		    // really draggging
 		    // console.log( "dx " + Math.abs( event.dx ) + " dy " + Math.abs( event.dy ) )
 		    if( Math.abs( event.dx ) >= 1 || Math.abs( event.dy ) >= 1 ) cancelHold()
 
 		    // drag outside to delete
-		    if( d.x < 20 || d.x > window.innerWidth || d.y < 20 || d.y > window.innerHeight ){
-			    nodes = nodes.filter(n => n !== d)
-			    links = links.filter(n => n.target != d.id && n.source != d.id )
+		    if( event.x < 20 || event.x > window.innerWidth || event.y < 20 || event.y > window.innerHeight ){
+
+			    if( crafting < 1 ) {  // not crafting
+				    nodes = nodes.filter(n => n !== d)
+				    links = links.filter(n => n.target != d.id && n.source != d.id )
+			    }
+
+		    } else {
+
+			    d.x = event.x;
+			    d.y = event.y;
+
 		    }
 
 		    changeGraph();
@@ -300,7 +306,7 @@
 				    if( item.toLowerCase() === ":reset" ) return clearGraph()
 				    item = item.charAt(0).toUpperCase() + item.slice(1).toLowerCase();
 				    nodes.push({
-					    id: nodes.length + 1,
+					    id: nodeID++,
 					    x: x,
 					    y: y,
 					    name: item
@@ -358,7 +364,7 @@
 				      r.result.forEach( ( item , i ) => {
 
 					      // set initial position avoid boundries
-					      const newID = nodes.length + 1
+					      const newID = nodeID++
 					      let cordx = selectedLast.x + ( i + 1 ) * 10 + ( i * i ) * 10
 					      if( cordx > window.innerWidth ) cordx = window.innerWidth - 50
 					      let cordy = selectedLast.y + ( i + 1 ) * 40
@@ -393,7 +399,7 @@
 
 		      svg.selectAll(".node-group.selected").classed("selected", false);
 		      selectedNodes = [];
-	      }, 4000);
+	      }, 3000);
     }
 		      
 </script>
