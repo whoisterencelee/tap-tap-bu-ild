@@ -47,6 +47,20 @@
     .selected > .node-label { fill: #333 !important; }
     .selected > .node-text { fill: white !important; }
 
+    .shake > rect { animation: shake 500ms ease-in-out infinite; }
+    @keyframes shake {
+	    10% { transform: translate(1px, 1px); }
+	    20% { transform: translate(0, 0); }
+	    30% { transform: translate(-1px, -1px); }
+	    42% { transform: translate(0, 0); }
+	    52% { transform: translate(1px, -1px); }
+	    60% { transform: translate(0, 0); }
+	    70% { transform: translate(-1px, 1px); }
+	    80% { transform: translate(0, 0); }
+	    90% { transform: translate(-1px, -1px); }
+	    100% { transform: translate(0, 0); }
+    }
+
   </style>
 </head>
 <body>
@@ -83,6 +97,7 @@
 	    let graphData = JSON.parse( savedData )
 	    nodes = graphData.nodes
 	    links = graphData.links
+	    nodeID = nodes.reduce( ( a , b ) => a > b.id ? a : b.id  ) // find the biggest nodeID
 	    return true
     }
     function changeGraph(){
@@ -105,11 +120,13 @@
 
     // User Interaction
     const drag = d3.drag()
-	    .on( "start" , ( event , d ) => {
+	    .on( "start" , function( event , d ){
 		    holdDrag = d3.select( this )
 		    startHoldTimer( d )
 	    } )
-	    .on("drag", (event, d) => {
+	    .on("drag", function( event, d ){  // do not use arrow function, otherwise loose this context
+
+		    holdDrag = d3.select( this )
 
 		    if( isHolding ) return  // stop the first return from other tab
 
@@ -117,10 +134,10 @@
 		    // console.log( "dx " + Math.abs( event.dx ) + " dy " + Math.abs( event.dy ) )
 		    if( Math.abs( event.dx ) >= 1 || Math.abs( event.dy ) >= 1 ) cancelHold()
 
-		    // drag outside to delete
-		    if( event.x < 20 || event.x > window.innerWidth || event.y < 20 || event.y > window.innerHeight ){
+		    // drag outside boundry to delete
+		    if( event.x < 20 || event.x > ( window.innerWidth - 20 ) || event.y < 20 || event.y > ( window.innerHeight - 20 ) ){
 
-			    if( crafting < 1 ) {  // not crafting
+			    if( crafting < 1 ) {  // delete if not crafting
 				    nodes = nodes.filter(n => n !== d)
 				    links = links.filter(n => n.target != d.id && n.source != d.id )
 			    }
@@ -134,7 +151,7 @@
 
 		    changeGraph();
 	    } )
-	    .on( "end" , ( event , d ) => {
+	    .on( "end" , function( event , d ){
 		    cancelHold()
 		    isHolding = false
 	    } )
@@ -145,7 +162,7 @@
 		    holdTimer = setTimeout(() => {
 			    isHolding = true
 			    if( holdDrag ) {
-				    holdDrag.interrupt()
+	//			    holdDrag.interrupt()  // not need to be so violent, state machine can handle it now
 				    holdDrag = null
 			    }
 			    openWikipedia(nodeData.name);
@@ -306,7 +323,7 @@
 				    if( item.toLowerCase() === ":reset" ) return clearGraph()
 				    item = item.charAt(0).toUpperCase() + item.slice(1).toLowerCase();
 				    nodes.push({
-					    id: nodeID++,
+					    id: ++nodeID,
 					    x: x,
 					    y: y,
 					    name: item
@@ -332,7 +349,11 @@
 	      clearTimeout(selectionTimer);
 	      selectionTimer = setTimeout(() => {
 
+		      var selectedDOM = svg.selectAll(".node-group.selected")
+
 		      if( selectedNodes.length < 1 ) return
+
+		      selectedDOM.classed("shake", true);
 
 		      let selectedItems = Array.from( selectedNodes )
 		      let items = selectedItems.map( n => n.name )
@@ -361,11 +382,14 @@
 
 				      console.log( r.result )
 
+				      selectedDOM.classed( "selected shake", false )
+
 				      r.result.forEach( ( item , i ) => {
 
 					      // set initial position avoid boundries
-					      const newID = nodeID++
-					      let cordx = selectedLast.x + ( i + 1 ) * 10 + ( i * i ) * 10
+					      const newID = ++nodeID
+					      //let cordx = selectedLast.x + ( i + 1 ) * 10 + ( i * i ) * 10
+					      let cordx = selectedLast.x + 30
 					      if( cordx > window.innerWidth ) cordx = window.innerWidth - 50
 					      let cordy = selectedLast.y + ( i + 1 ) * 40
 					      if( cordy > window.innerHeight ) cordy = window.innerHeight - 50
@@ -397,9 +421,8 @@
 			      console.error( 'Network error: ' , error )
 		      })
 
-		      svg.selectAll(".node-group.selected").classed("selected", false);
 		      selectedNodes = [];
-	      }, 3000);
+	      }, 2000);
     }
 		      
 </script>
