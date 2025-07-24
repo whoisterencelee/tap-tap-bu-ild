@@ -144,12 +144,12 @@
 
 		    } else {
 
-			    d.x = event.x;
-			    d.y = event.y;
+			    d.x = event.x
+			    d.y = event.y
 
 		    }
 
-		    changeGraph();
+		    changeGraph()
 	    } )
 	    .on( "end" , function( event , d ){
 		    cancelHold()
@@ -199,42 +199,42 @@
     // MAIN LOOP
     function updateGraph() {
 
-      // Update links (lines)
-      const linkElements = svg.select(".links-layer").selectAll(".link")
-        .data(links)
-        .join("line")
-        .attr("class", "link")
-        .attr("x1", d => nodes.find(n => n.id === d.source).x)
-        .attr("y1", d => nodes.find(n => n.id === d.source).y)
-        .attr("x2", d => nodes.find(n => n.id === d.target).x)
-        .attr("y2", d => nodes.find(n => n.id === d.target).y);
+	    // Update links (lines)
+	    const linkElements = svg.select(".links-layer").selectAll(".link")
+		    .data(links)
+		    .join("line")
+		    .classed( "link" , true )
+		    .attr("x1", d => nodes.find(n => n.id === d.source).x)
+		    .attr("y1", d => nodes.find(n => n.id === d.source).y)
+		    .attr("x2", d => nodes.find(n => n.id === d.target).x)
+		    .attr("y2", d => nodes.find(n => n.id === d.target).y);
 
-      // Update nodes (rectangles + text)
-      const nodeGroups = svg.select(".nodes-layer").selectAll(".node-group")
-        .data(nodes)
-        .join("g")
-        .attr("class", "node-group")
-        .call(drag);
+	    // Update nodes (rectangles + text)
+	    const nodeGroups = svg.select(".nodes-layer").selectAll(".node-group")
+		    .data(nodes)
+		    .join("g")
+		    .classed( "node-group" , true )
+		    .call(drag);
 
-      // Draw label background (auto-width rectangle)
-      nodeGroups.selectAll(".node-label")
-	    .data(d => [d])
-	    .join("rect")
-	    .attr("class", "node-label")
-	    .attr("x", d => d.x - 15 - getTextWidth(d.name)/2) // Center based on text width
-	    .attr("y", d => d.y - 15)
-	    .attr("width", d => getTextWidth(d.name) + 30) // 15px padding each side
-	    .attr("height", 30);
+	    // Draw label background (auto-width rectangle)
+	    nodeGroups.selectAll(".node-label")
+		    .data(d => [d])
+		    .join("rect")
+		    .classed( "node-label" , true )
+		    .attr("x", d => d.x - 15 - getTextWidth(d.name)/2) // Center based on text width
+		    .attr("y", d => d.y - 15)
+		    .attr("width", d => getTextWidth(d.name) + 30) // 15px padding each side
+		    .attr("height", 30);
 
-      // Draw text (centered inside rectangle)
-      nodeGroups.selectAll(".node-text")
-        .data(d => [d])
-        .join("text")
-        .attr("class", "node-text")
-        .attr("x", d => d.x)
-        .attr("y", d => d.y + 5)
-        .attr("text-anchor", "middle")
-        .text(d => d.name);
+	    // Draw text (centered inside rectangle)
+	    nodeGroups.selectAll(".node-text")
+		    .data(d => [d])
+		    .join("text")
+		    .classed( "node-text" , true )
+		    .attr("x", d => d.x)
+		    .attr("y", d => d.y + 5)
+		    .attr("text-anchor", "middle")
+		    .text(d => d.name);
 
 	    // Select Things
 	    nodeGroups.on("click", function(event, d) {
