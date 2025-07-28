@@ -64,12 +64,30 @@
   </style>
 </head>
 <body>
-	<instructions class=unselectable style=position:absolute;top:1em;width:100vw;text-align:center;font-size:x-small; >
-	double tap adds &emsp; <loading>tap &amp; craft</loading> &emsp; hold for wiki &emsp; type :commands
-	</instructions>
+	<div class=unselectable style=position:absolute;top:1em;width:100vw;text-align:center;font-size:x-small;display:flex;justify-content:center; >
+	double tap &emsp; <loading>tap &amp; craft</loading> &emsp; hold &emsp; 
+		<div id=command onclick="showHide(event.target)">
+			:command
+			<table style="display:none;position:fixed;text-align:left;border-spacing:10px 0;" display-value="table" >
+				<tr> <td>:command</td>		<td>show/hide</td> </tr>
+				<tr> <td>:download</td>		<td>save file</td></tr>
+				<tr> <td>:upload</td>		<td>load file</td> </tr>
+				<tr> <td>:reset</td>		<td>clear</td> </tr>
+			</table>
+		</div>
+	</div>
 
   <svg id="graph" class=unselectable ></svg>
   <script>
+
+	  function showHide( container ){
+		  var c = container.childNodes
+		  for( var n = 0 ; n < c.length ; n++ ){
+			  let cn = c [ n ]
+			  let d = cn?.getAttribute ? cn.getAttribute( "display-value" ) : 'block'
+			  if( cn.style ) cn.style.display = cn.style.display == 'none' ? d : 'none'
+		  }
+	  }
 
     // Initialize SVG and dimensions
     const svg = d3.select("#graph");
@@ -89,7 +107,11 @@
     let nodeID = 1978
 
     // Data storage
-    function saveGraph(){ localStorage.setItem( 'sustainableCraft' , JSON.stringify( { nodes : nodes , links : links } ) ) }
+    function saveGraph(){ 
+	    let data = JSON.stringify( { nodes : nodes , links : links } )
+	    localStorage.setItem( 'sustainableCraft' , data ) 
+	    return data
+    }
     function loadGraph( savedData ){
     	    savedData? savedData : savedData = localStorage.getItem( 'sustainableCraft' )
 	    if( !savedData ) return false
@@ -100,6 +122,47 @@
 	    nodeID = nodes.reduce( ( a , b ) => a > b.id ? a : b.id  ) // find the biggest nodeID
 	    return true
     }
+
+    // Data download
+    function download( data , format ){ 
+	    let blob = new Blob( [ data ] , { type: format? format : 'application/json' } )
+	    let down = URL.createObjectURL( blob )
+	    let a = document.createElement( 'a' )
+	    a.href = down
+	    a.download = 'sustainableCraft-' + getTimestamp() + '.json'
+	    a.click()
+	    URL.revokeObjectURL( down )
+    } // download
+    function upload(){
+	    let input = document.createElement( 'input' )
+	    input.type = 'file'
+	    input.accept = '.json'
+
+	    input.onchange = ( e ) => {
+		    let file = e.target.files[ 0 ]
+		    let reader = new FileReader()
+
+		    reader.onload = ( event ) => { 
+			    loadGraph( event.target.result ) 
+			    changeGraph()
+		    }
+		    reader.readAsText( file )
+		}
+	    input.click()
+    } // upload
+    		
+    function getTimestamp() {
+	    const now = new Date();
+	    const year = now.getFullYear().toString().slice(-2); // 'YY'
+	    const month = (now.getMonth() + 1).toString().padStart(2, '0'); // 'MM'
+	    const day = now.getDate().toString().padStart(2, '0'); // 'DD'
+	    const hours = now.getHours().toString().padStart(2, '0'); // 'hh'
+	    const minutes = now.getMinutes().toString().padStart(2, '0'); // 'mm'
+	    const seconds = now.getSeconds().toString().padStart(2, '0'); // 'ss'
+
+	    return `${year}${month}${day}${hours}${minutes}${seconds}`;
+    }
+
     function changeGraph(){
 	    updateGraph()
 	    saveGraph()
@@ -304,7 +367,7 @@
 
 	      // Handle text input width resizing
 	      input.addEventListener("input", function() {
-		          const text = this.value || "New";
+		          const text = this.value || "New";  // TODO this should be pre-generated
 		          const width = Math.max(getTextWidth(text) + 30, 60); // Min width 60px
 		          
 		          // Update rectangle and input field
@@ -320,7 +383,17 @@
 		    if (e.key === "Enter" ){
 			    if( e.target.value.trim() ) {
 				    let item = e.target.value.trim()
-				    if( item.toLowerCase() === ":reset" ) return clearGraph()
+
+				    let command = item.toLowerCase()
+				    if( command.match( /^:/ ) ){
+					    if( command === ":command" ) showHide( document.getElementById( "command" ) )
+					    else if( command === ":reset" ) return clearGraph()
+					    else if( command.match( /^:download/ ) ) download( saveGraph() ) 
+					    else if( command.match( /^:upload/ ) ) upload()
+					    inputGroup.remove()
+					    return
+				    } // command
+
 				    item = item.charAt(0).toUpperCase() + item.slice(1).toLowerCase();
 				    nodes.push({
 					    id: ++nodeID,
