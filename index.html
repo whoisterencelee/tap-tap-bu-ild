@@ -4,6 +4,7 @@
   <meta charset="UTF-8" />
   <title>Sustainable Craft</title>
   <script src="https://d3js.org/d3.v7.min.js"></script>
+  <!--<script src="https://cdnjs.cloudflare.com/ajax/libs/pako/2.1.0/pako.min.js" integrity="sha512-g2TeAWw5GPnX7z0Kn8nFbYfeHcvAu/tx6d6mrLe/90mkCxO+RcptyYpksUz35EO337F83bZwcmUyHiHamspkfg==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>-->
   <meta name="viewport" content="width=device-width,initial-scale=1" />
   <meta name="description" content="" />
   <link rel="icon" href="favicon.png">
@@ -65,16 +66,18 @@
 </head>
 <body>
 	<div class=unselectable style=position:absolute;top:1em;width:100vw;text-align:center;font-size:x-small;display:flex;justify-content:center; >
-	double tap &emsp; <loading>tap &amp; craft</loading> &emsp; hold &emsp; 
-		<div id=command onclick="showHide(event.target)">
-			:command
-			<table style="display:none;position:fixed;text-align:left;border-spacing:10px 0;" display-value="table" >
-				<tr> <td>:command</td>		<td>show/hide</td> </tr>
-				<tr> <td>:download</td>		<td>save file</td></tr>
-				<tr> <td>:upload</td>		<td>load file</td> </tr>
-				<tr> <td>:reset</td>		<td>clear</td> </tr>
-			</table>
-		</div>
+	<loading>tap tap craft</loading> &emsp; hold for wiki&emsp; 
+	<div id=command onclick="showHide(event.target)">
+		:command
+		<table style="display:none;position:fixed;text-align:left;border-spacing:10px 0;margin-left:-11px;" display-value="table" >
+			<tr> <td>:command</td>		<td>hide this</td> </tr>
+			<tr> <td>:download</td>		<td>save file</td></tr>
+			<tr> <td>:upload</td>		<td>load file</td> </tr>
+			<tr> <td>:reset</td>		<td>clear</td> </tr>
+			<tr> <td>:share</td>		<td>share</td> </tr>
+		</table>
+	</div>
+	&emsp; <div onclick="share()">share</div>
 	</div>
 
   <svg id="graph" class=unselectable ></svg>
@@ -97,18 +100,16 @@
 
     // Sample data: nodes and links
     let nodes = [
-      //{ id: 1, x: 100, y: 100, name: "Orange peel" },
-      //{ id: 2, x: 300, y: 100, name: "Oil" },
-      //{ id: 3, x: 200, y: 300, name: "Steam" }
+	    {"id":2013,"x":292,"y":72,"name":"Plastic bottle"},{"id":2017,"x":81,"y":72,"name":"Cardboard box"},{"id":2018,"x":189,"y":72,"name":"Soda can"},{"id":2027,"x":383,"y":73,"name":"Paper"},{"id":2028,"x":59,"y":116,"name":"Old clothing"},{"id":2030,"x":162,"y":116,"name":"Glass bottle"},{"id":2060,"x":262,"y":116,"name":"Food waste"},{"id":2064,"x":370,"y":116,"name":"Old electronics"}
     ];
     let links = [
-      //{ source: 1, target: 2, result: [ "Orange peel" , "Oil" ] }
+	    //{ source: 1, target: 2 }
     ];
     let nodeID = 1978
 
     // Data storage
     function saveGraph(){ 
-	    let data = JSON.stringify( { nodes : nodes , links : links } )
+	    let data = JSON.stringify( { nodes : nodes , links : links , settings : { width : width , height : height } } )
 	    localStorage.setItem( 'sustainableCraft' , data ) 
 	    return data
     }
@@ -162,6 +163,33 @@
 
 	    return `${year}${month}${day}${hours}${minutes}${seconds}`;
     }
+
+    // Share
+    function saveURL( data ){
+        const base64 = btoa( unescape( encodeURIComponent( data ) ) )
+	const result = `${window.location.origin}${window.location.pathname}?data=${base64}`
+	if( result.length > 8000 ){
+		alert( "ERROR too large to directly share\n:download graph, share file and :upload" ) 
+		return `${window.location.origin}${window.location.pathname}`
+	}
+	return result
+    }
+
+	  async function share(){
+		  if( navigator.share ){
+			  try {
+				  await navigator.share( {
+					  title : "Sustainable Craft" ,
+					  text : "Sending you ideas" ,
+					  url : saveURL( saveGraph() )
+				  } )
+			  } catch( err ) {
+				  console.log( "Sharing failed:", err )
+			  }
+		  }
+	  }
+
+    // Graph Methods
 
     function changeGraph(){
 	    updateGraph()
@@ -348,7 +376,7 @@
 	      
 	      // Create input field
 	      const fo = inputGroup.append("foreignObject")
-	    	.attr("x", -30)
+	    	.attr("x", -28)
 	        .attr("y", -10)
 	    	.attr("width", 50)
 	        .attr("height", 20);
@@ -367,7 +395,7 @@
 
 	      // Handle text input width resizing
 	      input.addEventListener("input", function() {
-		          const text = this.value || "New";  // TODO this should be pre-generated
+		          const text = this.value || "New";  // TODO NEW should be pre-generated
 		          const width = Math.max(getTextWidth(text) + 30, 60); // Min width 60px
 		          
 		          // Update rectangle and input field
@@ -390,6 +418,7 @@
 					    else if( command === ":reset" ) return clearGraph()
 					    else if( command.match( /^:download/ ) ) download( saveGraph() ) 
 					    else if( command.match( /^:upload/ ) ) upload()
+					    else if( command.match( /^:share/ ) ) share()
 					    inputGroup.remove()
 					    return
 				    } // command
@@ -479,7 +508,7 @@
 						      links.push({
 							      source: prior.id ,
 							      target: newID ,
-							      result: [ prior.name , item ]
+							      // result: [ prior.name , item ]  // remove to reduce storage and share
 						      } )
 						} )
 				      })
