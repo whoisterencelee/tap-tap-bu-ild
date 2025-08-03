@@ -15,6 +15,11 @@
 
 <head>
   <style>
+	@font-face {
+		font-family: Geoform;
+		src: url(Geoform-HeavyItalic.ttf);
+	}
+
     body { margin: 0; overflow: hidden; }
 
     .unselectable { user-select:none; }
@@ -78,6 +83,24 @@
 		</table>
 	</div>
 	&emsp; <div onclick="share()">share</div>
+	</div>
+
+	<div id=backgroundWord class=unselectable style=position:absolute;width:100vw;height:100vh;display:flex;align-items:center;color:lightgrey;z-index:-1;font-family:Geoform;opacity:0.15;text-align:center;line-height:0.8em;>
+		TAPTAP<BR />CRAFT
+		<script>
+			function getTextWidth(text, fontSize = "12px", fontFamily = "Arial") {
+				const canvas = document.createElement("canvas");
+				const context = canvas.getContext("2d");
+				context.font = `${fontSize} ${fontFamily}`;
+				return context.measureText(text).width;
+			}
+		var textwidth = 0
+		for( var fontSize = 12 ; textwidth < window.innerWidth ; fontSize = fontSize + 2 ){
+			textwidth = Math.floor( getTextWidth("TAPTAP ", fontSize + "px", "Geoform" ) ) 
+			var d = document.getElementById( "backgroundWord" )
+			d.style.fontSize = fontSize + "px"
+		}
+		</script>
 	</div>
 
   <svg id="graph" class=unselectable ></svg>
@@ -214,6 +237,7 @@
 	    .on( "start" , function( event , d ){
 		    holdDrag = d3.select( this )
 		    startHoldTimer( d )
+		    playSound()
 	    } )
 	    .on("drag", function( event, d ){  // do not use arrow function, otherwise loose this context
 
@@ -222,6 +246,8 @@
 		    if( isHolding ) return  // stop the first return from other tab
 
 		    // really draggging
+		    stopSound()
+
 		    // console.log( "dx " + Math.abs( event.dx ) + " dy " + Math.abs( event.dy ) )
 		    if( Math.abs( event.dx ) >= 1 || Math.abs( event.dy ) >= 1 ) cancelHold()
 
@@ -245,6 +271,7 @@
 	    .on( "end" , function( event , d ){
 		    cancelHold()
 		    isHolding = false
+		    stopSound()
 	    } )
 
     function startHoldTimer(nodeData) {
@@ -282,6 +309,20 @@
 	      context.font = `${fontSize} ${fontFamily}`;
 	      return context.measureText(text).width;
     }
+
+	  // Sound effect
+	  const sounds = {
+		  click : new Audio( 'water-drop-85731.mp3' )
+	  }
+
+	  function playSound( effect = 'click' ){
+		  sounds[ effect ].currentTime = 0
+		  sounds[ effect ].play()
+	  }
+
+	  function stopSound( effect = 'click' ){
+		  sounds[ effect ].pause()
+	  }
 
     // Layering
     svg.append("g").attr("class", "links-layer")
@@ -331,6 +372,8 @@
 	    nodeGroups.on("click", function(event, d) {
 		    event.stopPropagation();
 
+		    playSound()
+
 		    // Toggle selection directly via D3
 		    const nodeGroup = d3.select(this);
 		    const isSelected = nodeGroup.classed("selected");
@@ -343,8 +386,10 @@
 			    selectedNodes.push(d); // Add by reference
 		    }
 
-		    if( selectedNodes.length < 1 ) clearTimeout(selectionTimer) // all selections removed
-		    else resetSelectionTimer(); // Reset 3-second clear
+		    if( selectedNodes.length < 1 ){
+			    clearTimeout(selectionTimer) // all selections removed
+			    stopSound()
+		    } else resetSelectionTimer(); // Reset 3-second clear
 	    });
 
     }  // updateGraph
