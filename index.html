@@ -105,7 +105,7 @@
 		for( var fontSize = 12 ; textwidth < window.innerWidth ; fontSize = fontSize + 2 ){
 			textwidth = Math.floor( getTextWidth("TAPTAP ", fontSize + "px", "Geoform-HeavyItalic" ) ) 
 			var d = document.getElementById( "backgroundWord" )
-			d.style.fontSize = fontSize + "px"
+			d.style.fontSize = ( fontSize - 2 ) + "px"
 		}
 		</script>
 	</div>
@@ -206,17 +206,22 @@
     }
 
 	  async function share(){
-		  if( navigator.share ){
-			  try {
+		  var s = saveURL( saveGraph() )
+		  try {
+			  if( navigator.share ){
 				  await navigator.share( {
 					  title : "Sustainable Craft" ,
 					  text : "Sending you ideas" ,
-					  url : saveURL( saveGraph() )
+					  url : s
 				  } )
-			  } catch( err ) {
-				  console.log( "Sharing failed:", err )
+			  }else if( navigator?.clipboard?.writeText ){
+				  await navigator.clipboard.writeText( s )
+				  alert( "copied share" )
 			  }
+		  } catch( err ) {
+			  console.log( "Sharing failed:", err )
 		  }
+
 	  }
 
     // Graph Methods
