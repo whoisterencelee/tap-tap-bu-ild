@@ -16,8 +16,12 @@
 <head>
   <style>
 	@font-face {
-		font-family: Geoform;
+		font-family: Geoform-HeavyItalic;
 		src: url(Geoform-HeavyItalic.ttf);
+	}
+	@font-face {
+		font-family: Geoform;
+		src: url(Geoform.otf);
 	}
 
     body { margin: 0; overflow: hidden; }
@@ -37,7 +41,7 @@
       rx: 5px; /* Rounded corners */
     }
     .node-text {
-      font-family: Arial;
+      font-family: Geoform;
       font-size: 12px;
       /* fill: white; */
       pointer-events: none; /* Prevent text from blocking drag */
@@ -70,8 +74,9 @@
   </style>
 </head>
 <body>
-	<div class=unselectable style=position:absolute;top:1em;width:100vw;text-align:center;font-size:x-small;display:flex;justify-content:center; >
-	<loading>tap tap craft</loading> &emsp; hold for wiki&emsp; 
+	<div class=unselectable style=position:absolute;top:1em;width:100vw;text-align:center;font-size:x-small;display:flex;justify-content:center;font-family:Geoform; >
+	<loading>tap tap craft</loading> &emsp;
+	hold for wiki&emsp; 
 	<div id=command onclick="showHide(event.target)">
 		:command
 		<table style="display:none;position:fixed;text-align:left;border-spacing:10px 0;margin-left:-11px;" display-value="table" >
@@ -85,8 +90,10 @@
 	&emsp; <div onclick="share()">share</div>
 	</div>
 
-	<div id=backgroundWord class=unselectable style=position:absolute;width:100vw;height:100vh;display:flex;align-items:center;color:lightgrey;z-index:-1;font-family:Geoform;opacity:0.15;text-align:center;line-height:0.8em;>
-		TAPTAP<BR />CRAFT
+	<div class=unselectable style=position:absolute;width:100vw;height:100vh;display:flex;align-items:center;color:lightgrey;z-index:-1;font-family:Geoform-HeavyItalic;opacity:0.12;line-height:1.2em;flex-direction:column;justify-content:center;word-break:break-all;word-spacing:0.4em;overflow:hidden;>
+		<div id=backgroundWord style=line-height:0.8em;text-align:center;width:100vw;background:white;font-family:Geoform-HeavyItalic;>
+			TAPTAP<BR />CRAFT
+		</div>
 		<script>
 			function getTextWidth(text, fontSize = "12px", fontFamily = "Arial") {
 				const canvas = document.createElement("canvas");
@@ -96,7 +103,7 @@
 			}
 		var textwidth = 0
 		for( var fontSize = 12 ; textwidth < window.innerWidth ; fontSize = fontSize + 2 ){
-			textwidth = Math.floor( getTextWidth("TAPTAP ", fontSize + "px", "Geoform" ) ) 
+			textwidth = Math.floor( getTextWidth("TAPTAP ", fontSize + "px", "Geoform-HeavyItalic" ) ) 
 			var d = document.getElementById( "backgroundWord" )
 			d.style.fontSize = fontSize + "px"
 		}
