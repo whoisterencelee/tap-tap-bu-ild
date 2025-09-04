@@ -74,24 +74,43 @@
   </style>
 </head>
 <body>
-	<div class=unselectable style=position:absolute;top:1em;width:100vw;text-align:center;font-size:x-small;display:flex;justify-content:center;font-family:Geoform; >
-	<loading>tap tap craft</loading> &emsp;
-	hold for wiki&emsp; 
-	<div id=command onclick="showHide(event.target)">
-		:command
-		<table style="display:none;position:fixed;text-align:left;border-spacing:10px 0;margin-left:-11px;" display-value="table" >
-			<tr> <td>:command</td>		<td>hide this</td> </tr>
-			<tr> <td>:download</td>		<td>save file</td></tr>
-			<tr> <td>:upload</td>		<td>load file</td> </tr>
-			<tr> <td>:reset</td>		<td>clear</td> </tr>
-			<tr> <td>:share</td>		<td>share</td> </tr>
+	<div id=menu class=unselectable style=position:absolute;top:1em;width:100vw;text-align:center;font-size:x-small;display:flex;justify-content:center;font-family:Geoform; >
+	<loading onclick="showHide(event.target)">tap tap craft
+		<div style=position:absolute;width:100vw;top:2vh;left:0;display:flex;flex-direction:column;align-items:center;z-index:-1; display-value=flex>
+			<p style=text-align:center;>
+
+							AI-powered world crafting<br /><br />
+							Imagine Minecraft but instead of digging blocks, you’re tapping<br />
+							words to build your perfect world<br /><br />
+			</p>
+
+		<style>
+			#helptable tr {vertical-align:top;}
+			#helptable tr td:nth-child(1) {width:30%;text-align:right;}
+
+		</style>
+		<table id=helptable style="text-align:left;border-spacing:10px 0;max-width:80vw" >
+			<tr> <td colspan=2 style=text-align:center;> <u> actions </u> </td> </tr>
+			<tr> <td> tap tap</td> <td> anywhere to create a new word</td></tr>
+			<tr> <td> tap </td>	<td> on word(s) to break or merge to create entirely new combinations </td> </tr>
+			<tr> <td> watch </td> <td>as the AI takes a little time to considers </td> </tr>
+			<tr> <td> drag </td>		<td> move words around to perfect your design </td> </tr>
+			<tr> <td> delete </td>		<td> drag words to the edge to remove them </td> </tr>
+			<tr> <td> hold </td>		<td> on a word to read wikipedia </td> </tr>
+			<tr> <td> :help </td>		<td> type to show this or click tap tap craft </td> </tr>
+			<tr> <td> :save </td>		<td> save file for big world </td></tr>
+			<tr> <td> :load </td>		<td> load world file </td> </tr>
+			<tr> <td> :reset </td>		<td> clear </td> </tr>
+			<tr> <td> :share </td>		<td> with a link to your world </td> </tr>
 		</table>
-	</div>
-	&emsp; <div onclick="share()">share</div>
+     
+		</div>
+	</loading> &emsp;
+	<div onclick="share()">share</div>
 	</div>
 
 	<div class=unselectable style=position:absolute;width:100vw;height:100vh;display:flex;align-items:center;color:lightgrey;z-index:-1;font-family:Geoform-HeavyItalic;opacity:0.12;line-height:1.2em;flex-direction:column;justify-content:center;word-break:break-all;word-spacing:0.4em;overflow:hidden;>
-		<div id=backgroundWord style=line-height:0.8em;text-align:center;width:100vw;background:white;font-family:Geoform-HeavyItalic;>
+		<div id=backgroundWord style=line-height:0.8em;text-align:center;width:100vw;background:white;font-family:Geoform-HeavyItalic;word-break:keep-all;>
 			TAPTAP<BR />CRAFT
 		</div>
 		<script>
@@ -130,7 +149,7 @@
 
     // Sample data: nodes and links
     let nodes = [
-	    {"id":2013,"x":292,"y":72,"name":"Plastic bottle"},{"id":2017,"x":81,"y":72,"name":"Cardboard box"},{"id":2018,"x":189,"y":72,"name":"Soda can"},{"id":2027,"x":383,"y":73,"name":"Paper"},{"id":2028,"x":59,"y":116,"name":"Old clothing"},{"id":2030,"x":162,"y":116,"name":"Glass bottle"},{"id":2060,"x":262,"y":116,"name":"Food waste"},{"id":2064,"x":370,"y":116,"name":"Old electronics"}
+	    {"id":2013,"x":292,"y":372,"name":"Plastic bottle"},{"id":2017,"x":81,"y":372,"name":"Cardboard box"},{"id":2018,"x":189,"y":372,"name":"Soda can"},{"id":2027,"x":383,"y":372,"name":"Paper"},{"id":2028,"x":59,"y":416,"name":"Old clothing"},{"id":2030,"x":162,"y":416,"name":"Glass bottle"},{"id":2060,"x":262,"y":416,"name":"Food waste"},{"id":2064,"x":370,"y":416,"name":"Old electronics"}
     ];
     let links = [
 	    //{ source: 1, target: 2 }
@@ -160,7 +179,7 @@
 	    let down = URL.createObjectURL( blob )
 	    let a = document.createElement( 'a' )
 	    a.href = down
-	    a.download = 'sustainableCraft-' + getTimestamp() + '.json'
+	    a.download = 'taptapcraft-' + getTimestamp() + '.json'
 	    a.click()
 	    URL.revokeObjectURL( down )
     } // download
@@ -199,7 +218,7 @@
         const base64 = btoa( unescape( encodeURIComponent( data ) ) )
 	const result = `${window.location.origin}${window.location.pathname}?data=${base64}`
 	if( result.length > 8000 ){
-		alert( "ERROR too large to directly share\n:download graph, share file and :upload" ) 
+		alert( "ERROR too large to directly share\n:save graph, share file and :load" ) 
 		return `${window.location.origin}${window.location.pathname}`
 	}
 	return result
@@ -473,8 +492,8 @@
 				    if( command.match( /^:/ ) ){
 					    if( command === ":command" ) showHide( document.getElementById( "command" ) )
 					    else if( command === ":reset" ) return clearGraph()
-					    else if( command.match( /^:download/ ) ) download( saveGraph() ) 
-					    else if( command.match( /^:upload/ ) ) upload()
+					    else if( command.match( /^:save/ ) ) download( saveGraph() ) 
+					    else if( command.match( /^:load/ ) ) upload()
 					    else if( command.match( /^:share/ ) ) share()
 					    inputGroup.remove()
 					    return
