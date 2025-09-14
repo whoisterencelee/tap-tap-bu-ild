@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <title>Sustainable Craft</title>
+  <title>Tap Tap Craft</title>
   <script src="https://d3js.org/d3.v7.min.js"></script>
   <!--<script src="https://cdnjs.cloudflare.com/ajax/libs/pako/2.1.0/pako.min.js" integrity="sha512-g2TeAWw5GPnX7z0Kn8nFbYfeHcvAu/tx6d6mrLe/90mkCxO+RcptyYpksUz35EO337F83bZwcmUyHiHamspkfg==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>-->
   <meta name="viewport" content="width=device-width,initial-scale=1" />
@@ -75,7 +75,7 @@
 </head>
 <body>
 	<div id=menu class=unselectable style=position:absolute;top:1em;width:100vw;text-align:center;font-size:x-small;display:flex;justify-content:center;font-family:Geoform; >
-	<loading onclick="showHide(event.target)">tap tap craft
+		<div id=help onclick=showHide(event.currentTarget)><loading>tap tap craft</loading>
 		<div style=position:absolute;width:100vw;top:2vh;left:0;display:flex;flex-direction:column;align-items:center;z-index:-1; display-value=flex>
 			<p style=text-align:center;>
 
@@ -103,9 +103,11 @@
 			<tr> <td> :reset </td>		<td> clear </td> </tr>
 			<tr> <td> :share </td>		<td> with a link to your world </td> </tr>
 		</table>
+
+						<p>please send feedback to terence.lee+taptapcraft@<span style=display:none;>email</span>sustaincia.<span style=display:none;>domain</span>org</p>
      
 		</div>
-	</loading> &emsp;
+	</div><!--showHide--> &emsp;
 	<div onclick="share()">share</div>
 	</div>
 
@@ -136,8 +138,8 @@
 		  var c = container.childNodes
 		  for( var n = 0 ; n < c.length ; n++ ){
 			  let cn = c [ n ]
-			  let d = cn?.getAttribute ? cn.getAttribute( "display-value" ) : 'block'
-			  if( cn.style ) cn.style.display = cn.style.display == 'none' ? d : 'none'
+			  let d = cn?.getAttribute ? cn.getAttribute( "display-value" ) : null
+			  if( d && cn.style ) cn.style.display = cn.style.display == 'none' ? d : 'none'
 		  }
 	  }
 
@@ -166,11 +168,16 @@
     	    savedData? savedData : savedData = localStorage.getItem( 'sustainableCraft' )
 	    if( !savedData ) return false
 	    console.log( "used " + savedData.length + " / 5,000,000 of localStorage" )
-	    let graphData = JSON.parse( savedData )
-	    nodes = graphData.nodes
-	    links = graphData.links
-	    nodeID = nodes.reduce( ( a , b ) => a > b.id ? a : b.id  ) // find the biggest nodeID
-	    return true
+		 try{
+			 let graphData = JSON.parse( savedData )
+			 nodes = graphData.nodes
+			 links = graphData.links
+			 nodeID = nodes.reduce( ( a , b ) => a > b.id ? a : b.id  , nodeID ? nodeID : 1978 ) // find the biggest nodeID
+			 return true
+		 }catch(e){
+			 console.error( "loadGraph error", e )
+			 return false
+		 }
     }
 
     // Data download
@@ -229,8 +236,8 @@
 		  try {
 			  if( navigator.share ){
 				  await navigator.share( {
-					  title : "Sustainable Craft" ,
-					  text : "Sending you ideas" ,
+					  title : "Tap Tap Craft" ,
+					  text : "Building Worlds" ,
 					  url : s
 				  } )
 			  }else if( navigator?.clipboard?.writeText ){
@@ -251,6 +258,7 @@
     }
     function clearGraph(){
 	    localStorage.removeItem( 'sustainableCraft')
+		 localStorage.setItem( 'sustainableCraft' , '{"nodes":[],"links":[]}' ) 
 	    location.reload()
     }
     loadGraph()
@@ -490,7 +498,7 @@
 
 				    let command = item.toLowerCase()
 				    if( command.match( /^:/ ) ){
-					    if( command === ":command" ) showHide( document.getElementById( "command" ) )
+					    if( command === ":help" ) showHide( document.getElementById( "help" ) )
 					    else if( command === ":reset" ) return clearGraph()
 					    else if( command.match( /^:save/ ) ) download( saveGraph() ) 
 					    else if( command.match( /^:load/ ) ) upload()
