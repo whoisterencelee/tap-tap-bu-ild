@@ -150,8 +150,8 @@
 	   //  {"id":2013,"x":292,"y":372,"name":"Plastic bottle"},{"id":2017,"x":81,"y":372,"name":"Cardboard box"},{"id":2018,"x":189,"y":372,"name":"Soda can"},{"id":2027,"x":383,"y":372,"name":"Paper"},{"id":2028,"x":59,"y":416,"name":"Old clothing"},{"id":2030,"x":162,"y":416,"name":"Glass bottle"},{"id":2060,"x":262,"y":416,"name":"Food waste"},{"id":2064,"x":370,"y":416,"name":"Old electronics"}
     // ];
 	 let nodes = [
-		  {"id":2013,"x":262,"y":400,"name":"Heat"},{"id":2018,"x":169,"y":400,"name":"Water"},
-		  {"id":2030,"x":220,"y":360,"name":"@step1 What happens if you tap on Water and Heat?"}
+		  // {"id":2013,"x":262,"y":400,"name":"Heat"},{"id":2018,"x":169,"y":400,"name":"Water"},
+		  // {"id":2030,"x":220,"y":360,"name":"@step1 What happens if you tap on Water and Heat?"}
 	 ]
     let links = [
 	    //{ source: 1, target: 2 }
@@ -255,7 +255,9 @@
     function changeGraph(){
 	    updateGraph()
 	    saveGraph()
+		 checkLessonCompletion()  // <--- lesson module
     }
+
     function clearGraph(){
 	    localStorage.removeItem( 'sustainableCraft')
 		 localStorage.setItem( 'sustainableCraft' , '{"nodes":[],"links":[]}' ) 
@@ -514,6 +516,7 @@
 					    y: y,
 					    name: item
 				    });
+
 				    changeGraph();
 			    }
 			    inputGroup.remove();
@@ -619,10 +622,10 @@
 let lessons = [
   {
     id: "step1",
-    title: "Basic Combinations",
-    description: "Combine Water and Heat to create Steam",
+    title: "Basic Combination",
+    description: "@step1 What happens if you tap on Water and Heat?",
     requiredNodes: ["Water", "Heat"],
-    targetNodes: ["Steam"],
+    targetNodes: ["Fog", "Ice", "Mist", "Steam", "Vapor"],
     hint: "Select both Water and Heat nodes and wait for the result",
     nextLesson: "step2",
     completed: false
@@ -630,18 +633,138 @@ let lessons = [
   {
     id: "step2",
     title: "Advanced Combinations",
-    description: "Combine Steam and Metal to create Engine",
-    requiredNodes: ["Steam", "Metal"],
-    targetNodes: ["Engine"],
-    hint: "Try combining different elements",
+    description: "@step2 Combine Heat, Water and Metal to create Steam Engine",
+    requiredNodes: ["Heat", "Metal", "Water"],
+    targetNodes: ["Steam engine"],
+    hint: "Try combining more than two elements",
     nextLesson: "step3",
     completed: false
-  }
-  // Add more lessons as needed
+  },
+  {
+	 id: "step3",
+	 title: "Adding your own Node",
+	 description: "@step3 Double click on empty space to add the word 'Wheel'",
+	 requiredNodes: [],
+	 targetNodes: ["Wheel"],
+	 hint: "Double click anywhere to add a new word",
+	 nextLesson: null,
+	 completed: false
+  },
+  {
+		id: "step4",
+		title: "Using your new Node",
+		description: "@step4 Combine Steam Engine and Wheel to create Locomotive",
+		requiredNodes: ["Steam engine", "Wheel"],
+		targetNodes: ["Locomotive"],
+		hint: "Select both Steam Engine and Wheel nodes and wait for the result",
+		nextLesson: null,
+		completed: false
+	}
 ];
 
 let currentLesson = "step1";
 let lessonNodes = []; // Track nodes created for lesson completion
+
+
+
+
+function checkLessonCompletion() {
+	const lesson = lessons.find(l => l.id === currentLesson);
+	if (!lesson || lesson.completed) return;
+
+	// Check if all target nodes have been created
+	const allTargetsCreated = lesson.targetNodes.every(target => 
+		nodes.some(node => node.name === target)
+	);
+
+	if (allTargetsCreated) {
+		completeLesson(currentLesson);
+	}
+}  // checkLessonCompletion
+
+
+function completeLesson(lessonId) {
+	const lesson = lessons.find(l => l.id === lessonId);
+	if (!lesson) return;
+
+	lesson.completed = true;
+
+	// Show completion message
+	alert(`Lesson Complete: You can now do ${lesson.title}`);
+
+	// Move to next lesson if available
+	if (lesson.nextLesson && lessons.find(l => l.id === lesson.nextLesson)) {
+		// remove current lesson description node
+		nodes = nodes.filter(n => n.name !== lesson.description);
+
+		currentLesson = lesson.nextLesson;
+
+		// safe to localStorage
+		localStorage.setItem( 'nextLesson' , currentLesson )
+
+		startLesson(currentLesson);
+	}
+}  // completeLesson
+
+
+
+
+
+function updateLessonUI() {
+	const lesson = lessons.find(l => l.id === currentLesson);
+	if (!lesson) return;
+
+	// Update background word or UI element with lesson hint
+	const backgroundWord = document.getElementById("backgroundWord");
+	//backgroundWord.innerHTML = `Lesson: ${lesson.title}<br>${lesson.hint}`;
+	backgroundWord.innerHTML = `${lesson.title}`;
+
+
+
+}  // updateLessonUI
+
+
+function startLesson(lessonId = "step1" ) {
+	const lesson = lessons.find(l => l.id === lessonId);
+	if (!lesson) return;
+
+	currentLesson = lessonId;
+	if (lesson && lesson.description && !nodes.some(n => n.name === lesson.description ) ){
+		// Show lesson description
+		nodes.push({
+			id: ++nodeID,
+			x: window.innerWidth / 2,
+			y: 100,
+			name: lesson.description
+		});
+	}
+	if (lesson && lesson.requiredNodes) {
+		// Ensure required nodes are present
+		lesson.requiredNodes.forEach(reqNode => {
+			if (!nodes.some(n => n.name === reqNode)) {
+				// Add missing required node at random position
+				nodes.push({
+					id: ++nodeID,
+					x: 30 + Math.random() * ( window.innerWidth - 60 ),
+					y: 30 + Math.random() * ( window.innerHeight - 60 ),
+					name: reqNode
+				});
+			}
+		});
+	}
+	updateLessonUI();
+	changeGraph();
+}  // startLesson
+
+// On page load, check for saved lesson state
+window.addEventListener('load', () => {
+	const savedLesson = localStorage.getItem('nextLesson');
+	if (savedLesson && lessons.find(l => l.id === savedLesson)) {
+		startLesson(savedLesson);
+	} else {
+		startLesson("step1");
+	}
+} )
 
 </script>
 
