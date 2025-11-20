@@ -4,16 +4,11 @@
   <meta charset="UTF-8" />
   <title>Tap Tap Craft</title>
   <script src="https://d3js.org/d3.v7.min.js"></script>
-  <!--<script src="https://cdnjs.cloudflare.com/ajax/libs/pako/2.1.0/pako.min.js" integrity="sha512-g2TeAWw5GPnX7z0Kn8nFbYfeHcvAu/tx6d6mrLe/90mkCxO+RcptyYpksUz35EO337F83bZwcmUyHiHamspkfg==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>-->
   <meta name="viewport" content="width=device-width,initial-scale=1" />
   <meta name="description" content="" />
   <link rel="icon" href="favicon.png">
   <link rel="manifest" href="manifest.webmanifest">
-</head>
 
-<body>
-
-<head>
   <style>
 	@font-face {
 		font-family: Geoform-HeavyItalic;
@@ -72,11 +67,12 @@
     }
 
   </style>
+
 </head>
 <body>
 	<div id=menu class=unselectable style=position:absolute;top:1em;width:100vw;text-align:center;font-size:x-small;display:flex;justify-content:center;font-family:Geoform; >
 		<div id=help onclick=showHide(event.currentTarget)><loading>tap tap craft</loading>
-		<div style=position:absolute;width:100vw;top:2vh;left:0;display:flex;flex-direction:column;align-items:center;z-index:-1; display-value=flex>
+		<div style=position:absolute;width:100vw;top:2vh;left:0;display:none;flex-direction:column;align-items:center;z-index:-1; display-value=flex>
 			<p style=text-align:center;>
 
 							AI-powered world crafting<br /><br />
@@ -154,7 +150,8 @@
 	   //  {"id":2013,"x":292,"y":372,"name":"Plastic bottle"},{"id":2017,"x":81,"y":372,"name":"Cardboard box"},{"id":2018,"x":189,"y":372,"name":"Soda can"},{"id":2027,"x":383,"y":372,"name":"Paper"},{"id":2028,"x":59,"y":416,"name":"Old clothing"},{"id":2030,"x":162,"y":416,"name":"Glass bottle"},{"id":2060,"x":262,"y":416,"name":"Food waste"},{"id":2064,"x":370,"y":416,"name":"Old electronics"}
     // ];
 	 let nodes = [
-	    {"id":2013,"x":292,"y":372,"name":"Heat"},{"id":2018,"x":189,"y":372,"name":"Water"}
+		  {"id":2013,"x":262,"y":400,"name":"Heat"},{"id":2018,"x":169,"y":400,"name":"Water"},
+		  {"id":2030,"x":220,"y":360,"name":"@step1 What happens if you tap on Water and Heat?"}
 	 ]
     let links = [
 	    //{ source: 1, target: 2 }
@@ -614,6 +611,49 @@
 	      }, 2000);
     }
 		      
+</script>
+
+<script>
+// lesson module
+// Add this after the existing data structures
+let lessons = [
+  {
+    id: "step1",
+    title: "Basic Combinations",
+    description: "Combine Water and Heat to create Steam",
+    requiredNodes: ["Water", "Heat"],
+    targetNodes: ["Steam"],
+    hint: "Select both Water and Heat nodes and wait for the result",
+    nextLesson: "step2",
+    completed: false
+  },
+  {
+    id: "step2",
+    title: "Advanced Combinations",
+    description: "Combine Steam and Metal to create Engine",
+    requiredNodes: ["Steam", "Metal"],
+    targetNodes: ["Engine"],
+    hint: "Try combining different elements",
+    nextLesson: "step3",
+    completed: false
+  }
+  // Add more lessons as needed
+];
+
+let currentLesson = "step1";
+let lessonNodes = []; // Track nodes created for lesson completion
+
+</script>
+
+
+<script src="https://cdn.jsdelivr.net/npm/rrweb@latest/dist/rrweb.min.js"></script>
+<script src="rrweb-recorder.js"></script>
+
+<script>
+// Auto-starts recording on page load
+// Or manually control:
+// startRecording();
+// stopRecording();
 </script>
 
 </body>
