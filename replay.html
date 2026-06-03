@@ -1,0 +1,934 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>User Session Viewer</title>
+    <script src="https://cdn.jsdelivr.net/npm/rrweb@latest/dist/rrweb.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/rrweb-player@latest/dist/index.js"></script>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/rrweb-player@latest/dist/style.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: #f5f5f5;
+            color: #333;
+            line-height: 1.6;
+            height: 100vh;
+            overflow: hidden;
+        }
+
+        .container {
+            max-width: 100vw;
+            height: 100vh;
+            margin: 0 auto;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+        }
+
+        header {
+            background: white;
+            padding: 15px 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            margin-bottom: 15px;
+            flex-shrink: 0;
+			   display: flex;
+			   justify-content: space-between;
+			   flex-direction: row;
+        }
+
+        h1 {
+            color: #2c3e50;
+            margin-bottom: 5px;
+            font-size: 1.5rem;
+        }
+
+        .controls {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 15px;
+            align-items: center;
+            flex-wrap: wrap;
+            flex-shrink: 0;
+        }
+
+        select, input, button {
+            padding: 8px 12px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 14px;
+        }
+
+        button {
+            background: #007bff;
+            color: white;
+            border: none;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+
+        button:hover {
+            background: #0056b3;
+        }
+
+        button:disabled {
+            background: #6c757d;
+            cursor: not-allowed;
+        }
+
+        .main-content {
+            display: grid;
+            grid-template-columns: 280px 1fr;
+            gap: 20px;
+            flex: 1;
+            min-height: 0;
+            overflow: hidden;
+        }
+
+        .sessions-list {
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .sessions-header {
+            padding: 15px;
+            border-bottom: 1px solid #eee;
+            background: #f8f9fa;
+            flex-shrink: 0;
+        }
+
+        .sessions-container {
+            flex: 1;
+            overflow-y: auto;
+        }
+
+        .session-item {
+            padding: 15px;
+            border-bottom: 1px solid #eee;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+
+        .session-item:hover {
+            background: #f8f9fa;
+        }
+
+        .session-item.active {
+            background: #e3f2fd;
+            border-left: 4px solid #007bff;
+        }
+
+        .session-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 8px;
+        }
+
+        .session-user {
+            font-weight: bold;
+            flex-grow: 1;
+        }
+
+        .session-meta {
+            font-size: 12px;
+            color: #666;
+            margin-bottom: 3px;
+        }
+
+        .session-stats {
+            display: flex;
+            gap: 10px;
+            margin: 8px 0;
+            padding: 8px;
+            background: #f8f9fa;
+            border-radius: 4px;
+        }
+
+        .stat-badge {
+            font-size: 11px;
+            padding: 2px 6px;
+            background: #e9ecef;
+            border-radius: 3px;
+            font-weight: bold;
+        }
+
+        .device-tag, .user-tag {
+            display: inline-block;
+            padding: 2px 6px;
+            border-radius: 3px;
+            font-size: 11px;
+            font-weight: bold;
+            margin-right: 5px;
+        }
+
+        .device-mobile { background: #e8f5e8; color: #2e7d32; }
+        .device-tablet { background: #fff3e0; color: #ef6c00; }
+        .device-desktop { background: #e3f2fd; color: #1565c0; }
+        .user-tag { background: #f3e5f5; color: #7b1fa2; }
+
+        .replay-container {
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+
+        .replay-info {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 10px;
+            margin-bottom: 10px;
+        }
+
+        .info-item {
+            font-size: 14px;
+        }
+
+        .info-label {
+            font-weight: bold;
+            color: #666;
+        }
+
+        #replayPlayer {
+            flex: 1;
+            min-height: 0;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            position: relative;
+        }
+
+        /* RRWeb Player Container */
+        #rrweb-player-container {
+            flex: 1;
+            min-height: 0;
+            width: 100%;
+            position: relative;
+        }
+
+        /* Force rrweb-player to fill container */
+        .rr-player {
+            width: 100% !important;
+            height: 100% !important;
+            position: absolute !important;
+            top: 0 !important;
+            left: 0 !important;
+        }
+
+        .rr-player__frame {
+            width: 100% !important;
+            height: 100% !important;
+        }
+
+        .rr-player__frame > iframe {
+            width: 100% !important;
+            height: 100% !important;
+        }
+
+        /* Ensure controls are visible */
+        .rr-controller {
+            position: absolute !important;
+            bottom: 0 !important;
+            left: 0 !important;
+            right: 0 !important;
+            z-index: 1000 !important;
+            background: rgba(0, 0, 0, 0.2) !important;
+        }
+
+        .loading {
+            text-align: center;
+            padding: 40px;
+            color: #666;
+			   position: absolute;
+			   top: 50%;
+			   left:45%;
+			   text-align: center;
+        }
+
+        .error {
+            background: #f8d7da;
+            color: #721c24;
+            padding: 15px;
+            border-radius: 4px;
+            margin: 10px 0;
+        }
+
+        .stats-bar {
+            display: flex;
+            gap: 20px;
+            padding: 15px;
+            background: #f8f9fa;
+            border-radius: 6px;
+            flex-shrink: 0;
+        }
+
+        .stat-item {
+            text-align: center;
+        }
+
+        .stat-value {
+            font-size: 18px;
+            font-weight: bold;
+            color: #007bff;
+        }
+
+        .stat-label {
+            font-size: 12px;
+            color: #666;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 40px;
+            color: #666;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            height: 100%;
+        }
+
+        .replay-controls {
+            display: flex;
+            gap: 10px;
+            padding: 15px;
+            border-top: 1px solid #eee;
+            background: #f8f9fa;
+            flex-shrink: 0;
+        }
+
+        .replay-controls button {
+            padding: 6px 12px;
+            font-size: 12px;
+        }
+
+        @media (max-width: 1024px) {
+            .main-content {
+                grid-template-columns: 350px 1fr;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                padding: 10px;
+                height: 100vh;
+            }
+
+            .main-content {
+                grid-template-columns: 1fr;
+                grid-template-rows: 300px 1fr;
+            }
+
+            .sessions-list {
+                max-height: 300px;
+            }
+
+            .controls {
+                flex-direction: column;
+                align-items: stretch;
+            }
+            
+            .stats-bar {
+                flex-direction: column;
+                gap: 10px;
+            }
+
+            .replay-info {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+				<div>
+					<h1>🎥 Session Analysis Tool</h1>
+					<p>View user sessions with combined recording playback</p>
+				</div>
+
+				<div class="stats-bar" id="statsBar">
+					<div class="stat-item">
+						<div class="stat-value" id="totalSessions">0</div>
+						<div class="stat-label">Total Sessions</div>
+					</div>
+					<!-- <div class="stat-item"> -->
+					<!-- 	<div class="stat-value" id="totalUsers">0</div> -->
+					<!-- 	<div class="stat-label">Unique Users</div> -->
+					<!-- </div> -->
+					<div class="stat-item">
+						<div class="stat-value" id="mobilePercentage">0%</div>
+						<div class="stat-label">Mobile Users</div>
+					</div>
+					<div class="stat-item">
+						<div class="stat-value" id="totalRecordings">0</div>
+						<div class="stat-label">Recording Chunks</div>
+					</div>
+				</div>
+        </header>
+
+        <div class="controls">
+            <select id="deviceFilter">
+                <option value="">All Devices</option>
+                <option value="mobile">Mobile Only</option>
+                <option value="tablet">Tablet Only</option>
+                <option value="desktop">Desktop Only</option>
+            </select>
+            
+            <input type="text" id="userFilter" placeholder="Filter by User ID">
+            
+            <input type="number" id="limitInput" placeholder="Sessions Limit" value="20" min="1" max="100">
+            
+            <button onclick="loadSessions()">Refresh Sessions</button>
+            <button onclick="loadMoreSessions()" id="loadMoreBtn">Load More</button>
+        </div>
+
+        <div class="main-content">
+            <div class="sessions-list">
+                <div class="sessions-header">
+                    <h3>Sessions</h3>
+                </div>
+                <div class="sessions-container" id="sessionsContainer">
+                    <div class="loading">Loading sessions...</div>
+                </div>
+            </div>
+
+            <div class="replay-container">
+                <div id="replayPlayer">
+                    <div class="empty-state">
+                        <div style="font-size: 48px; margin-bottom: 10px;">📹</div>
+                        <h3>No Session Selected</h3>
+                        <p>Click on a session from the list to view the combined replay</p>
+                    </div>
+                </div>
+                <div id="replayStatus" class="loading" style="display: none;">
+                    Loading session replay data...
+                </div>
+                
+            </div>
+        </div>
+    </div>
+
+    <script>
+        class SessionViewer {
+            constructor() {
+                this.baseUrl = window.location.origin + '/record';
+                this.currentSession = null;
+                this.currentOffset = 0;
+                this.currentLimit = 20;
+                this.allSessions = [];
+                this.hasMoreSessions = true;
+                this.replayPlayer = null;
+                this.allEvents = [];
+            }
+
+            async loadSessions(deviceType = '', userId = '', limit = 20, offset = 0) {
+                try {
+                    const params = new URLSearchParams({
+                        limit: limit,
+                        offset: offset,
+                        ...(deviceType && { device_type: deviceType }),
+                        ...(userId && { user_id: userId })
+                    });
+
+                    const response = await fetch(`${this.baseUrl}/api/sessions?${params}`);
+                    
+                    if (!response.ok) {
+                        throw new Error(`HTTP ${response.status}`);
+                    }
+
+                    const data = await response.json();
+                    return data;
+                } catch (error) {
+                    console.error('Error loading sessions:', error);
+                    this.showError('Failed to load sessions');
+                    return { sessions: [], total: 0 };
+                }
+            }
+
+            async loadAllRecordingEvents(sessionId) {
+                try {
+                    // First get all recordings for this session
+                    const recordingsResponse = await fetch(`${this.baseUrl}/api/recordings/${sessionId}?limit=1000`);
+                    
+                    if (!recordingsResponse.ok) {
+                        throw new Error(`HTTP ${recordingsResponse.status}`);
+                    }
+
+                    const recordingsData = await recordingsResponse.json();
+                    const recordings = recordingsData.recordings || [];
+                    
+                    if (recordings.length === 0) {
+                        return [];
+                    }
+
+                    // Load events for all recordings and combine them
+                    const allEvents = [];
+                    
+                    for (const recording of recordings) {
+                        try {
+                            const eventsResponse = await fetch(`${this.baseUrl}/api/recordings/events/${recording.recording_id}`);
+                            
+                            if (eventsResponse.ok) {
+                                const eventsData = await eventsResponse.json();
+                                if (eventsData.events && eventsData.events.length > 0) {
+                                    // Fix timestamps and add to combined events
+                                    const fixedEvents = eventsData.events.map(event => ({
+                                        ...event,
+                                        timestamp: event.timestamp && typeof event.timestamp === 'string' 
+                                            ? new Date(event.timestamp).getTime() 
+                                            : event.timestamp
+                                    }));
+                                    allEvents.push(...fixedEvents);
+                                }
+                            }
+                        } catch (error) {
+                            console.error(`Error loading events for recording ${recording.recording_id}:`, error);
+                        }
+                    }
+
+                    // Sort events by timestamp to ensure correct playback order
+                    allEvents.sort((a, b) => (a.timestamp || 0) - (b.timestamp || 0));
+                    
+                    return allEvents;
+                } catch (error) {
+                    console.error('Error loading session events:', error);
+                    return [];
+                }
+            }
+
+            async loadStats() {
+                try {
+                  const response = await fetch(`${this.baseUrl}/api/analytics/mobile-users`);
+                  //const response = await fetch(`${this.baseUrl}/api/recordings/stats/overview`);
+                    
+                    if (!response.ok) {
+                        throw new Error(`HTTP ${response.status}`);
+                    }
+
+                    const data = await response.json();
+                    return data;
+                } catch (error) {
+                    console.error('Error loading stats:', error);
+                    return null;
+                }
+            }
+
+            displaySessions(sessions, append = false) {
+                const container = document.getElementById('sessionsContainer');
+                
+                if (!append) {
+                    container.innerHTML = '';
+                    this.allSessions = [];
+                }
+
+                if (sessions.length === 0 && !append) {
+                    container.innerHTML = `
+                        <div class="empty-state">
+                            <div style="font-size: 36px; margin-bottom: 10px;">👥</div>
+                            <h3>No sessions found</h3>
+                            <p>No user sessions have been recorded yet.</p>
+                        </div>
+                    `;
+                    return;
+                }
+
+                this.allSessions = [...this.allSessions, ...sessions];
+
+                const sessionsHtml = sessions.map(session => `
+                    <div class="session-item" onclick="sessionViewer.selectSession('${session.session_id}')" 
+                         data-session-id="${session.session_id}">
+                        <div class="session-header">
+                            <div class="session-user">
+                                ${session.user_id ? this.truncateText(session.user_id, 20) : 'Anonymous User'}
+                            </div>
+                            <span class="device-tag device-${session.device_type}">${session.device_type}</span>
+                        </div>
+                        
+                        <div class="session-stats">
+                            <span class="stat-badge">${session.total_recordings || 0} chunks</span>
+                            <span class="stat-badge">${session.total_events || 0} events</span>
+                            <span class="stat-badge">${this.formatDuration(this.calculateSessionDuration(session))}</span>
+                        </div>
+                        
+                        <div class="session-meta">
+                            First: ${this.formatDate(session.first_visit)}
+                        </div>
+                        
+                        <div class="session-meta">
+                            Last: ${this.formatDate(session.last_activity)}
+                        </div>
+                        
+                        <div class="session-meta">
+                            ${session.browser_name} • ${session.os_name} • ${session.screen_width}x${session.screen_height}
+                        </div>
+                    </div>
+                `).join('');
+
+                if (append) {
+                    container.innerHTML += sessionsHtml;
+                } else {
+                    container.innerHTML = sessionsHtml;
+                }
+
+                // Update load more button
+                const loadMoreBtn = document.getElementById('loadMoreBtn');
+                if (loadMoreBtn) {
+                    loadMoreBtn.disabled = sessions.length < this.currentLimit;
+                }
+            }
+
+            calculateSessionDuration(session) {
+                // Calculate approximate session duration based on first and last activity
+                if (session.first_visit && session.last_activity) {
+                    const start = new Date(session.first_visit).getTime();
+                    const end = new Date(session.last_activity).getTime();
+                    return end - start;
+                }
+                return 0;
+            }
+
+            async selectSession(sessionId) {
+                // Remove active class from all items
+                document.querySelectorAll('.session-item').forEach(item => {
+                    item.classList.remove('active');
+                });
+
+                // Add active class to selected session
+                const selectedSession = document.querySelector(`[data-session-id="${sessionId}"]`);
+                if (selectedSession) selectedSession.classList.add('active');
+
+                // Find session data
+                const session = this.allSessions.find(s => s.session_id === sessionId);
+                if (!session) return;
+
+                this.currentSession = session;
+
+                // Show loading
+                const statusElement = document.getElementById('replayStatus');
+                const playerElement = document.getElementById('replayPlayer');
+                statusElement.style.display = 'block';
+                statusElement.className = 'loading';
+                statusElement.textContent = `Loading ${session.total_recordings || 0} recording chunks...`;
+
+                // Clear previous replay
+                playerElement.innerHTML = '<div id="rrweb-player-container"></div>';
+
+                try {
+                    // Load all events from all recordings in this session
+                    this.allEvents = await this.loadAllRecordingEvents(sessionId);
+                    
+                    if (!this.allEvents || this.allEvents.length === 0) {
+                        throw new Error('No events found for this session');
+                    }
+
+                    console.log(`Loaded ${this.allEvents.length} events from ${session.total_recordings || 0} recording chunks`);
+
+                    // this.displaySessionInfo(session);
+                    
+                    // Create replay player with all combined events
+                    this.createReplayPlayer();
+                    
+                    statusElement.style.display = 'none';
+
+                } catch (error) {
+                    console.error('Error playing session:', error);
+                    statusElement.className = 'error';
+                    statusElement.textContent = `Error: ${error.message}`;
+                    playerElement.innerHTML = `
+                        <div class="error">
+                            <strong>Failed to load session replay:</strong><br>
+                            ${error.message}
+                        </div>
+                    `;
+                }
+            }
+
+            createReplayPlayer() {
+                // Destroy existing player if any
+                if (this.replayPlayer) {
+                    try {
+                        this.replayPlayer.$destroy && this.replayPlayer.$destroy();
+                    } catch (e) {
+                        console.warn('Error destroying previous player:', e);
+                    }
+                }
+
+				    var actualwidth = this.currentSession.screen_width
+				    var actualheight = this.currentSession.screen_height
+
+                // Create new rrweb player
+                this.replayPlayer = new rrwebPlayer({
+                    target: document.getElementById('rrweb-player-container'),
+                    props: {
+                        events: this.allEvents,
+                        width: actualwidth,
+                        height: actualheight,
+						  		maxScale : this.applyOptimalZoom(),
+                        autoPlay: true,
+                        speedOption: [0.5, 1, 2, 4],
+                        showController: true,
+                        mouseTail: true,
+                        UNSAFE_replayCanvas: true,
+                        triggerFocus: false,
+						      //inactiveColor: 'green',
+                        // insertStyleRules: [
+                        //     '.rr-player { width: 100% !important; height: 100% !important; }',
+                        //     '.rr-player__frame { width: 100% !important; height: 100% !important; }',
+                        //     '.rr-controller { position: absolute !important; bottom: 0 !important; left: 0 !important; right: 0 !important; z-index: 1000 !important; background: rgba(0, 0, 0, 0.8) !important; }'
+                        // ]
+                    }
+                });
+
+                // Add event listener for progress updates
+                setTimeout(() => {
+                    if (this.replayPlayer && this.replayPlayer.getReplayer) {
+                        const replayer = this.replayPlayer.getReplayer();
+                        if (replayer) {
+                            replayer.on('progress', (data) => {
+                                this.updateProgress(data);
+                            });
+                        }
+                    }
+                }, 1000);
+            }
+
+            updateProgress(data) {
+                const progressElement = document.getElementById('replayProgress');
+                if (progressElement && data && data.totalTime > 0) {
+                    const progress = (data.time / data.totalTime * 100).toFixed(1);
+                    progressElement.textContent = `${progress}%`;
+                }
+            }
+
+            togglePlay() {
+                if (this.replayPlayer && this.replayPlayer.getReplayer) {
+                    const replayer = this.replayPlayer.getReplayer();
+                    if (replayer) {
+                        if (replayer.service.state.matches('playing')) {
+                            replayer.pause();
+                            document.getElementById('playPauseBtn').textContent = 'Play';
+                        } else {
+                            replayer.play();
+                            document.getElementById('playPauseBtn').textContent = 'Pause';
+                        }
+                    }
+                }
+            }
+
+            resetReplay() {
+                if (this.replayPlayer && this.replayPlayer.getReplayer) {
+                    const replayer = this.replayPlayer.getReplayer();
+                    if (replayer) {
+                        replayer.play(0);
+                        document.getElementById('playPauseBtn').textContent = 'Pause';
+                    }
+                }
+            }
+
+            changeSpeed(speed) {
+                if (this.replayPlayer && this.replayPlayer.getReplayer) {
+                    const replayer = this.replayPlayer.getReplayer();
+                    if (replayer) {
+                        replayer.setConfig({ speed: parseFloat(speed) });
+                    }
+                }
+            }
+
+            async updateStats() {
+                const stats = await this.loadStats();
+                if (stats) {
+                    document.getElementById('totalSessions').textContent = stats.totalSessions || 0;
+                    // document.getElementById('totalUsers').textContent = stats.totalSessions || 0;
+                    document.getElementById('mobilePercentage').textContent = stats.mobilePercentage + '%';
+                    
+                    const totalRecordings = (stats.deviceBreakdown.mobile?.recordings || 0) + 
+                                          (stats.deviceBreakdown.tablet?.recordings || 0) + 
+                                          (stats.deviceBreakdown.desktop?.recordings || 0);
+                    document.getElementById('totalRecordings').textContent = totalRecordings;
+                }
+            }
+
+            formatDuration(ms) {
+                if (!ms) return '0s';
+                const seconds = Math.floor(ms / 1000);
+                const minutes = Math.floor(seconds / 60);
+                const hours = Math.floor(minutes / 60);
+
+                if (hours > 0) {
+                    return `${hours}h ${minutes % 60}m`;
+                } else if (minutes > 0) {
+                    return `${minutes}m ${seconds % 60}s`;
+                } else {
+                    return `${seconds}s`;
+                }
+            }
+
+            formatDate(dateString) {
+                if (!dateString) return 'Unknown';
+                try {
+                    const date = new Date(dateString);
+                    return date.toLocaleDateString() + ' ' + date.toLocaleTimeString();
+                } catch {
+                    return 'Invalid Date';
+                }
+            }
+
+            truncateText(text, maxLength) {
+                if (!text) return 'N/A';
+                return text.length > maxLength ? text.substring(0, maxLength) + '...' : text;
+            }
+
+            escapeHtml(unsafe) {
+                if (!unsafe) return '';
+                return unsafe
+                    .replace(/&/g, "&amp;")
+                    .replace(/</g, "&lt;")
+                    .replace(/>/g, "&gt;")
+                    .replace(/"/g, "&quot;")
+                    .replace(/'/g, "&#039;");
+            }
+
+            showError(message) {
+                const container = document.getElementById('sessionsContainer');
+                container.innerHTML = `<div class="error">${message}</div>`;
+            }
+
+			  applyOptimalZoom() {
+				  const container = document.getElementById('rrweb-player-container');
+				  if (!container || !this.currentSession) return;
+
+				  // // Get the iframe inside the rrweb player
+				  // const iframe = container.querySelector('.rr-player__frame');
+				  // if (!iframe) {
+					 //  console.log('Iframe not found yet, retrying...');
+					 //  setTimeout(() => this.applyOptimalZoom(), 500);
+					 //  return;
+				  // }
+						//
+				  // Get container dimensions
+				  const containerWidth = container.clientWidth;
+				  const containerHeight = container.clientHeight;
+
+				  // Get session screen dimensions
+				  const sessionWidth = this.currentSession.screen_width || 1920;
+				  const sessionHeight = this.currentSession.screen_height || 1080;
+
+				  console.log('Container size:', containerWidth, 'x', containerHeight);
+				  console.log('Session screen size:', sessionWidth, 'x', sessionHeight);
+
+				  // Calculate scale factors for width and height
+				  const scaleX = containerWidth / sessionWidth;
+				  const scaleY = containerHeight / sessionHeight;
+
+				  // Use the smaller scale to ensure content fits completely
+				  const optimalScale = Math.min(scaleX, scaleY);
+
+				  // Apply some padding (90% of the calculated scale)
+				  const scaleWithPadding = optimalScale * 0.9;
+
+				  console.log('Calculated scale for viewer:', scaleWithPadding);
+
+				  return scaleWithPadding
+
+				  // // Apply the transform ONLY to the iframe
+				  // iframe.style.transform = `scale(${scaleWithPadding})`;
+				  // iframe.style.transformOrigin = '0 0';
+				  // iframe.style.width = `${sessionWidth}px`; // Keep original session width
+				  // iframe.style.height = `${sessionHeight}px`; // Keep original session height
+						//
+				  // // Center the iframe in the container if needed
+				  // const scaledWidth = sessionWidth * scaleWithPadding;
+				  // const scaledHeight = sessionHeight * scaleWithPadding;
+						//
+				  // iframe.style.position = 'absolute';
+				  // iframe.style.left = '50%';
+				  // iframe.style.top = '50%';
+				  // iframe.style.marginLeft = `-${scaledWidth / 2}px`;
+				  // iframe.style.marginTop = `-${scaledHeight / 2}px`;
+			  }
+
+        }  //sessionViewer class
+
+        // Global instance
+        const sessionViewer = new SessionViewer();
+
+        // Global functions for UI
+        async function loadSessions() {
+            const deviceType = document.getElementById('deviceFilter').value;
+            const userId = document.getElementById('userFilter').value;
+            const limit = parseInt(document.getElementById('limitInput').value) || 20;
+            
+            sessionViewer.currentOffset = 0;
+            
+            const data = await sessionViewer.loadSessions(deviceType, userId, limit, sessionViewer.currentOffset);
+            sessionViewer.displaySessions(data.sessions, false);
+            
+            // Update stats
+            sessionViewer.updateStats();
+        }
+
+        async function loadMoreSessions() {
+            const deviceType = document.getElementById('deviceFilter').value;
+            const userId = document.getElementById('userFilter').value;
+            const limit = parseInt(document.getElementById('limitInput').value) || 20;
+            
+            sessionViewer.currentOffset += limit;
+            const data = await sessionViewer.loadSessions(deviceType, userId, limit, sessionViewer.currentOffset);
+            sessionViewer.displaySessions(data.sessions, true);
+        }
+
+        // Event listeners for filters
+        document.addEventListener('DOMContentLoaded', function() {
+            // Load initial data
+            loadSessions();
+            
+            // Add event listeners for real-time filtering
+            document.getElementById('deviceFilter').addEventListener('change', () => loadSessions());
+            document.getElementById('userFilter').addEventListener('input', debounce(() => loadSessions(), 500));
+            document.getElementById('limitInput').addEventListener('change', () => loadSessions());
+        });
+
+        // Debounce function for search inputs
+        function debounce(func, wait) {
+            let timeout;
+            return function executedFunction(...args) {
+                const later = () => {
+                    clearTimeout(timeout);
+                    func(...args);
+                };
+                clearTimeout(timeout);
+                timeout = setTimeout(later, wait);
+            };
+        }
+
+        // Handle window resize
+        window.addEventListener('resize', function() {
+            // Force rrweb player to recalculate dimensions
+            if (sessionViewer.replayPlayer && sessionViewer.replayPlayer.getReplayer) {
+                const replayer = sessionViewer.replayPlayer.getReplayer();
+                if (replayer) {
+                    setTimeout(() => {
+                        replayer.service.send({ type: 'RESIZE' });
+                    }, 100);
+                }
+            }
+        });
+
+    </script>
+</body>
+</html>
