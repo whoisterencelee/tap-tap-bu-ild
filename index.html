@@ -253,9 +253,9 @@
     // Graph Methods
 
     function changeGraph(){
+		 checkLessonCompletion()  // <--- lesson module
 	    updateGraph()
 	    saveGraph()
-		 checkLessonCompletion()  // <--- lesson module
     }
 
     function clearGraph(){
@@ -618,48 +618,52 @@
 
 <script>
 // lesson module
-// Add this after the existing data structures
 let lessons = [
-  {
-    id: "step1",
-    title: "Basic Combination",
-    description: "@step1 What happens if you tap on Water and Heat?",
-    requiredNodes: ["Water", "Heat"],
-    targetNodes: ["Fog", "Ice", "Mist", "Steam", "Vapor"],
-    hint: "Select both Water and Heat nodes and wait for the result",
-    nextLesson: "step2",
-    completed: false
-  },
-  {
-    id: "step2",
-    title: "Advanced Combinations",
-    description: "@step2 Combine Heat, Water and Metal to create Steam Engine",
-    requiredNodes: ["Heat", "Metal", "Water"],
-    targetNodes: ["Steam engine"],
-    hint: "Try combining more than two elements",
-    nextLesson: "step3",
-    completed: false
-  },
-  {
-	 id: "step3",
-	 title: "Adding your own Node",
-	 description: "@step3 Double click on empty space to add the word 'Wheel'",
-	 requiredNodes: [],
-	 targetNodes: ["Wheel"],
-	 hint: "Double click anywhere to add a new word",
-	 nextLesson: null,
-	 completed: false
-  },
-  {
+	{
+		id: "step1",
+		title: "Basic Combination",
+		description: "@step1 What happens if you tap on Water and Heat?",
+		requiredNodes: ["Water", "Heat"],
+		targetNodes: ["Fog", "Ice", "Mist", "Steam", "Vapor"],
+		hint: "Select both Water and Heat nodes and wait for the result",
+		nextLesson: "step2",
+	},
+	{
+		id: "step2",
+		title: "Advanced Combinations",
+		description: "@step2 Combine Heat, Water and Metal to create Steam Engine",
+		requiredNodes: ["Heat", "Metal", "Water"],
+		targetNodes: ["Steam engine"],
+		hint: "Try combining more than two elements",
+		nextLesson: "step3",
+	},
+	{
+		id: "step3",
+		title: "Adding your own Node",
+		description: "@step3 Double click on empty space to add the word 'Wheel'",
+		requiredNodes: [],
+		targetNodes: ["Wheel"],
+		hint: "Double click anywhere to add a new word",
+		nextLesson: "step4",
+	},
+	{
 		id: "step4",
-		title: "Using your new Node",
-		description: "@step4 Combine Steam Engine and Wheel to create Locomotive",
+		title: "Make a transportation",
+		description: "@step4 See if you can make a transportation",
 		requiredNodes: ["Steam engine", "Wheel"],
-		targetNodes: ["Locomotive"],
+		targetNodes: ["Transportation"],
 		hint: "Select both Steam Engine and Wheel nodes and wait for the result",
-		nextLesson: null,
-		completed: false
-	}
+		nextLesson: "step5",
+	},
+	{
+		id: "step5",
+		title: "Clear the way",
+		description: "@step5 Add a node with ':reset' command to clear the graph",
+		requiredNodes: [],
+		targetNodes: () => nodes.length == 1,
+		hint: "that's colon plus reset",
+		nextLesson: "step6",
+	},
 ];
 
 let currentLesson = "step1";
@@ -670,12 +674,17 @@ let lessonNodes = []; // Track nodes created for lesson completion
 
 function checkLessonCompletion() {
 	const lesson = lessons.find(l => l.id === currentLesson);
-	if (!lesson || lesson.completed) return;
+	if ( !lesson ) return;
 
-	// Check if all target nodes have been created
-	const allTargetsCreated = lesson.targetNodes.every(target => 
-		nodes.some(node => node.name === target)
-	);
+	if( Array.isArray( lesson.targetNodes ) == true ){
+		// Check if all target nodes have been created
+		allTargetsCreated = lesson.targetNodes.every(target => 
+			nodes.some(node => node.name === target)
+		)
+	} else {
+		// function check
+		allTargetsCreated = lesson.targetNodes()
+	}
 
 	if (allTargetsCreated) {
 		completeLesson(currentLesson);
@@ -687,15 +696,14 @@ function completeLesson(lessonId) {
 	const lesson = lessons.find(l => l.id === lessonId);
 	if (!lesson) return;
 
-	lesson.completed = true;
-
-	// Show completion message
-	alert(`Lesson Complete: You can now do ${lesson.title}`);
+	// remove current lesson description node
+	nodes = nodes.filter(n => n.name !== lesson.description);
 
 	// Move to next lesson if available
 	if (lesson.nextLesson && lessons.find(l => l.id === lesson.nextLesson)) {
-		// remove current lesson description node
-		nodes = nodes.filter(n => n.name !== lesson.description);
+
+		// Show completion message
+		alert(`Lesson Complete: You can now do ${lesson.title}`);
 
 		currentLesson = lesson.nextLesson;
 
