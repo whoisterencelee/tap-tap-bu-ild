@@ -660,7 +660,7 @@ let lessons = [
 		title: "Removing words",
 		description: "@step5 Drag the word 'Remove' to the edge",
 		requiredNodes: ["Remove"],
-		targetNodes: () => !nodes.includes( "Remove" ),
+		targetNodes: () => !nodes.some(node => node.name === "Remove" )
 		hint: "Dragging any word to any edge should remove the word",
 		nextLesson: "step6",
 	},
