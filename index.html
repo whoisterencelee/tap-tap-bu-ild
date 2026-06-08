@@ -76,8 +76,7 @@
 			<p style=text-align:center;>
 
 							AI-powered world crafting<br /><br />
-							Imagine Minecraft but instead of digging blocks, you’re tapping<br />
-							words to build your perfect world<br /><br />
+							Minecraft without digging blocks, tapping words to build your world<br /><br />
 			</p>
 
 		<style>
@@ -93,14 +92,15 @@
 			<tr> <td> drag </td>		<td> move words around to perfect your design </td> </tr>
 			<tr> <td> delete </td>		<td> drag words to the edge to remove them </td> </tr>
 			<tr> <td> hold </td>		<td> on a word to read wikipedia </td> </tr>
-			<tr> <td> :help </td>		<td> type to show this or click tap tap craft </td> </tr>
+			<tr> <td> :help </td>		<td> type to show this or click taptap.build </td> </tr>
+			<tr> <td> :sort by color </td>	<td> let the AI rearrange for you
 			<tr> <td> :save </td>		<td> save file for big world </td></tr>
 			<tr> <td> :load </td>		<td> load world file </td> </tr>
 			<tr> <td> :reset </td>		<td> clear </td> </tr>
 			<tr> <td> :share </td>		<td> with a link to your world </td> </tr>
 		</table>
 
-						<p>please send feedback to terence.lee+taptapcraft@<span style=display:none;>email</span>sustaincia.<span style=display:none;>domain</span>org</p>
+						<p>please send feedback to terence.lee+taptapbuild@<span style=display:none;>email</span>sustaincia.<span style=display:none;>domain</span>org</p>
      
 		</div>
 	</div><!--showHide--> &emsp;
@@ -667,10 +667,19 @@ let lessons = [
 	{
 		id: "step6",
 		title: "Clear the way",
-		description: "@step6 Start building your world, see more features by clicking taptap.build on the top, now add the word ':reset' to starting building your world",
+		description: "@step6 Start building your world <br/> See more features by clicking taptap.build on the top <br/> now add the word ':reset' to starting building your world",
 		requiredNodes: [],
-		targetNodes: () => nodes.length == 1,
+		targetNodes: () => nodes.length == 0,
 		hint: "that's colon plus reset",
+		nextLesson: "end",
+	},
+	{
+		id: "end",
+		title: "",
+		description: "",
+		requiredNodes: [],
+		targetNodes: () => nodes.length == 0,
+		hint: "",
 		nextLesson: "",
 	},
 ];
