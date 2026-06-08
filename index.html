@@ -660,14 +660,14 @@ let lessons = [
 		title: "Removing words",
 		description: "@step5 Drag the word 'Remove' to the edge",
 		requiredNodes: ["Remove"],
-		targetNodes: () => !nodes.some(node => node.name === "Remove" )
+		targetNodes: () => !nodes.some(node => node.name === "Remove" ),
 		hint: "Dragging any word to any edge should remove the word",
 		nextLesson: "step6",
 	},
 	{
 		id: "step6",
 		title: "Clear the way",
-		description: "@step5 Add a node with ':reset' command to clear the graph",
+		description: "@step6 Add a node with ':reset' command to clear the graph",
 		requiredNodes: [],
 		targetNodes: () => nodes.length == 1,
 		hint: "that's colon plus reset",
@@ -675,8 +675,8 @@ let lessons = [
 	},
 	{
 		id: "end",
-		title: "",
-		description: "@step6 Start building your world",
+		title: "Build",
+		description: "@Start building your world, see other commands by clicking taptap.build on the top",
 		requiredNodes: [],
 		targetNodes: () => nodes.length == 1,
 		hint: "",
