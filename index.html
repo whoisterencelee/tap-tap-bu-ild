@@ -139,20 +139,33 @@
 		  }
 	  }
 
+    window.addEventListener('resize', () => {
+	    // Update width/height variables
+	    width = window.innerWidth;
+	    height = window.innerHeight;
+	    changeGraph(); // Redraw with new dimensions
+    })
+
+    // Convert pixel to percentage coordinates
+    function toPercent(value, dimension) { return (value / dimension) * 100 }
+
+    // Convert percentage to pixel coordinates
+    function toPixel(percent, dimension) { return (percent / 100) * dimension }
+
     // Initialize SVG and dimensions
     const svg = d3.select("#graph");
-    const width = window.innerWidth;
-    const height = window.innerHeight;
+    let width = window.innerWidth;
+    let height = window.innerHeight;
     svg.attr("width", width).attr("height", height);
 
     // Sample data: nodes and links
     // let nodes = [
 	   //  {"id":2013,"x":292,"y":372,"name":"Plastic bottle"},{"id":2017,"x":81,"y":372,"name":"Cardboard box"},{"id":2018,"x":189,"y":372,"name":"Soda can"},{"id":2027,"x":383,"y":372,"name":"Paper"},{"id":2028,"x":59,"y":416,"name":"Old clothing"},{"id":2030,"x":162,"y":416,"name":"Glass bottle"},{"id":2060,"x":262,"y":416,"name":"Food waste"},{"id":2064,"x":370,"y":416,"name":"Old electronics"}
     // ];
-	 let nodes = [
-		  // {"id":2013,"x":262,"y":400,"name":"Heat"},{"id":2018,"x":169,"y":400,"name":"Water"},
-		  // {"id":2030,"x":220,"y":360,"name":"@step1 What happens if you tap on Water and Heat?"}
-	 ]
+    let nodes = [
+	    // {"id":2013,"x":262,"y":400,"name":"Heat"},{"id":2018,"x":169,"y":400,"name":"Water"},
+	    // {"id":2030,"x":220,"y":360,"name":"@step1 What happens if you tap on Water and Heat?"}
+    ]
     let links = [
 	    //{ source: 1, target: 2 }
     ];
@@ -292,19 +305,24 @@
 		    // console.log( "dx " + Math.abs( event.dx ) + " dy " + Math.abs( event.dy ) )
 		    if( Math.abs( event.dx ) >= 1 || Math.abs( event.dy ) >= 1 ) cancelHold()
 
+		    // Convert the delta movement to percentage
+		    // `event.x` is the absolute pixel position, but it's being measured from the wrong origin since the node is inside a transformed group
+		    const dxPct = (event.dx / width) * 100;
+		    const dyPct = (event.dy / height) * 100;
+
+		    // Calculate new percentage position from current position
+		    let newX = (d.x || 50) + dxPct;
+		    let newY = (d.y || 50) + dyPct;
+
 		    // drag outside boundry to delete
-		    if( event.x < 20 || event.x > ( window.innerWidth - 20 ) || event.y < 20 || event.y > ( window.innerHeight - 20 ) ){
-
-			    if( crafting < 1 ) {  // delete if not crafting
-				    nodes = nodes.filter(n => n !== d)
-				    links = links.filter(n => n.target != d.id && n.source != d.id )
+		    if (newX < 2 || newX > 98 || newY < 2 || newY > 98) {
+			    if (crafting < 1) {  // delete if not crafting
+				    nodes = nodes.filter(n => n !== d);
+				    links = links.filter(n => n.target != d.id && n.source != d.id);
 			    }
-
 		    } else {
-
-			    d.x = event.x
-			    d.y = event.y
-
+			    d.x = newX;
+			    d.y = newY;
 		    }
 
 		    changeGraph()
@@ -377,25 +395,30 @@
 		    .data(links)
 		    .join("line")
 		    .classed( "link" , true )
-		    .attr("x1", d => nodes.find(n => n.id === d.source).x)
-		    .attr("y1", d => nodes.find(n => n.id === d.source).y)
-		    .attr("x2", d => nodes.find(n => n.id === d.target).x)
-		    .attr("y2", d => nodes.find(n => n.id === d.target).y);
+		    .attr("x1", d => toPixel( nodes.find(n => n.id === d.source).x , width ) )
+		    .attr("y1", d => toPixel( nodes.find(n => n.id === d.source).y , height ) )
+		    .attr("x2", d => toPixel( nodes.find(n => n.id === d.target).x , width ) )
+		    .attr("y2", d => toPixel( nodes.find(n => n.id === d.target).y , height ) )
 
 	    // Update nodes (rectangles + text)
 	    const nodeGroups = svg.select(".nodes-layer").selectAll(".node-group")
 		    .data(nodes)
 		    .join("g")
 		    .classed( "node-group" , true )
-		    .call(drag);
+		    .call(drag)
+		    .attr("transform", d => {
+				    const px = toPixel(d.x , width);
+				    const py = toPixel(d.y , height);
+				    return `translate(${px},${py})`;
+				    })
 
 	    // Draw label background (auto-width rectangle)
 	    nodeGroups.selectAll(".node-label")
 		    .data(d => [d])
 		    .join("rect")
 		    .classed( "node-label" , true )
-		    .attr("x", d => d.x - 15 - getTextWidth(d.name)/2) // Center based on text width
-		    .attr("y", d => d.y - 15)
+		    .attr("x", d => -15 - getTextWidth(d.name)/2 ) // Center based on text width
+		    .attr("y", d => -15 )
 		    .attr("width", d => getTextWidth(d.name) + 30) // 15px padding each side
 		    .attr("height", 30);
 
@@ -404,12 +427,12 @@
 		    .data(d => [d])
 		    .join("text")
 		    .classed( "node-text" , true )
-		    .attr("x", d => d.x)
-		    .attr("y", d => d.y + 5)
+		    .attr("x", 0 )
+		    .attr("y", 5 )
 		    .attr("text-anchor", "middle")
 		    .text(d => d.name);
 
-	    // Select Things
+	    // Selection handling
 	    nodeGroups.on("click", function(event, d) {
 		    event.stopPropagation();
 
@@ -444,13 +467,13 @@
 	      // Remove any existing input nodes first
 	      svg.selectAll(".input-node").remove();
 
-	      const x = event.offsetX;
-	      const y = event.offsetY;
+	      const x = toPercent( event.offsetX , width )
+	      const y = toPercent( event.offsetY , height )
 	      
 	      // Create temporary input group
 	      const inputGroup = svg.append("g")
 	        .attr("class", "input-node")
-	        .attr("transform", `translate(${x},${y})`);
+	        .attr("transform", `translate(${event.offsetX},${event.offsetY})`);
 	      
 	      // Create expanding rectangle
 	      const rect = inputGroup.append("rect")
@@ -578,10 +601,14 @@
 					      // set initial position avoid boundries
 					      const newID = ++nodeID
 					      //let cordx = selectedLast.x + ( i + 1 ) * 10 + ( i * i ) * 10
-					      let cordx = selectedLast.x + 30
-					      if( cordx > window.innerWidth ) cordx = window.innerWidth - 50
-					      let cordy = selectedLast.y + ( i + 1 ) * 40
-					      if( cordy > window.innerHeight ) cordy = window.innerHeight - 50
+					      let cordx = selectedLast.x + 5
+					      let cordy = selectedLast.y + ( i + 1 ) * 5
+
+					      // Keep within bounds (2% to 95%)
+					      if (cordx > 95) cordx = 95;
+					      if (cordx < 2) cordx = 2;
+					      if (cordy > 95) cordy = 95;
+					      if (cordy < 2) cordy = 2;
 
 					      nodes.push({
 						      id: newID ,
@@ -667,7 +694,7 @@ let lessons = [
 	{
 		id: "step6",
 		title: "Clear the way",
-		description: "@step6 Start building your world <br/> See more features by clicking taptap.build on the top <br/> now add the word ':reset' to starting building your world",
+		description: "@step6 Start building your world \n See more features by clicking taptap.build on the top \n now add the word ':reset' to starting building your world",
 		requiredNodes: [],
 		targetNodes: () => nodes.length == 0,
 		hint: "that's colon plus reset",
@@ -759,8 +786,8 @@ function startLesson(lessonId = "step1" ) {
 		// Show lesson description
 		nodes.push({
 			id: ++nodeID,
-			x: window.innerWidth / 2,
-			y: 100,
+			x: 50,
+			y: 10,
 			name: lesson.description
 		});
 	}
@@ -771,8 +798,8 @@ function startLesson(lessonId = "step1" ) {
 				// Add missing required node at random position
 				nodes.push({
 					id: ++nodeID,
-					x: 30 + Math.random() * ( window.innerWidth - 60 ),
-					y: 30 + Math.random() * ( window.innerHeight - 60 ),
+					x: 5 + Math.random() * 90 ,
+					y: 5 + Math.random() * 90 ,
 					name: reqNode
 				});
 			}
