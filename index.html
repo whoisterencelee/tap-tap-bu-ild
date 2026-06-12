@@ -147,7 +147,7 @@
     })
 
     // Convert pixel to percentage coordinates
-    function toPercent(value, dimension) { return (value / dimension) * 100 }
+    function toPercent(value, dimension) { return Number( ( (value / dimension) * 100 ).toFixed(3) ) }
 
     // Convert percentage to pixel coordinates
     function toPixel(percent, dimension) { return (percent / 100) * dimension }
@@ -159,15 +159,12 @@
     svg.attr("width", width).attr("height", height);
 
     // Sample data: nodes and links
-    // let nodes = [
-	   //  {"id":2013,"x":292,"y":372,"name":"Plastic bottle"},{"id":2017,"x":81,"y":372,"name":"Cardboard box"},{"id":2018,"x":189,"y":372,"name":"Soda can"},{"id":2027,"x":383,"y":372,"name":"Paper"},{"id":2028,"x":59,"y":416,"name":"Old clothing"},{"id":2030,"x":162,"y":416,"name":"Glass bottle"},{"id":2060,"x":262,"y":416,"name":"Food waste"},{"id":2064,"x":370,"y":416,"name":"Old electronics"}
-    // ];
     let nodes = [
-	    // {"id":2013,"x":262,"y":400,"name":"Heat"},{"id":2018,"x":169,"y":400,"name":"Water"},
-	    // {"id":2030,"x":220,"y":360,"name":"@step1 What happens if you tap on Water and Heat?"}
+	    // {"i":2013,"x":26,"y":40,"n":"Heat"},{"i":2018,"x":169,"y":400,"n":"Water"},
+	    // {"i":2030,"x":50,"y":10,"n":"@step1 What happens if you tap on Water and Heat?"}
     ]
     let links = [
-	    //{ source: 1, target: 2 }
+	    //{ "s": 2013, "t": 2030 }
     ];
     let nodeID = 1978
 
@@ -185,7 +182,7 @@
 			 let graphData = JSON.parse( savedData )
 			 nodes = graphData.nodes
 			 links = graphData.links
-			 nodeID = nodes.reduce( ( a , b ) => a > b.id ? a : b.id  , nodeID ? nodeID : 1978 ) // find the biggest nodeID
+			 nodeID = nodes.reduce( ( a , b ) => a > b.i ? a : b.i  , nodeID ? nodeID : 1978 ) // find the biggest nodeID
 			 return true
 		 }catch(e){
 			 console.error( "loadGraph error", e )
@@ -318,7 +315,7 @@
 		    if (newX < 2 || newX > 98 || newY < 2 || newY > 98) {
 			    if (crafting < 1) {  // delete if not crafting
 				    nodes = nodes.filter(n => n !== d);
-				    links = links.filter(n => n.target != d.id && n.source != d.id);
+				    links = links.filter(n => n.t != d.i && n.s != d.i);
 			    }
 		    } else {
 			    d.x = newX;
@@ -342,7 +339,7 @@
 	//			    holdDrag.interrupt()  // not need to be so violent, state machine can handle it now
 				    holdDrag = null
 			    }
-			    openWikipedia(nodeData.name);
+			    openWikipedia(nodeData.n);
 		    }, 2500 );
 	    }
     }
@@ -395,10 +392,10 @@
 		    .data(links)
 		    .join("line")
 		    .classed( "link" , true )
-		    .attr("x1", d => toPixel( nodes.find(n => n.id === d.source).x , width ) )
-		    .attr("y1", d => toPixel( nodes.find(n => n.id === d.source).y , height ) )
-		    .attr("x2", d => toPixel( nodes.find(n => n.id === d.target).x , width ) )
-		    .attr("y2", d => toPixel( nodes.find(n => n.id === d.target).y , height ) )
+		    .attr("x1", d => toPixel( nodes.find(n => n.i === d.s).x , width ) )
+		    .attr("y1", d => toPixel( nodes.find(n => n.i === d.s).y , height ) )
+		    .attr("x2", d => toPixel( nodes.find(n => n.i === d.t).x , width ) )
+		    .attr("y2", d => toPixel( nodes.find(n => n.i === d.t).y , height ) )
 
 	    // Update nodes (rectangles + text)
 	    const nodeGroups = svg.select(".nodes-layer").selectAll(".node-group")
@@ -417,9 +414,9 @@
 		    .data(d => [d])
 		    .join("rect")
 		    .classed( "node-label" , true )
-		    .attr("x", d => -15 - getTextWidth(d.name)/2 ) // Center based on text width
+		    .attr("x", d => -15 - getTextWidth(d.n)/2 ) // Center based on text width
 		    .attr("y", d => -15 )
-		    .attr("width", d => getTextWidth(d.name) + 30) // 15px padding each side
+		    .attr("width", d => getTextWidth(d.n) + 30) // 15px padding each side
 		    .attr("height", 30);
 
 	    // Draw text (centered inside rectangle)
@@ -430,7 +427,7 @@
 		    .attr("x", 0 )
 		    .attr("y", 5 )
 		    .attr("text-anchor", "middle")
-		    .text(d => d.name);
+		    .text(d => d.n);
 
 	    // Selection handling
 	    nodeGroups.on("click", function(event, d) {
@@ -534,10 +531,10 @@
 
 				    item = item.charAt(0).toUpperCase() + item.slice(1).toLowerCase();
 				    nodes.push({
-					    id: ++nodeID,
+					    i: ++nodeID,
 					    x: x,
 					    y: y,
-					    name: item
+					    n: item
 				    });
 
 				    changeGraph();
@@ -568,7 +565,7 @@
 		      selectedDOM.classed("shake", true);
 
 		      let selectedItems = Array.from( selectedNodes )
-		      let items = selectedItems.map( n => n.name )
+		      let items = selectedItems.map( n => n.n )
 		      let selectedLast = selectedItems[ selectedItems.length - 1 ]
 			
 		      // loading
@@ -611,18 +608,18 @@
 					      if (cordy < 2) cordy = 2;
 
 					      nodes.push({
-						      id: newID ,
+						      i: newID ,
 						      x: cordx ,
 						      y: cordy ,
-						      name: item
+						      n: item
 					      });
 
 					      // create links
 					      selectedItems.forEach( prior => {
 						      links.push({
-							      source: prior.id ,
-							      target: newID ,
-							      // result: [ prior.name , item ]  // remove to reduce storage and share
+							      s: prior.i ,
+							      t: newID ,
+							      // result: [ prior.n , item ]  // remove to reduce storage and share
 						      } )
 						} )
 				      })
@@ -687,7 +684,7 @@ let lessons = [
 		title: "Removing words",
 		description: "@step5 Drag the word 'Remove' to the edge",
 		requiredNodes: ["Remove"],
-		targetNodes: () => !nodes.some(node => node.name === "Remove" ),
+		targetNodes: () => !nodes.some(node => node.n === "Remove" ),
 		hint: "Dragging any word to any edge should remove the word",
 		nextLesson: "step6",
 	},
@@ -724,7 +721,7 @@ function checkLessonCompletion() {
 	if( Array.isArray( lesson.targetNodes ) == true ){
 		// Check if all target nodes have been created
 		allTargetsCreated = lesson.targetNodes.every(target => 
-			nodes.some(node => node.name === target)
+			nodes.some(node => node.n === target)
 		)
 	} else {
 		// function check
@@ -742,7 +739,7 @@ function completeLesson(lessonId) {
 	if (!lesson) return;
 
 	// remove current lesson description node
-	nodes = nodes.filter(n => n.name !== lesson.description);
+	nodes = nodes.filter(n => n.n !== lesson.description);
 
 	// Move to next lesson if available
 	if (lesson.nextLesson && lessons.find(l => l.id === lesson.nextLesson)) {
@@ -782,25 +779,25 @@ function startLesson(lessonId = "step1" ) {
 	if (!lesson) return;
 
 	currentLesson = lessonId;
-	if (lesson && lesson.description && !nodes.some(n => n.name === lesson.description ) ){
+	if (lesson && lesson.description && !nodes.some(n => n.n === lesson.description ) ){
 		// Show lesson description
 		nodes.push({
-			id: ++nodeID,
+			i: ++nodeID,
 			x: 50,
 			y: 10,
-			name: lesson.description
+			n: lesson.description
 		});
 	}
 	if (lesson && lesson.requiredNodes) {
 		// Ensure required nodes are present
 		lesson.requiredNodes.forEach(reqNode => {
-			if (!nodes.some(n => n.name === reqNode)) {
+			if (!nodes.some(n => n.n === reqNode)) {
 				// Add missing required node at random position
 				nodes.push({
-					id: ++nodeID,
+					i: ++nodeID,
 					x: 5 + Math.random() * 90 ,
 					y: 5 + Math.random() * 90 ,
-					name: reqNode
+					n: reqNode
 				});
 			}
 		});
