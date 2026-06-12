@@ -101,22 +101,29 @@
 		</table>
 
 						<p>please send feedback to terence.lee+taptapbuild@<span style=display:none;>email</span>sustaincia.<span style=display:none;>domain</span>org</p>
-     
+      
 		</div>
 	</div><!--showHide--> &emsp;
 	<div onclick="share()">share</div>
 	</div>
 
-	<div class=unselectable style=position:absolute;width:100vw;height:100vh;display:flex;align-items:center;color:lightgrey;z-index:-1;font-family:Geoform-HeavyItalic;opacity:0.12;line-height:1.2em;flex-direction:column;justify-content:center;word-break:break-all;word-spacing:0.4em;overflow:hidden;>
+	<div class=unselectable style=position:absolute;width:100vw;height:100vh;display:flex;align-items:center;color:lightgrey;z-index:-1;font-family:Geoform-HeavyItalic;opacity:0.12;line-height:1.2em[...]
 		<div id=backgroundWord style=line-height:0.8em;text-align:center;width:100vw;background:white;font-family:Geoform-HeavyItalic;word-break:keep-all;>
 			TAPTAP<BR />CRAFT
 		</div>
 		<script>
 			function getTextWidth(text, fontSize = "12px", fontFamily = "Arial") {
-				const canvas = document.createElement("canvas");
-				const context = canvas.getContext("2d");
-				context.font = `${fontSize} ${fontFamily}`;
-				return context.measureText(text).width;
+				// Create a temporary SVG text element to measure width
+				const svg = document.createElementNS("http://www.w3.org/2000/svg", "svg");
+				const textElement = document.createElementNS("http://www.w3.org/2000/svg", "text");
+				textElement.setAttribute("font-family", fontFamily);
+				textElement.setAttribute("font-size", fontSize);
+				textElement.textContent = text;
+				svg.appendChild(textElement);
+				document.body.appendChild(svg);
+				const width = textElement.getComputedTextLength();
+				document.body.removeChild(svg);
+				return width;
 			}
 		var textwidth = 0
 		for( var fontSize = 12 ; textwidth < window.innerWidth ; fontSize = fontSize + 2 ){
@@ -360,10 +367,17 @@
 
     // Scaling text labels
     function getTextWidth(text, fontSize = "12px", fontFamily = "Arial") {
-	      const canvas = document.createElement("canvas");
-	      const context = canvas.getContext("2d");
-	      context.font = `${fontSize} ${fontFamily}`;
-	      return context.measureText(text).width;
+	      // Create a temporary SVG text element to measure width
+	      const svg = document.createElementNS("http://www.w3.org/2000/svg", "svg");
+	      const textElement = document.createElementNS("http://www.w3.org/2000/svg", "text");
+	      textElement.setAttribute("font-family", fontFamily);
+	      textElement.setAttribute("font-size", fontSize);
+	      textElement.textContent = text;
+	      svg.appendChild(textElement);
+	      document.body.appendChild(svg);
+	      const width = textElement.getComputedTextLength();
+	      document.body.removeChild(svg);
+	      return width;
     }
 
 	  // Sound effect
@@ -755,7 +769,6 @@ function completeLesson(lessonId) {
 		startLesson(currentLesson);
 	}
 }  // completeLesson
-
 
 
 
