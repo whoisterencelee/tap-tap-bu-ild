@@ -107,7 +107,7 @@
 	<div onclick="share()">share</div>
 	</div>
 
-	<div class=unselectable style=position:absolute;width:100vw;height:100vh;display:flex;align-items:center;color:lightgrey;z-index:-1;font-family:Geoform-HeavyItalic;opacity:0.12;line-height:1.2em[...]
+	<div class=unselectable style=position:absolute;width:100vw;height:100vh;display:flex;align-items:center;color:lightgrey;z-index:-1;font-family:Geoform-HeavyItalic;opacity:0.12;line-height:1.2em;flex-direction:column;justify-content:center;word-break:break-all;word-spacing:0.4em;overflow:hidden;>
 		<div id=backgroundWord style=line-height:0.8em;text-align:center;width:100vw;background:white;font-family:Geoform-HeavyItalic;word-break:keep-all;>
 			TAPTAP<BR />CRAFT
 		</div>
@@ -423,16 +423,6 @@
 				    return `translate(${px},${py})`;
 				    })
 
-	    // Draw label background (auto-width rectangle)
-	    nodeGroups.selectAll(".node-label")
-		    .data(d => [d])
-		    .join("rect")
-		    .classed( "node-label" , true )
-		    .attr("x", d => -15 - getTextWidth(d.n)/2 ) // Center based on text width
-		    .attr("y", d => -15 )
-		    .attr("width", d => getTextWidth(d.n) + 30) // 15px padding each side
-		    .attr("height", 30);
-
 	    // Draw text (centered inside rectangle)
 	    nodeGroups.selectAll(".node-text")
 		    .data(d => [d])
@@ -440,8 +430,31 @@
 		    .classed( "node-text" , true )
 		    .attr("x", 0 )
 		    .attr("y", 5 )
+		    .attr("z", 3 )
 		    .attr("text-anchor", "middle")
 		    .text(d => d.n);
+
+	    // Draw label background (auto-width rectangle)
+	    nodeGroups.selectAll(".node-label")
+		    .data(d => [d])
+		    .join("rect")
+		    .classed( "node-label" , true )
+		    .each(function(d) {
+			    // Get the text element's bounding box
+			    const textElement = d3.select(this.parentNode).select(".node-text").node();
+			    if (textElement) {
+				    const bbox = textElement.getBBox();
+				    const padding = 15;
+
+				    // Position and size rectangle based on text
+				    d3.select(this)
+				    .attr("x", bbox.x - padding)
+				    .attr("y", bbox.y - padding/2 )
+				    .attr("width", bbox.width + padding * 2)
+				    .attr("height", bbox.height + padding );
+			    }
+		    } )
+		    .lower();
 
 	    // Selection handling
 	    nodeGroups.on("click", function(event, d) {
