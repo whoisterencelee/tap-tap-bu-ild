@@ -71,7 +71,7 @@
 </head>
 <body>
 	<div id=menu class=unselectable style=position:absolute;top:1em;width:100vw;text-align:center;font-size:x-small;display:flex;justify-content:center;font-family:Geoform; >
-		<div id=help onclick=showHide(event.currentTarget)><loading>tap tap craft</loading>
+		<div id=help onclick=showHide(event.currentTarget)><loading>taptap.build</loading>
 		<div style=position:absolute;width:100vw;top:2vh;left:0;display:none;flex-direction:column;align-items:center;z-index:-1; display-value=flex>
 			<p style=text-align:center;>
 
@@ -96,11 +96,12 @@
 			<tr> <td> :sort by color </td>	<td> let the AI rearrange for you
 			<tr> <td> :save </td>		<td> save file for big world </td></tr>
 			<tr> <td> :load </td>		<td> load world file </td> </tr>
-			<tr> <td> :reset </td>		<td> clear </td> </tr>
+			<tr> <td> :clear </td>		<td> restart with a blank world </td> </tr>
 			<tr> <td> :share </td>		<td> with a link to your world </td> </tr>
 		</table>
 
-						<p>please send feedback to terence.lee+taptapbuild@<span style=display:none;>email</span>sustaincia.<span style=display:none;>domain</span>org</p>
+						<p>send feedback to taptapbuild@<span style=display:none;>email</span>sustaincia.<span style=display:none;>domain</span>org</p>
+						<p>tap taptap.build on top to close help</p>
       
 		</div>
 	</div><!--showHide--> &emsp;
@@ -423,14 +424,13 @@
 				    return `translate(${px},${py})`;
 				    })
 
-	    // Draw text (centered inside rectangle)
+	    // Draw text (centered)
 	    nodeGroups.selectAll(".node-text")
 		    .data(d => [d])
 		    .join("text")
 		    .classed( "node-text" , true )
 		    .attr("x", 0 )
 		    .attr("y", 5 )
-		    .attr("z", 3 )
 		    .attr("text-anchor", "middle")
 		    .text(d => d.n);
 
@@ -548,7 +548,7 @@
 				    let command = item.toLowerCase()
 				    if( command.match( /^:/ ) ){
 					    if( command === ":help" ) showHide( document.getElementById( "help" ) )
-					    else if( command === ":reset" ) return clearGraph()
+					    else if( command === ":clear" ) return clearGraph()
 					    else if( command.match( /^:save/ ) ) download( saveGraph() ) 
 					    else if( command.match( /^:load/ ) ) upload()
 					    else if( command.match( /^:share/ ) ) share()
@@ -669,6 +669,7 @@
 
 <script>
 // lesson module
+let lessonTimer
 let lessons = [
 	{
 		id: "step1",
@@ -717,11 +718,27 @@ let lessons = [
 	},
 	{
 		id: "step6",
-		title: "Clear the way",
-		description: "@step6 Start building your world \n See more features by clicking taptap.build on the top \n now add the word ':reset' to starting building your world",
+		title: "Advance features",
+		description: "@step6 See more features by clicking taptap.build on the top now",
 		requiredNodes: [],
-		targetNodes: () => nodes.length == 0,
-		hint: "that's colon plus reset",
+		targetNodes: () => {
+			if( !lessonTimer ) lessonTimer = setInterval( ()=>checkLessonCompletion() , 3000 )
+			if( document.getElementById("help").getElementsByTagName("div")[0].style.display != "none" ){
+				clearInterval( lessonTimer )
+				return true
+			}
+			return false
+		},
+		hint: "Tap taptap.build at the top ",
+		nextLesson: "end",
+	},
+	{
+		id: "step7",
+		title: "Clear the way",
+		description: "@step7 Start building your world \n See more features by clicking taptap.build on the top \n now add the word ':clear' to starting building your world",
+		requiredNodes: [],
+		targetNodes: () => nodes.length == 1,
+		hint: "that's colon plus clear",
 		nextLesson: "end",
 	},
 	{
@@ -729,7 +746,7 @@ let lessons = [
 		title: "",
 		description: "",
 		requiredNodes: [],
-		targetNodes: () => nodes.length == 0,
+		targetNodes: () => true,
 		hint: "",
 		nextLesson: "",
 	},
