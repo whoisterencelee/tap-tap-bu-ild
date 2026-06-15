@@ -75,8 +75,7 @@
 		<div style=position:absolute;width:100vw;top:2vh;left:0;display:none;flex-direction:column;align-items:center;z-index:-1; display-value=flex>
 			<p style=text-align:center;>
 
-							AI-powered world crafting<br /><br />
-							Minecraft without digging blocks, tapping words to build your world<br /><br />
+							Tap powered world building<br /><br />
 			</p>
 
 		<style>
@@ -93,7 +92,7 @@
 			<tr> <td> delete </td>		<td> drag words to the edge to remove them </td> </tr>
 			<tr> <td> hold </td>		<td> on a word to read wikipedia </td> </tr>
 			<tr> <td> :help </td>		<td> type to show this or click taptap.build </td> </tr>
-			<tr> <td> :sort by color </td>	<td> let the AI rearrange for you
+			<tr> <td> :sort ... </td>	<td> let the AI rearrange for you
 			<tr> <td> :save </td>		<td> save file for big world </td></tr>
 			<tr> <td> :load </td>		<td> load world file </td> </tr>
 			<tr> <td> :clear </td>		<td> restart with a blank world </td> </tr>
@@ -722,7 +721,7 @@ let lessons = [
 		description: "@step6 See more features by clicking taptap.build on the top now",
 		requiredNodes: [],
 		targetNodes: () => {
-			if( !lessonTimer ) lessonTimer = setInterval( ()=>checkLessonCompletion() , 3000 )
+			if( !lessonTimer ) lessonTimer = setInterval( ()=>checkLessonCompletion() , 1000 )
 			if( document.getElementById("help").getElementsByTagName("div")[0].style.display != "none" ){
 				clearInterval( lessonTimer )
 				return true
@@ -730,7 +729,7 @@ let lessons = [
 			return false
 		},
 		hint: "Tap taptap.build at the top ",
-		nextLesson: "end",
+		nextLesson: "step7",
 	},
 	{
 		id: "step7",
