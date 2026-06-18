@@ -86,21 +86,20 @@
 		<table id=helptable style="text-align:left;border-spacing:10px 0;max-width:80vw" >
 			<tr> <td colspan=2 style=text-align:center;> <u> actions </u> </td> </tr>
 			<tr> <td> tap tap</td> <td> anywhere to create a new word</td></tr>
-			<tr> <td> tap </td>	<td> on word(s) to break or merge to create entirely new combinations </td> </tr>
+			<tr> <td> tap </td>	<td> word(s) to break or merge to create entirely new combinations </td> </tr>
 			<tr> <td> watch </td> <td>as the AI takes a little time to considers </td> </tr>
 			<tr> <td> drag </td>		<td> move words around to perfect your design </td> </tr>
 			<tr> <td> delete </td>		<td> drag words to the edge to remove them </td> </tr>
 			<tr> <td> hold </td>		<td> on a word to read wikipedia </td> </tr>
-			<tr> <td> :help </td>		<td> type to show this or click taptap.build </td> </tr>
-			<tr> <td> :sort ... </td>	<td> let the AI rearrange for you
+			<tr> <td> :layout ... </td>	<td> tap to auto-layout based on ...how... </td> </tr>
 			<tr> <td> :save </td>		<td> save file for big world </td></tr>
 			<tr> <td> :load </td>		<td> load world file </td> </tr>
 			<tr> <td> :clear </td>		<td> restart with a blank world </td> </tr>
 			<tr> <td> :share </td>		<td> with a link to your world </td> </tr>
+			<tr> <td> :help </td>		<td> type to show this or tap taptap.build on top to close </td> </tr>
 		</table>
 
 						<p>send feedback to taptapbuild@<span style=display:none;>email</span>sustaincia.<span style=display:none;>domain</span>org</p>
-						<p>tap taptap.build on top to close help</p>
       
 		</div>
 	</div><!--showHide--> &emsp;
@@ -549,14 +548,19 @@
 				    let item = e.target.value.trim()
 
 				    let command = item.toLowerCase()
+				    let removeCommand = true
 				    if( command.match( /^:/ ) ){
 					    if( command === ":help" ) showHide( document.getElementById( "help" ) )
-					    else if( command === ":clear" ) return clearGraph()
+					    else if( command.match( /^:layout/ ) && typeof runLayout == "function" ) removeCommand = false
+					    else if( command.match( /^:clear/ ) ) return clearGraph()
 					    else if( command.match( /^:save/ ) ) download( saveGraph() ) 
 					    else if( command.match( /^:load/ ) ) upload()
 					    else if( command.match( /^:share/ ) ) share()
-					    inputGroup.remove()
-					    return
+
+					    if( removeCommand ){
+						    inputGroup.remove()
+						    return
+					    }
 				    } // command
 
 				    item = item.charAt(0).toUpperCase() + item.slice(1).toLowerCase();
@@ -605,7 +609,20 @@
 
 		      console.log( items )
 
-		      // call server
+		      // commands
+		      let layoutCommand = ""
+		      items.forEach( ( c , ci ) => {
+			      if( c.match( /^:layout/ ) ){
+				      layoutCommand += c.split( /^:layout/ )[1] + " "
+				      selectedItems.splice( ci , 1 )
+			      }
+		      })
+		      if( layoutCommand != "" ){
+
+			      return
+		      }
+
+		      // call craft server
 		      fetch( 'https://craft.functional.limited/' , {
 			      method: 'POST' ,
 			      headers: {
@@ -729,12 +746,9 @@ function Normalize() {
 }  // Normalize
 
 
-// -----------------------------------------------------
-// 4. Run D3 force simulation with LLM parameters
-// -----------------------------------------------------
 let simulation = null;
 
-function runForceLayout( selectedNodes ) {
+function runLayout( selectedNodes ) {
   // Stop any previous simulation
   if (simulation) simulation.stop();
 
@@ -755,26 +769,12 @@ function runForceLayout( selectedNodes ) {
     .velocityDecay(llmConfig.simulation.velocityDecay)
     */
 
-}  //runForceLayout
-
-// -----------------------------------------------------
-// 6. Modify the existing `changeGraph` to use simulation
-// -----------------------------------------------------
-// Replace the original `changeGraph` with this:
-const originalChangeGraph = changeGraph;
-simchangeGraph = function() {
-  checkLessonCompletion();
-  // Instead of static update, run force layout if LLM config is available
-  if (llmConfig && llmConfig.affine) {
-    runForceLayout();
-  } else {
-    // Fallback to static (original) update
-    originalChangeGraph();
-  }
-  //saveGraph();
-};
+}  //runLayout
 
 </script>
+
+
+
 
 <script>
 // lesson module
