@@ -91,7 +91,7 @@
 			<tr> <td> drag </td>		<td> move words around to perfect your design </td> </tr>
 			<tr> <td> delete </td>		<td> drag words to the edge to remove them </td> </tr>
 			<tr> <td> hold </td>		<td> on a word to read wikipedia </td> </tr>
-			<tr> <td> :layout ... </td>	<td> tap to auto-layout based on ...how... </td> </tr>
+			<tr> <td> :remix ... </td>	<td> tap to remix ...how... </td> </tr>
 			<tr> <td> :save </td>		<td> save file for big world </td></tr>
 			<tr> <td> :load </td>		<td> load world file </td> </tr>
 			<tr> <td> :clear </td>		<td> restart with a blank world </td> </tr>
@@ -548,16 +548,16 @@
 				    let item = e.target.value.trim()
 
 				    let command = item.toLowerCase()
-				    let removeCommand = true
+				    let keepNode = false
 				    if( command.match( /^:/ ) ){
 					    if( command === ":help" ) showHide( document.getElementById( "help" ) )
-					    else if( command.match( /^:layout/ ) && typeof runLayout == "function" ) removeCommand = false
+					    else if( command.match( /^:remix/ ) && typeof runLayout == "function" ) keepNode = true
 					    else if( command.match( /^:clear/ ) ) return clearGraph()
 					    else if( command.match( /^:save/ ) ) download( saveGraph() ) 
 					    else if( command.match( /^:load/ ) ) upload()
 					    else if( command.match( /^:share/ ) ) share()
 
-					    if( removeCommand ){
+					    if( !keepNode ){
 						    inputGroup.remove()
 						    return
 					    }
@@ -599,8 +599,9 @@
 		      selectedDOM.classed("shake", true);
 
 		      let selectedItems = Array.from( selectedNodes )
-		      let items = selectedItems.map( n => n.n )
+		      selectedNodes = [];
 		      let selectedLast = selectedItems[ selectedItems.length - 1 ]
+		      let items = selectedItems.map( n => n.n )
 			
 		      // loading
 		      crafting++
@@ -610,15 +611,15 @@
 		      console.log( items )
 
 		      // commands
-		      let layoutCommand = ""
+		      let layoutPrompt = ""
 		      items.forEach( ( c , ci ) => {
-			      if( c.match( /^:layout/ ) ){
-				      layoutCommand += c.split( /^:layout/ )[1] + " "
+			      if( c.match( /^:remix/ ) ){
+				      layoutPrompt += c.split( /^:remix/ )[1] + " "
 				      selectedItems.splice( ci , 1 )
 			      }
 		      })
-		      if( layoutCommand != "" ){
-
+		      if( layoutPrompt != "" ){
+			      runLayout( layoutPrompt , selectedItems )
 			      return
 		      }
 
@@ -681,7 +682,6 @@
 			      console.error( 'Network error: ' , error )
 		      })
 
-		      selectedNodes = [];
 	      }, 2000);
     }
 		      
@@ -691,39 +691,11 @@
 
 <script>
 /* LAYOUT ENGINE */
-const LL = 
- {"goal":"gradient_vertical","description":"The layout orders the items vertically based on their cost, showing the most expensive concepts near the top.","layout":{"1980":{"x":0.5,"y":0.7,"conf":1},"1981":{"x":0.2,"y":0.3,"conf":1},"1982":{"x":0.4,"y":0.5,"conf":1},"1985":{"x":0.7,"y":0.65,"conf":1},"1986":{"x":0.75,"y":0.4,"conf":1},"1988":{"x":0.3,"y":0.8,"conf":0.2},"1990":{"x":0.3,"y":0.8,"conf":0.2},"1991":{"x":0.5,"y":0.5,"conf":0.2},"1995":{"x":0.4,"y":0.85,"conf":1},"1996":{"x":0.6,"y":0.75,"conf":1},"1997":{"x":0.65,"y":0.3,"conf":1},"1998":{"x":0.7,"y":0.2,"conf":1},"1999":{"x":0.45,"y":0.35,"conf":1}}}
+function Normalize( graph ) {
 
-/*
-{"goal":"gradient_diagonal","description":"The items are arranged along a gradient, starting from low energy inputs (top-left) and increasing in power requirements towards complex chemical processes (bottom-right).","layout":{"1980":{"x":0.1,"y":0.1,"conf":1},"1981":{"x":0.15,"y":0.2,"conf":1},"1982":{"x":0.2,"y":0.3,"conf":1},"1985":{"x":0.3,"y":0.4,"conf":0.8},"1986":{"x":0.25,"y":0.45,"conf":1},"1988":{"x":0.35,"y":0.5,"conf":0.7},"1990":{"x":0.4,"y":0.52,"conf":0.8},"1991":{"x":0.45,"y":0.6,"conf":1},"1995":{"x":0.55,"y":0.7,"conf":1},"1996":{"x":0.6,"y":0.72,"conf":1},"1997":{"x":0.65,"y":0.75,"conf":1},"1998":{"x":0.7,"y":0.82,"conf":1},"1999":{"x":0.6,"y":0.85,"conf":1}}}
-*/
-
-/*
-{"goal":"gradient_diagonal","description":"The layout is organized along a diagonal gradient, moving from low power requirement (bottom-left) to high power requirement (top-right).","layout":{"1980":{"x":0.2,"y":0.3,"conf":0.8},"1981":{"x":0.15,"y":0.4,"conf":0.7},"1982":{"x":0.35,"y":0.6,"conf":0.8},"1985":{"x":0.6,"y":0.3,"conf":0.4},"1986":{"x":0.7,"y":0.5,"conf":0.8},"1988":{"x":0.25,"y":0.6,"conf":0.3},"1990":{"x":0.3,"y":0.6,"conf":0.4},"1991":{"x":0.5,"y":0.7,"conf":0.8},"1995":{"x":0.3,"y":0.4,"conf":0.6},"1996":{"x":0.55,"y":0.75,"conf":0.8},"1997":{"x":0.75,"y":0.9,"conf":1},"1998":{"x":0.8,"y":0.95,"conf":1},"1999":{"x":0.65,"y":0.85,"conf":1}}}
-*/
-
-/* deepseek
-{ "goal": "gradient_diagonal",                                                                                                                "description": "High temperature nodes (Pyrolysis, Biochar) rise to the top‑right, low temperature nodes (Water, Wheel) stay at bottom‑left. You can read the increasing energy from bottom‑left to top‑right.",                                                                        "layout": {
-    "1980": { "x": 25, "y": 75, "conf": 1 },
-    "1981": { "x": 35, "y": 60, "conf": 1 },
-    "1982": { "x": 50, "y": 45, "conf": 1 },
-    "1985": { "x": 30, "y": 60, "conf": 1 },
-    "1986": { "x": 55, "y": 35, "conf": 1 },
-    "1988": { "x": 25, "y": 70, "conf": 1 },
-    "1990": { "x": 25, "y": 70, "conf": 1 },
-    "1991": { "x": 50, "y": 50, "conf": 1 },
-    "1995": { "x": 65, "y": 25, "conf": 1 },
-    "1996": { "x": 60, "y": 30, "conf": 1 },                                                                                                    "1997": { "x": 75, "y": 22, "conf": 1 },
-    "1998": { "x": 70, "y": 28, "conf": 1 },                                                                                                    "1999": { "x": 45, "y": 55, "conf": 1 }
-  }                                                                                                                                         }
-  */
-
-
-
-function Normalize() {
-
-  var minX = 100 , maxX = 0 , minY = 100 , maxY = 0
-  Object.entries( LL.layout ).forEach( nodeprop => {
+  // determine new graph range
+  var minX = Infinity , maxX = -Infinity , minY = Infinity , maxY = -Infinity
+  Object.entries( graph.layout ).forEach( nodeprop => {
   	var id = nodeprop[ 0 ] 
 	var change = nodeprop[ 1 ]
 	minX = Math.min( minX , change.x )
@@ -734,11 +706,13 @@ function Normalize() {
 
   // normalize to 20–80% range
   const targetMaxX = 80 , targetMinX = 20 , targetMaxY = 80 , targetMinY = 20
-  Object.entries( LL.layout ).forEach( nodeprop => {
+  Object.entries( graph.layout ).forEach( nodeprop => {
   	var id = nodeprop[ 0 ] 
 	var change = nodeprop[ 1 ]
-	var node = nodes.find( n => n.i == id )
+	var node = nodes.find( n => n.i == id )  
 	if( !node || change.conf < 0.0 ) return
+
+	// modify nodes
 	node.x = ( change.x - minX ) * ( targetMaxX - targetMinX ) / ( maxX - minX )  + targetMinX
 	node.y = ( change.y - minY ) * ( targetMaxY - targetMinY ) / ( maxY - minY ) + targetMinY
   } )
@@ -748,26 +722,58 @@ function Normalize() {
 
 let simulation = null;
 
-function runLayout( selectedNodes ) {
+function runLayout( layoutPrompt , selectedItems ) {
   // Stop any previous simulation
   if (simulation) simulation.stop();
 
-  Normalize();
+  // clean up the nodes
+  if( !Array.isArray( selectedItems) || selectedItems.length == 0 ) selectedItems = nodes.filter( c => !c.n.match( /^:/ ) )
+  selectedItems = selectedItems.map( n => { return { i : n.i , n : n.n , x : n.x , y : n.y } })
 
-  // Build simulation
-  simulation = d3.forceSimulation( nodes )
-    .force("charge", d3.forceManyBody()
-      .strength(-3)
-      .distanceMin(3)
-      .distanceMax(10)
-    )
-    .on("tick", () => {
-	    updateGraph( 3000 );
-    })
-    /*
-    .alphaDecay(llmConfig.simulation.alphaDecay)
-    .velocityDecay(llmConfig.simulation.velocityDecay)
-    */
+  fetch( 'https://craft.functional.limited/layout' , {
+	method: 'POST' ,
+	headers: {
+	'Content-Type' : 'application/json' ,
+	},
+	body: JSON.stringify( { prompt : layoutPrompt , nodes : selectedItems , links : links } )
+	}).then( response => {
+		if( !response.ok) {
+		console.error( 'Server error: ' , response.status )
+		}
+
+		// stop crafting
+		var selectedDOM = svg.selectAll(".node-group.selected")
+		selectedDOM.classed( "selected shake", false )
+		let loading = document.getElementsByTagName( "loading" )
+		if( --crafting < 1 ) for( var d = 0 ; d < loading.length ; d++ ){ loading[ d ].classList.remove( 'blink' ) }
+
+		response.json().then( r => {
+			
+			if( !r.layout ) return console.error( 'response missing layout' )
+
+			Normalize( r );
+
+			updateGraph( 3000 );
+
+			//r.result.forEach( ( item , i ) => {
+
+			  /* if we want to avoid overlap, but this is slow
+			  // Build simulation
+			  simulation = d3.forceSimulation( nodes )
+			    .force("charge", d3.forceManyBody()
+			      .strength(-3)
+			      .distanceMin(3)
+			      .distanceMax(10)
+			    )
+			    .on("end", () => {
+				    updateGraph( 3000 );
+			    })
+			    */
+			    /*
+			    .velocityDecay(llmConfig.simulation.velocityDecay)
+			    */
+		} )  // response.json
+	} )  //fetch.then
 
 }  //runLayout
 
