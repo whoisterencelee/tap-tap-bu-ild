@@ -704,9 +704,11 @@
 /* LAYOUT ENGINE */
 function Normalize( graph ) {
 
+  var affected = []
+
   // determine new graph range
   var minX = Infinity , maxX = -Infinity , minY = Infinity , maxY = -Infinity
-  Object.entries( graph.layout ).forEach( nodeprop => {
+  Object.entries( graph ).forEach( nodeprop => {
   	var id = nodeprop[ 0 ] 
 	var change = nodeprop[ 1 ]
 	minX = Math.min( minX , change.x )
@@ -717,16 +719,19 @@ function Normalize( graph ) {
 
   // normalize to 20–80% range
   const targetMaxX = 80 , targetMinX = 20 , targetMaxY = 80 , targetMinY = 20
-  Object.entries( graph.layout ).forEach( nodeprop => {
+  Object.entries( graph ).forEach( nodeprop => {
   	var id = nodeprop[ 0 ] 
 	var change = nodeprop[ 1 ]
 	var node = nodes.find( n => n.i == id )  
-	if( !node || change.conf < 0.0 ) return
+	if( !node || change.conf < 0.0 ) return  // filter by confidence
+	affected.push( node )
 
 	// modify nodes
 	node.x = ( change.x - minX ) * ( targetMaxX - targetMinX ) / ( maxX - minX )  + targetMinX
 	node.y = ( change.y - minY ) * ( targetMaxY - targetMinY ) / ( maxY - minY ) + targetMinY
   } )
+
+  return affected
 
 }  // Normalize
 
@@ -752,37 +757,35 @@ function runLayout( layoutPrompt , selectedItems ) {
 		console.error( 'Server error: ' , response.status )
 		}
 
-		// stop crafting
-		var selectedDOM = svg.selectAll(".node-group.selected")
-		selectedDOM.classed( "selected shake", false )
-		let loading = document.getElementsByTagName( "loading" )
-		if( --crafting < 1 ) for( var d = 0 ; d < loading.length ; d++ ){ loading[ d ].classList.remove( 'blink' ) }
-
 		response.json().then( r => {
 			
 			if( !r.layout ) return console.error( 'response missing layout' )
 
-			Normalize( r );
+			var affected = Normalize( r.layout );
 
-			updateGraph( 3000 );
+			//updateGraph( 3000 );
 
-			//r.result.forEach( ( item , i ) => {
+			// Build simulation to avoid overlaps
+			simulation = d3.forceSimulation( affected )
+				.force("charge", d3.forceManyBody()
+					.strength(-3)
+					.distanceMin(3)
+					.distanceMax(10)
+			        )
+			//.on("tick", () => Normalize( affected ) )
+			.on("end", () => {
 
-			  /* if we want to avoid overlap, but this is slow
-			  // Build simulation
-			  simulation = d3.forceSimulation( nodes )
-			    .force("charge", d3.forceManyBody()
-			      .strength(-3)
-			      .distanceMin(3)
-			      .distanceMax(10)
-			    )
-			    .on("end", () => {
-				    updateGraph( 3000 );
-			    })
-			    */
-			    /*
-			    .velocityDecay(llmConfig.simulation.velocityDecay)
-			    */
+					Normalize( affected )
+					updateGraph( 3000 );
+
+					// stop crafting
+					var selectedDOM = svg.selectAll(".node-group.selected")
+					selectedDOM.classed( "selected shake", false )
+					let loading = document.getElementsByTagName( "loading" )
+					if( --crafting < 1 ) for( var d = 0 ; d < loading.length ; d++ ){ loading[ d ].classList.remove( 'blink' ) }
+
+					})
+			// .velocityDecay(llmConfig.simulation.velocityDecay)
 		} )  // response.json
 	} )  //fetch.then
 
