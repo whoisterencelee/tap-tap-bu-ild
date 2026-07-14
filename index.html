@@ -125,7 +125,7 @@
 			TAPTAP<BR />CRAFT
 		</div>
 		<script>
-			function getTextWidth(text, fontSize = "12px", fontFamily = "Arial") {
+			function getWideTextWidth(text, fontSize = "12px", fontFamily = "Arial") {
 				// Create a temporary SVG text element to measure width
 				const svg = document.createElementNS("http://www.w3.org/2000/svg", "svg");
 				const textElement = document.createElementNS("http://www.w3.org/2000/svg", "text");
@@ -140,7 +140,7 @@
 			}
 		var textwidth = 0
 		for( var fontSize = 12 ; textwidth < window.innerWidth ; fontSize = fontSize + 2 ){
-			textwidth = Math.floor( getTextWidth("TAPTAP ", fontSize + "px", "Geoform-HeavyItalic" ) ) 
+			textwidth = Math.floor( getWideTextWidth("TAPTAP ", fontSize + "px", "Geoform-HeavyItalic" ) ) 
 			var d = document.getElementById( "backgroundWord" )
 			d.style.fontSize = ( fontSize - 2 ) + "px"
 		}
@@ -426,7 +426,7 @@
 		    .attr("x2", d => toPixel( nodes.find(n => n.i === d.t).x , width ) )
 		    .attr("y2", d => toPixel( nodes.find(n => n.i === d.t).y , height ) )
 
-	    // Update nodes (rectangles + text)
+	    // Update nodes (text + rectangles)
 	    const nodeGroups = svg.select(".nodes-layer").selectAll(".node-group")
 		    .data(nodes)
 		    .join("g")
@@ -439,7 +439,6 @@
 				    const py = toPixel(d.y , height);
 				    return `translate(${px},${py})`;
 				    })
-
 	    // Draw text (centered)
 	    nodeGroups.selectAll(".node-text")
 		    .data(d => [d])
@@ -448,7 +447,70 @@
 		    .attr("x", 0 )
 		    .attr("y", 5 )
 		    .attr("text-anchor", "middle")
-		    .text(d => d.n);
+		    .each( function( d ) {
+				    const textElement = d3.select(this);
+				    const maxWidth = width / 2;
+				    const maxChars = 40;
+
+				    // First split by newlines, then process each segment
+				    const paragraphs = d.n.split("\n");
+				    let lines = [];
+
+				    paragraphs.forEach(paragraph => {
+						    if (paragraph === "") {
+						    // Preserve empty lines
+						    lines.push("");
+						    return;
+						    }
+
+						    const words = paragraph.split(/\s+/);
+						    let currentLine = words[0];
+
+						    for (let i = 1; i < words.length; i++) {
+							    // Check if current word itself is too long (over 40 chars)
+							    if (words[i].length > maxChars) {
+								    // Push current line if not empty
+								    if (currentLine !== "") {
+									    lines.push(currentLine);
+								    }
+								    // Split the long word into chunks of 40 chars
+								    const longWord = words[i];
+								    for (let j = 0; j < longWord.length; j += maxChars) {
+									    lines.push(longWord.substring(j, j + maxChars));
+								    }
+								    currentLine = "";
+								    continue;
+							    }
+
+							    const testLine = currentLine === "" ? words[i] : currentLine + " " + words[i];
+							    const testWidth = getTextWidth(testLine);
+
+							    if (testWidth <= maxWidth && testLine.length <= maxChars) {
+								    currentLine = testLine;
+							    } else {
+								    if (currentLine !== "") {
+									    lines.push(currentLine);
+								    }
+								    currentLine = words[i];
+							    }
+						    }
+
+						    // Push remaining line
+						    if (currentLine !== "") {
+							    lines.push(currentLine);
+						    }
+				    });
+
+				    // Clear existing content and add tspans
+				    textElement.text(null);
+
+				    textElement.selectAll("tspan")
+					    .data(lines)
+					    .join("tspan")
+					    .attr("x", 0)
+					    .attr("dy", (d, i) => i === 0 ? 0 : "1.2em")
+					    .text(d => d);
+		    } )
 
 	    // Draw label background (auto-width rectangle)
 	    nodeGroups.selectAll(".node-label")
@@ -803,7 +865,7 @@ let lessons = [
 	{
 		id: "step1",
 		title: "Basic Combination",
-		description: "@step1 What happens if you tap on Water and Heat?",
+		description: "@step1 What happens if you tap on\n Water and Heat, as quickly as you can?",
 		requiredNodes: ["Water", "Heat"],
 		targetNodes: ["Steam"],
 		hint: "Select both Water and Heat nodes and wait for the result",
@@ -830,7 +892,7 @@ let lessons = [
 	{
 		id: "step4",
 		title: "Make a transportation",
-		description: "@step4 See if you can make a transportation",
+		description: "@step4 See if you can make a Steam engine transportation",
 		requiredNodes: ["Steam engine", "Wheel"],
 		targetNodes: ["Transportation"] ,
 		hint: "Select both Steam Engine and Wheel nodes and wait for the result",
@@ -864,7 +926,7 @@ let lessons = [
 	{
 		id: "step7",
 		title: "Clear the way",
-		description: "@step7 Start building your world \n See more features by clicking taptap.build on the top \n now add the word ':clear' to starting building your world",
+		description: "@step7 See more features by clicking taptap.build on the top \n now add the command ':clear' (that's typing 'colon' + 'clear')\n to starting building your world",
 		requiredNodes: [],
 		targetNodes: () => nodes.length == 1,
 		hint: "that's colon plus clear",
