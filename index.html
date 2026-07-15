@@ -106,6 +106,7 @@
 			<tr> <td> delete </td>		<td> drag words to the edge to remove them </td> </tr>
 			<tr> <td> hold </td>		<td> on a word to read wikipedia </td> </tr>
 			<tr> <td> :remix ... </td>	<td> tap to remix ...how... </td> </tr>
+			<tr> <td> :whatif ... </td>	<td> tap to imagine ..whatif.. </td> </tr>
 			<tr> <td> :save </td>		<td> save file for big world </td></tr>
 			<tr> <td> :load </td>		<td> load world file </td> </tr>
 			<tr> <td> :clear </td>		<td> restart with a blank world </td> </tr>
@@ -566,6 +567,8 @@
     // Double click create new node
     svg.on("dblclick", (event) => {
 
+	      if( event.target.id != "graph" ) return event.stopPropagation()// prevent multiple triggering
+
 	      // Remove any existing input nodes first
 	      svg.selectAll(".input-node").remove();
 
@@ -627,7 +630,7 @@
 				    let keepNode = false
 				    if( command.match( /^:/ ) ){
 					    if( command === ":help" ) showHide( document.getElementById( "help" ) )
-					    else if( command.match( /^:remix/ ) && typeof runLayout == "function" ) keepNode = true
+					    else if( command.match( /^:(remix|whatif)/ ) && typeof runLayout == "function" ) keepNode = true
 					    else if( command.match( /^:clear/ ) ) return clearGraph()
 					    else if( command.match( /^:save/ ) ) download( saveGraph() ) 
 					    else if( command.match( /^:load/ ) ) upload()
@@ -686,7 +689,7 @@
 		      // commands
 		      let layoutPrompt = ""
 		      selectedItems = selectedItems.filter( c => {
-			      if( c.n.match( /^:remix/ ) ) layoutPrompt += c.n.split( /^:remix/ )[1] + ". "
+			      if( c.n.match( /^:(remix|whatif)/ ) ) layoutPrompt += c.n.split( /^:(remix|whatif)/ )[1] + ". "
 			      else if( !c.n.match( /^:/ ) ) return true
 			      return false  // removes all commands
 		      })
@@ -892,8 +895,8 @@ let lessons = [
 	{
 		id: "step4",
 		title: "Make a transportation",
-		description: "@step4 See if you can make a Steam engine transportation",
-		requiredNodes: ["Steam engine", "Wheel"],
+		description: "@step4 See if you can make a transportation with what you already have",
+		requiredNodes: ["Steam engine", "Wheel"],  // Wheel was already created but we keep incase user removed
 		targetNodes: ["Transportation"] ,
 		hint: "Select both Steam Engine and Wheel nodes and wait for the result",
 		nextLesson: "step5",
@@ -926,7 +929,7 @@ let lessons = [
 	{
 		id: "step7",
 		title: "Clear the way",
-		description: "@step7 See more features by clicking taptap.build on the top \n now add the command ':clear' (that's typing 'colon' + 'clear')\n to starting building your world",
+		description: "@step7 Add the command ':clear' \n----\n that is typing 'colon' + 'clear'\n----\n to starting building your world",
 		requiredNodes: [],
 		targetNodes: () => nodes.length == 1,
 		hint: "that's colon plus clear",
