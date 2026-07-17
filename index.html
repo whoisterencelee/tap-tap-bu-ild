@@ -630,7 +630,7 @@
 				    let keepNode = false
 				    if( command.match( /^:/ ) ){
 					    if( command === ":help" ) showHide( document.getElementById( "help" ) )
-					    else if( command.match( /^:(remix|whatif)/ ) && typeof runLayout == "function" ) keepNode = true
+					    else if( command.match( /^(:remix|:whatif)/ ) && typeof runLayout == "function" ) keepNode = true
 					    else if( command.match( /^:clear/ ) ) return clearGraph()
 					    else if( command.match( /^:save/ ) ) download( saveGraph() ) 
 					    else if( command.match( /^:load/ ) ) upload()
@@ -689,7 +689,7 @@
 		      // commands
 		      let layoutPrompt = ""
 		      selectedItems = selectedItems.filter( c => {
-			      if( c.n.match( /^:(remix|whatif)/ ) ) layoutPrompt += c.n.split( /^:(remix|whatif)/ )[1] + ". "
+			      if( c.n.match( /^(:remix|:whatif)/ ) ) layoutPrompt += c.n.split( /^(:remix|:whatif)/ )[2] + ". "
 			      else if( !c.n.match( /^:/ ) ) return true
 			      return false  // removes all commands
 		      })
