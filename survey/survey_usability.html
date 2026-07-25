@@ -119,6 +119,8 @@
             scroll-behavior: smooth;
         }
 
+	h3 { background: gold; padding: 0.5em; }
+
         .question {
             margin-bottom: 20px;
             padding: 12px 0;
@@ -139,10 +141,13 @@
             margin-bottom: 8px;
             font-size: 15px;
         }
-
-        .required {
-            color: #d93025;
-        }
+	
+	/* Auto-add asterisk to required questions using :has() */
+	.question:has(input[required]) .question-label::after {
+	    content: " *";
+	    color: #d93025;
+	    font-weight: 700;
+	}
 
         .options-grid label {
             display: flex;
@@ -213,7 +218,6 @@
         .nav-buttons {
             margin-top: 24px;
             padding-top: 16px;
-            border-top: 1px solid #eee;
             text-align: right;
             scroll-margin-top: 20px;
         }
@@ -320,118 +324,168 @@
 
             <form id="f">
 
+
+		  <h3>
+		  ✍️ 
+		  Help us with Your Experience
+		  </h3>
+
                 <!-- Q1 -->
                 <div class="question" id="q1">
-                    <span class="question-label">1. How easy was it to TAP a word to select it? <span class="required">*</span></span>
-                    <div class="options-grid">
-                        <label><input type="radio" name="q1" value="Very easy" required onchange="answered(this)" /> Very easy</label>
-                        <label><input type="radio" name="q1" value="Easy" onchange="answered(this)" /> Easy</label>
-                        <label><input type="radio" name="q1" value="OK" onchange="answered(this)" /> OK</label>
-                        <label><input type="radio" name="q1" value="Hard" onchange="answered(this)" /> Hard</label>
-                        <label><input type="radio" name="q1" value="Very hard" onchange="answered(this)" /> Very hard</label>
+                    <span class="question-label">1. How easy was it to TAP a word to select it? </span>
+		    <div class="options-grid" onchange=answered(this)>
+                        <label><input type="radio" name="q1" value="Very easy" required /> Very easy</label>
+                        <label><input type="radio" name="q1" value="Easy" /> Easy</label>
+                        <label><input type="radio" name="q1" value="OK" /> OK</label>
+                        <label><input type="radio" name="q1" value="Hard" /> Hard</label>
+                        <label><input type="radio" name="q1" value="Very hard" /> Very hard</label>
                     </div>
                 </div>
 
                 <!-- Q2 -->
                 <div class="question" id="q2">
-                    <span class="question-label">2. How easy was it to TAP words to connect them? <span class="required">*</span></span>
-                    <div class="options-grid">
-                        <label><input type="radio" name="q2" value="Very easy" required onchange="answered(this)" /> Very easy</label>
-                        <label><input type="radio" name="q2" value="Easy" onchange="answered(this)" /> Easy</label>
-                        <label><input type="radio" name="q2" value="OK" onchange="answered(this)" /> OK</label>
-                        <label><input type="radio" name="q2" value="Hard" onchange="answered(this)" /> Hard</label>
-                        <label><input type="radio" name="q2" value="Very hard" onchange="answered(this)" /> Very hard</label>
+                    <span class="question-label">2. How easy was it to TAP words to connect them? </span>
+		    <div class="options-grid" onchange=answered(this)>
+                        <label><input type="radio" name="q2" value="Very easy" required /> Very easy</label>
+                        <label><input type="radio" name="q2" value="Easy" /> Easy</label>
+                        <label><input type="radio" name="q2" value="OK" /> OK</label>
+                        <label><input type="radio" name="q2" value="Hard" /> Hard</label>
+                        <label><input type="radio" name="q2" value="Very hard" /> Very hard</label>
                     </div>
                 </div>
 
                 <!-- Q3 -->
                 <div class="question" id="q3">
-                    <span class="question-label">3. How easy was it to DRAG words to position them? <span class="required">*</span></span>
-                    <div class="options-grid">
-                        <label><input type="radio" name="q3" value="Very easy" required onchange="answered(this)" /> Very easy</label>
-                        <label><input type="radio" name="q3" value="Easy" onchange="answered(this)" /> Easy</label>
-                        <label><input type="radio" name="q3" value="OK" onchange="answered(this)" /> OK</label>
-                        <label><input type="radio" name="q3" value="Hard" onchange="answered(this)" /> Hard</label>
-                        <label><input type="radio" name="q3" value="Very hard" onchange="answered(this)" /> Very hard</label>
+                    <span class="question-label">3. How easy was it to DRAG words to position them? </span>
+		    <div class="options-grid" onchange=answered(this)>
+                        <label><input type="radio" name="q3" value="Very easy" required /> Very easy</label>
+                        <label><input type="radio" name="q3" value="Easy" /> Easy</label>
+                        <label><input type="radio" name="q3" value="OK" /> OK</label>
+                        <label><input type="radio" name="q3" value="Hard" /> Hard</label>
+                        <label><input type="radio" name="q3" value="Very hard" /> Very hard</label>
                     </div>
                 </div>
 
                 <!-- Q4 -->
                 <div class="question" id="q4">
-                    <span class="question-label">4. How easy was it to TAP-AND-HOLD to look something up? <span class="required">*</span></span>
-                    <div class="options-grid">
-                        <label><input type="radio" name="q4" value="Very easy" required onchange="answered(this)" /> Very easy</label>
-                        <label><input type="radio" name="q4" value="Easy" onchange="answered(this)" /> Easy</label>
-                        <label><input type="radio" name="q4" value="OK" onchange="answered(this)" /> OK</label>
-                        <label><input type="radio" name="q4" value="Hard" onchange="answered(this)" /> Hard</label>
-                        <label><input type="radio" name="q4" value="Very hard" onchange="answered(this)" /> Very hard</label>
-                        <label><input type="radio" name="q4" value="I didn't use this" onchange="answered(this)" /> I didn't use this</label>
+                    <span class="question-label">4. How easy was it to TAP-AND-HOLD to look something up? </span>
+		    <div class="options-grid" onchange=answered(this)>
+                        <label><input type="radio" name="q4" value="Very easy" required /> Very easy</label>
+                        <label><input type="radio" name="q4" value="Easy" /> Easy</label>
+                        <label><input type="radio" name="q4" value="OK" /> OK</label>
+                        <label><input type="radio" name="q4" value="Hard" /> Hard</label>
+                        <label><input type="radio" name="q4" value="Very hard" /> Very hard</label>
+                        <label><input type="radio" name="q4" value="I didn't use this" /> I didn't use this</label>
                     </div>
                 </div>
 
                 <!-- Q5 -->
                 <div class="question" id="q5">
-                    <span class="question-label">5. Did the lesson modules help you understand how to use it? <span class="required">*</span></span>
-                    <div class="options-grid">
-                        <label><input type="radio" name="q5" value="Yes, I felt ready" required onchange="answered(this)" /> Yes, I felt ready</label>
-                        <label><input type="radio" name="q5" value="Mostly—I understood the basics" onchange="answered(this)" /> Mostly—I understood the basics</label>
-                        <label><input type="radio" name="q5" value="A little—I was still confused" onchange="answered(this)" /> A little—I was still confused</label>
-                        <label><input type="radio" name="q5" value="Not really—I was still confused" onchange="answered(this)" /> Not really—I was still confused</label>
-                        <label><input type="radio" name="q5" value="Not at all—I had no idea" onchange="answered(this)" /> Not at all—I had no idea</label>
+                    <span class="question-label">5. Did the lesson modules help you understand how to use it? </span>
+		    <div class="options-grid" onchange=answered(this)>
+                        <label><input type="radio" name="q5" value="Yes, I felt ready" required /> Yes, I felt ready</label>
+                        <label><input type="radio" name="q5" value="Mostly—I understood the basics" /> Mostly—I understood the basics</label>
+                        <label><input type="radio" name="q5" value="A little—I was still confused" /> A little—I was still confused</label>
+                        <label><input type="radio" name="q5" value="Not really—I was still confused" /> Not really—I was still confused</label>
+                        <label><input type="radio" name="q5" value="Not at all—I had no idea" /> Not at all—I had no idea</label>
                     </div>
                 </div>
 
                 <!-- Q6 -->
                 <div class="question" id="q6">
-                    <span class="question-label">6. After the lessons, how confident did you feel? <span class="required">*</span></span>
-                    <div class="options-grid">
-                        <label><input type="radio" name="q6" value="Very confident" required onchange="answered(this)" /> Very confident</label>
-                        <label><input type="radio" name="q6" value="Pretty confident" onchange="answered(this)" /> Pretty confident</label>
-                        <label><input type="radio" name="q6" value="OK, I guess" onchange="answered(this)" /> OK, I guess</label>
-                        <label><input type="radio" name="q6" value="Not very confident" onchange="answered(this)" /> Not very confident</label>
-                        <label><input type="radio" name="q6" value="Not confident at all" onchange="answered(this)" /> Not confident at all</label>
+                    <span class="question-label">6. After the lessons, how confident did you feel about further exploration? </span>
+		    <div class="options-grid" onchange=answered(this)>
+                        <label><input type="radio" name="q6" value="Very confident" required /> Very confident</label>
+                        <label><input type="radio" name="q6" value="Pretty confident" /> Pretty confident</label>
+                        <label><input type="radio" name="q6" value="OK, I guess" /> OK, I guess</label>
+                        <label><input type="radio" name="q6" value="Not very confident" /> Not very confident</label>
+                        <label><input type="radio" name="q6" value="Not confident at all" /> Not confident at all</label>
                     </div>
                 </div>
 
                 <!-- Q7 -->
                 <div class="question" id="q7">
-                    <span class="question-label">7. Did you ever feel lost or not know what to do next? <span class="required">*</span></span>
-                    <div class="options-grid">
-                        <label><input type="radio" name="q7" value="Never" required onchange="answered(this)" /> Never</label>
-                        <label><input type="radio" name="q7" value="Rarely" onchange="answered(this)" /> Rarely</label>
-                        <label><input type="radio" name="q7" value="Sometimes" onchange="answered(this)" /> Sometimes</label>
-                        <label><input type="radio" name="q7" value="Often" onchange="answered(this)" /> Often</label>
-                        <label><input type="radio" name="q7" value="Very often" onchange="answered(this)" /> Very often</label>
+                    <span class="question-label">7. Did you ever feel lost or not know what to do next? </span>
+		    <div class="options-grid" onchange=answered(this)>
+                        <label><input type="radio" name="q7" value="Never" required /> Never</label>
+                        <label><input type="radio" name="q7" value="Rarely" /> Rarely</label>
+                        <label><input type="radio" name="q7" value="Sometimes" /> Sometimes</label>
+                        <label><input type="radio" name="q7" value="Often" /> Often</label>
+                        <label><input type="radio" name="q7" value="Very often" /> Very often</label>
                     </div>
                 </div>
 
+		 <!--<h3>🤩 Already more than half way </h3>-->
+
                 <!-- Q8 -->
                 <div class="question" id="q8">
-                    <span class="question-label">8. Overall, how easy was TapTap.Build to use? <span class="required">*</span></span>
-                    <div class="options-grid">
-                        <label><input type="radio" name="q8" value="Very easy—I got it right away" required onchange="answered(this)" /> Very easy—I got it right away</label>
-                        <label><input type="radio" name="q8" value="Easy" onchange="answered(this)" /> Easy</label>
-                        <label><input type="radio" name="q8" value="OK" onchange="answered(this)" /> OK</label>
-                        <label><input type="radio" name="q8" value="Hard" onchange="answered(this)" /> Hard</label>
-                        <label><input type="radio" name="q8" value="Very hard—I struggled" onchange="answered(this)" /> Very hard—I struggled</label>
+                    <span class="question-label">8. Overall, how easy was TapTap.Build to use? </span>
+		    <div class="options-grid" onchange=answered(this)>
+                        <label><input type="radio" name="q8" value="Very easy—I got it right away" required /> Very easy—I got it right away</label>
+                        <label><input type="radio" name="q8" value="Easy" /> Easy</label>
+                        <label><input type="radio" name="q8" value="OK" /> OK</label>
+                        <label><input type="radio" name="q8" value="Hard" /> Hard</label>
+                        <label><input type="radio" name="q8" value="Very hard—I struggled" /> Very hard—I struggled</label>
                     </div>
                 </div>
 
                 <!-- Q9 -->
                 <div class="question" id="q9">
                     <span class="question-label">9. What was the most frustrating or confusing thing?</span>
-                    <textarea name="q9" placeholder="Type your answer..." onfocus="scrollQuestion(this)" onchange="answered(this)" id="ta9"></textarea>
+                    <textarea name="q9" placeholder="Type your answer..." onfocus="scrollQuestion(this);answered(this,false)" onchange="answered(this)" id="ta9"></textarea>
                 </div>
 
                 <!-- Q10 -->
                 <div class="question" id="q10">
                     <span class="question-label">10. What worked well? What did you like?</span>
-                    <textarea name="q10" placeholder="Type your answer..." onfocus="scrollQuestion(this)" onchange="answered(this)" id="ta10"></textarea>
+                    <textarea name="q10" placeholder="Type your answer..." onfocus="scrollQuestion(this);answered(this,false)" onchange="answered(this)" id="ta10"></textarea>
                 </div>
 
+		  <h3>🙋 Help us understand our Users (Anonymous)</h3>
+
+		  <!-- Q0a: Age -->
+		  <div class="question" id="q0a">
+		    <span class="question-label">Your age range:</span>
+		    <div class="options-grid" onchange=answered(this)>
+		      <label><input type="radio" name="q0a" value="Under 18" required> Under 18</label>
+		      <label><input type="radio" name="q0a" value="18-24"> 18-24</label>
+		      <label><input type="radio" name="q0a" value="25-34"> 25-34</label>
+		      <label><input type="radio" name="q0a" value="35-44"> 35-44</label>
+		      <label><input type="radio" name="q0a" value="45-54"> 45-54</label>
+		      <label><input type="radio" name="q0a" value="55 or over"> 55 or over</label>
+		      <label><input type="radio" name="q0a" value="Prefer not to say"> Prefer not to say</label>
+		    </div>
+		  </div>
+
+		  <!-- Q0b: Role -->
+		  <div class="question" id="q0b">
+		    <span class="question-label">Your primary role:</span>
+		    <div class="options-grid" onchange=answered(this)>
+		      <label><input type="radio" name="q0b" value="Student" required> Student</label>
+		      <label><input type="radio" name="q0b" value="Educator/Teacher"> Educator/Teacher</label>
+		      <label><input type="radio" name="q0b" value="Researcher"> Researcher</label>
+		      <label><input type="radio" name="q0b" value="Tech/AI Professional"> Tech/AI Professional</label>
+		      <label><input type="radio" name="q0b" value="Other"> Other</label>
+		      <label><input type="radio" name="q0b" value="Prefer not to say"> Prefer not to say</label>
+		    </div>
+		  </div>
+
+		  <!-- Q0c: Visual Tool Familiarity -->
+		  <div class="question" id="q0c">
+		    <span class="question-label">Before this, how familiar were you with mind maps or visual tools?</span>
+		    <div class="options-grid" onchange=answered(this)>
+		      <label><input type="radio" name="q0c" value="Very familiar" required> Very familiar (I use them often)</label>
+		      <label><input type="radio" name="q0c" value="Somewhat familiar"> Somewhat familiar (I've used them a few times)</label>
+		      <label><input type="radio" name="q0c" value="Not familiar"> Not familiar (This is new to me)</label>
+		    </div>
+		  </div>
                 <div class="nav-buttons" id="navButtons">
-                    <button type="submit" class="btn" id="btn">✅ Submit</button>
+                    <button disabled type="submit" class="btn" id="btn" style=width:100%;>Submit</button>
                 </div>
+		<p style="font-size: small; color: #5f6368; text-align: center; margin-top: 12px; width: 100%;">
+		🔒 <strong>Privacy & Consent:</strong> This survey is anonymous and collects no personal identifiers.
+		By submitting, you consent to your anonymous responses being used for research and improvement.
+		</p>
 
             </form>
 
@@ -494,7 +548,7 @@
             return -1;
         }
 
-        // ===== Restore answered state from user input =====
+        // ===== Restore answered state from user input into DOM attribute answered =====
         function restoreAnsweredState() {
             var questions = document.querySelectorAll('.question');
 
@@ -531,24 +585,26 @@
         }
 
         // ===== Mark answered and scroll to next =====
-        function answered(el) {
+        function answered( el, move=true ) {
             var q = el.closest('.question');
             if (!q) return;
 
             q.setAttribute('data-answered', 'true');
+	    if (!move) return
+
             updateProgress();
 
             var nextIndex = getQuestionIndex(q) + 1;
             var next = getNextUnanswered(nextIndex);
 
             if (next) {
-                setTimeout(function() {
-                    next.scrollIntoView({ behavior: 'smooth', block: 'start' });
-                    var ta = next.querySelector('textarea');
-                    if (ta) {
-                        setTimeout(function() { ta.focus(); }, 400);
-                    }
-                }, 150);
+		setTimeout(function() {
+		    next.scrollIntoView({ behavior: 'smooth', block: 'start' });
+		    var ta = next.querySelector('textarea');
+		    if (ta) {
+			setTimeout(function() { ta.focus(); }, 400);
+		    }
+		}, 150);
             } else {
                 // All answered — scroll to nav-buttons
                 setTimeout(function() {
@@ -556,6 +612,7 @@
                     if (nav) {
                         nav.scrollIntoView({ behavior: 'smooth', block: 'start' });
                     }
+		    $('btn').disabled = false
                     $('btn').classList.add('btn-highlight');
                     setTimeout(function() { $('btn').classList.remove('btn-highlight'); }, 2500);
                 }, 150);
@@ -587,6 +644,7 @@
                     q.style.borderLeft = '';
                     q.style.paddingLeft = '';
                 });
+		$('btn').disabled = true
                 $('btn').classList.remove('btn-highlight');
                 $('err').className = 'msg error';
                 $('ok').className = 'msg success';
