@@ -324,6 +324,11 @@
 
             <form id="f">
 
+		    <div class="hpot" style=display:none;><label>
+		    <!--<input name="_next" value="https://sustaincia.org?success"></input>-->
+		    <input name="_gotcha"></input>
+		    <input name="_to" value="https://particiate.org/survey"></input>
+		    </label></div>
 
 		  <h3>
 		  ✍️ 
@@ -677,8 +682,7 @@
                 }
             }
 
-            var data = {};
-            new FormData($('f')).forEach(function(val, key) { data[key] = val; });
+            var data = extractFormDataAsUrlEncoded('f')
 
             $('btn').disabled = true;
             $('btn').textContent = '⏳ Sending...';
@@ -686,7 +690,7 @@
             fetch('https://functional.limited/forms', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify(data)
+                    body: data
                 })
                 .then(function(res) {
                     if (res.ok) {
@@ -700,10 +704,10 @@
                         $('label').textContent = 'All done! 🎉';
                     } else {
                         $('err').className = 'msg error show';
-                        $('errText').textContent = 'Server error. Please try again.';
+                        $('errText').textContent = 'Server error. Please try again later.';
                         $('ok').className = 'msg success';
                         $('btn').disabled = false;
-                        $('btn').textContent = '✅ Submit';
+                        $('btn').textContent = 'Submit';
                     }
                 })
                 .catch(function() {
@@ -719,6 +723,187 @@
         restoreAnsweredState();
         updateProgress();
     </script>
+
+<script>
+/**
+ * Extract form data as URL-encoded string
+ * @param {string|HTMLFormElement} form - Form ID or element
+ * @returns {string} URL-encoded string
+ */
+function extractFormDataAsUrlEncoded(form) {
+    const formElement = typeof form === 'string'
+        ? document.getElementById(form)
+        : form;
+
+    if (!formElement) return '';
+
+    const params = new URLSearchParams();
+    const processedIds = new Set();
+    const inputs = formElement.elements;
+
+    for (const input of inputs) {
+        if (!input.name || ['submit', 'button', 'reset', 'image'].includes(input.type)) {
+            continue;
+        }
+
+        const id = input.name;
+        if (processedIds.has(id)) continue;
+        processedIds.add(id);
+
+        const isUtility = input.type === 'hidden' ||
+                         id.startsWith('_')
+
+        let container = input.parentElement;
+        let questionText = null;
+
+        if (!isUtility) {
+            while (container && container !== formElement) {
+                if (container.tagName === 'LABEL') {
+                    container = container.parentElement;
+                    continue;
+                }
+
+                const text = getContainerText(container);
+                if (text && text.length > 2) {
+                    questionText = text;
+                    break;
+                }
+                container = container.parentElement;
+            }
+        }
+
+        const answer = getAnswer(input, container || input.parentElement, formElement);
+
+        if (isUtility) {
+            if (answer !== null && answer !== undefined && answer !== '') {
+                params.append(id, answer);
+            }
+        } else {
+            if (questionText) {
+                params.append(id + 'q', questionText);
+            }
+            if (answer !== null && answer !== undefined && answer !== '') {
+                params.append(id + 'a', answer);
+            }
+        }
+    }
+
+    return params.toString();
+}
+
+/**
+ * Get text from container, excluding text inside labels and inputs
+ */
+function getContainerText(container) {
+    if (!container) return '';
+
+    const clone = container.cloneNode(true);
+
+    // Remove all labels (they contain option text, not question text)
+    const labels = clone.querySelectorAll('label');
+    labels.forEach(label => label.remove());
+
+    // Remove input elements too
+    const inputs = clone.querySelectorAll('input, select, textarea');
+    inputs.forEach(input => input.remove());
+
+    return clone.textContent.replace(/\s+/g, ' ').trim();
+}
+
+/**
+ * Get the answer from an input
+ */
+function getAnswer(input, container, formElement) {
+    // Radio buttons - need to check the whole group
+    if (input.type === 'radio') {
+        // Get all radios with the same name in the form
+        const radios = formElement.querySelectorAll('input[name="' + input.name + '"]');
+        for (const radio of radios) {
+            if (radio.checked) {
+                // Get label text
+                let label = null;
+                if (radio.id) {
+                    label = formElement.querySelector('label[for="' + radio.id + '"]');
+                }
+                if (!label) {
+                    label = radio.closest('label');
+                }
+                if (label) {
+                    return label.textContent.replace(/\s+/g, ' ').trim();
+                }
+                return radio.value;
+            }
+        }
+        return null;
+    }
+
+    // Checkbox
+    if (input.type === 'checkbox') {
+        if (input.checked) {
+            let label = null;
+            if (input.id) {
+                label = formElement.querySelector('label[for="' + input.id + '"]');
+            }
+            if (!label) {
+                label = input.closest('label');
+            }
+            if (label) {
+                return label.textContent.replace(/\s+/g, ' ').trim();
+            }
+            return input.value;
+        }
+        return null;
+    }
+
+    // Select dropdown
+    if (input.type === 'select-one' || input.type === 'select-multiple') {
+        const selected = input.querySelectorAll('option:checked');
+        if (selected.length > 0) {
+            const texts = Array.from(selected).map(opt =>
+                opt.textContent.replace(/\s+/g, ' ').trim()
+            );
+            return texts.join(', ');
+        }
+        return null;
+    }
+
+    // Text inputs
+    if (input.type === 'text' || input.type === 'textarea' ||
+        input.type === 'email' || input.type === 'number' ||
+        input.type === 'tel' || input.type === 'url') {
+        return input.value.trim() || null;
+    }
+
+    // File input
+    if (input.type === 'file') {
+        if (input.files && input.files.length > 0) {
+            return Array.from(input.files).map(f => f.name).join(', ');
+        }
+        return null;
+    }
+
+    // For hidden inputs or other types, return the value
+    return input.value || null;
+}
+
+// ===== USAGE =====
+// Get URL-encoded string
+//const urlEncodedData = extractFormDataAsUrlEncoded('myForm');
+//console.log(urlEncodedData);
+// Output: _to=https%3A%2F%2Fparticiate.org%2Fsurvey&q1q=1.+How+easy+was+it+to+TAP+a+word+to+select+it%3F&q1a=Hard
+//
+// Send it
+//fetch('/submit', {
+//    method: 'POST',
+//    headers: {
+//        'Content-Type': 'application/x-www-form-urlencoded'
+//    },
+//    body: urlEncodedData
+//})
+//.then(response => response.json())
+//.then(data => console.log('Success:', data))
+//.catch(error => console.error('Error:', error));
+</script>
 
 </body>
 </html>
