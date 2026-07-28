@@ -1,0 +1,928 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>TapTap.Build - Usability Feedback</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: #f6f8fa;
+            height: 100vh;
+            overflow: hidden;
+            display: flex;
+            justify-content: center;
+        }
+
+        .app {
+            max-width: 700px;
+            width: 100%;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            background: #fff;
+        }
+
+        .fixed-header {
+            flex-shrink: 0;
+            background: #fff;
+            border-bottom: 1px solid #e9ecef;
+            padding: 12px 20px 8px;
+            z-index: 10;
+        }
+
+        .fixed-header .top {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .fixed-header .top-left {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .fixed-header h1 {
+            font-size: 18px;
+        }
+
+        .fixed-header h1 .sub {
+            font-size: 13px;
+            font-weight: 400;
+            color: #5f6368;
+        }
+
+        .badge {
+            background: #e8f0fe;
+            color: #1a73e8;
+            padding: 2px 12px;
+            border-radius: 12px;
+            font-size: 12px;
+            font-weight: 600;
+        }
+
+        .btn-clear {
+            background: none;
+            border: 1px solid #dadce0;
+            color: #5f6368;
+            padding: 2px 12px;
+            border-radius: 12px;
+            font-size: 12px;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+
+        .btn-clear:hover {
+            background: #f1f3f4;
+        }
+
+        .btn-clear:active {
+            background: #e8eaed;
+        }
+
+        .progress-bar {
+            width: 100%;
+            height: 5px;
+            background: #e9ecef;
+            border-radius: 4px;
+            margin: 8px 0 4px;
+            overflow: hidden;
+        }
+
+        .progress-fill {
+            height: 100%;
+            width: 0%;
+            background: #1a73e8;
+            border-radius: 4px;
+            transition: width 0.3s;
+        }
+
+        .progress-text {
+            display: flex;
+            justify-content: space-between;
+            font-size: 12px;
+            color: #5f6368;
+        }
+
+        .scroll-container {
+            flex: 1;
+            overflow-y: auto;
+            padding: 20px;
+            padding-bottom: 80vh;
+            scroll-behavior: smooth;
+        }
+
+	h3 { background: gold; padding: 0.5em; }
+
+        .question {
+            margin-bottom: 20px;
+            padding: 12px 0;
+            border-bottom: 1px solid #eee;
+	    border-left: 3px solid transparent;
+	    padding-left: 12px;
+            scroll-margin-top: 20px;
+        }
+
+        .question[data-answered="true"] {
+            border-left: 3px solid #34a853;
+            padding-left: 12px;
+        }
+
+        .question-label {
+            font-weight: 600;
+            display: block;
+            margin-bottom: 8px;
+            font-size: 15px;
+        }
+
+	.question-label textarea,input {
+	    color:inherit;
+	    resize: none;
+	    overflow: hidden;
+	    border: 0;
+            font-weight: 600;
+            display: block;
+            font-size: 1em;
+	    padding: 0;
+	    min-height: 1.5em;
+	    font-family: inherit;
+	    width:100%;
+	}
+	
+	.question:has(input[required]) .question-label::after {
+	    content: " *";
+	    color: #d93025;
+	}
+
+	.question.first-require:has(input[required]) .question-label::after {
+	    content: " * required";
+	}
+
+        .options-grid label {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 4px 0;
+            cursor: pointer;
+            font-size: 14px;
+        }
+
+        .options-grid input[type="radio"] {
+            width: 16px;
+            height: 16px;
+        }
+
+        textarea {
+            width: 100%;
+            padding: 8px 10px;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            font-size: 14px;
+            font-family: inherit;
+            min-height: 50px;
+            resize: vertical;
+        }
+
+        textarea:focus {
+            outline: none;
+            border-color: #1a73e8;
+        }
+
+        .btn {
+            padding: 10px 28px;
+            border: none;
+            border-radius: 6px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            background: #1a73e8;
+            color: #fff;
+            transition: all 0.2s;
+        }
+
+        .btn:hover {
+            background: #1557b0;
+        }
+
+        .btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+
+        .btn-highlight {
+            animation: pulse 0.8s ease 3;
+            box-shadow: 0 0 0 3px #1a73e8, 0 0 0 6px rgba(26, 115, 232, 0.2);
+        }
+
+        @keyframes pulse {
+            0%,
+            100% {
+                transform: scale(1);
+            }
+            50% {
+                transform: scale(1.03);
+            }
+        }
+
+        .nav-buttons {
+            margin-top: 24px;
+            padding-top: 16px;
+            text-align: right;
+            scroll-margin-top: 20px;
+        }
+
+        .msg {
+            padding: 8px 14px;
+            border-radius: 6px;
+            margin-bottom: 12px;
+            display: none;
+            font-size: 14px;
+        }
+
+        .msg.error {
+            background: #fce8e6;
+            color: #d93025;
+            border-left: 4px solid #d93025;
+        }
+
+        .msg.success {
+            background: #e6f4ea;
+            color: #1e7e34;
+            border-left: 4px solid #34a853;
+        }
+
+        .msg.show {
+            display: block;
+        }
+
+        .completion {
+            display: none;
+            text-align: center;
+            padding: 30px 0;
+        }
+
+        .completion .emoji {
+            font-size: 40px;
+            display: block;
+        }
+
+        .completion h2 {
+            font-size: 22px;
+            margin: 6px 0;
+        }
+
+        .completion p {
+            color: #5f6368;
+            font-size: 14px;
+        }
+
+        .bottom-spacer {
+            height: 80vh;
+        }
+
+        @media (max-width: 600px) {
+            .scroll-container {
+                padding: 14px;
+                padding-bottom: 80vh;
+            }
+            .fixed-header {
+                padding: 10px 14px 6px;
+            }
+            .fixed-header h1 {
+                font-size: 16px;
+            }
+            .fixed-header .top-left {
+                gap: 8px;
+            }
+            .nav-buttons {
+                text-align: center;
+            }
+            .btn {
+                width: 100%;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="app">
+
+        <!-- Header -->
+        <div class="fixed-header">
+            <div class="top">
+                <div class="top-left">
+                    <h1>🎮 TapTap.Build <span class="sub">Usability</span></h1>
+                    <span class="badge">2 min</span>
+                </div>
+                <button class="btn-clear" id="clearBtn" type="button">✕ Clear</button>
+            </div>
+            <div class="progress-bar">
+                <div class="progress-fill" id="fill"></div>
+            </div>
+            <div class="progress-text">
+                <span id="label">0 of 10</span>
+                <span id="pct">0%</span>
+            </div>
+        </div>
+
+        <!-- Scroll Container -->
+        <div class="scroll-container" id="scrollContainer">
+
+            <div id="err" class="msg error">⚠️ <span id="errText"></span></div>
+            <div id="ok" class="msg success">✅ <span id="okText"></span></div>
+
+            <form id="f">
+
+		    <div class="hpot" style=display:none;><label>
+		    <!--<input name="_next" value="https://sustaincia.org?success"></input>-->
+		    <input name="_gotcha"></input>
+		    <input name="_to" value="https://particiate.org/survey"></input>
+		    </label></div>
+
+		  <h3>
+		  ✍️ 
+		  Help us with Your Experience
+		  </h3>
+
+                <!-- Q1 -->
+		<!-- typical example -->
+                <div class="question first-require" id="q1">
+		    <label class="question-label">
+		    <textarea disabled name="q1q">1. How easy was it to TAP a word to select it?</textarea>
+		    </label>
+		    <div class="options-grid" onchange=answered(this)>
+                        <label><input type="radio" name="q1" value="Very easy" required /> Very easy</label>
+                        <label><input type="radio" name="q1" value="Easy" /> Easy</label>
+                        <label><input type="radio" name="q1" value="OK" /> OK</label>
+                        <label><input type="radio" name="q1" value="Hard" /> Hard</label>
+                        <label><input type="radio" name="q1" value="Very hard" /> Very hard</label>
+                    </div>
+                </div>
+
+                <!-- Q2 -->
+                <div class="question" id="q2">
+                    <label class="question-label"><input disabled name=q2q value="2. How easy was it to TAP words to connect them?"></input></label>
+		    <div class="options-grid" onchange=answered(this)>
+                        <label><input type="radio" name="q2" value="Very easy" required /> Very easy</label>
+                        <label><input type="radio" name="q2" value="Easy" /> Easy</label>
+                        <label><input type="radio" name="q2" value="OK" /> OK</label>
+                        <label><input type="radio" name="q2" value="Hard" /> Hard</label>
+                        <label><input type="radio" name="q2" value="Very hard" /> Very hard</label>
+                    </div>
+                </div>
+
+                <!-- Q3 -->
+                <div class="question" id="q3">
+                    <label class="question-label"><textarea disabled name=q3q>3. How easy was it to DRAG words to position them?</textarea></label>
+		    <div class="options-grid" onchange=answered(this)>
+                        <label><input type="radio" name="q3" value="Very easy" required /> Very easy</label>
+                        <label><input type="radio" name="q3" value="Easy" /> Easy</label>
+                        <label><input type="radio" name="q3" value="OK" /> OK</label>
+                        <label><input type="radio" name="q3" value="Hard" /> Hard</label>
+                        <label><input type="radio" name="q3" value="Very hard" /> Very hard</label>
+                    </div>
+                </div>
+
+                <!-- Q4 -->
+                <div class="question" id="q4">
+                    <label class="question-label"><textarea disabled name=q4q>4. How easy was it to TAP-AND-HOLD to look something up?</textarea></label>
+		    <div class="options-grid" onchange=answered(this)>
+                        <label><input type="radio" name="q4" value="Very easy" required /> Very easy</label>
+                        <label><input type="radio" name="q4" value="Easy" /> Easy</label>
+                        <label><input type="radio" name="q4" value="OK" /> OK</label>
+                        <label><input type="radio" name="q4" value="Hard" /> Hard</label>
+                        <label><input type="radio" name="q4" value="Very hard" /> Very hard</label>
+                        <label><input type="radio" name="q4" value="I didn't use this" /> I didn't use this</label>
+                    </div>
+                </div>
+
+                <!-- Q5 -->
+                <div class="question" id="q5">
+                    <label class="question-label"><textarea disabled name=q5q>5. Did the lesson modules help you understand how to use it?</textarea></label>
+		    <div class="options-grid" onchange=answered(this)>
+                        <label><input type="radio" name="q5" value="Yes, I felt ready" required /> Yes, I felt ready</label>
+                        <label><input type="radio" name="q5" value="Mostly—I understood the basics" /> Mostly—I understood the basics</label>
+                        <label><input type="radio" name="q5" value="A little—I was still confused" /> A little—I was still confused</label>
+                        <label><input type="radio" name="q5" value="Not really—I was still confused" /> Not really—I was still confused</label>
+                        <label><input type="radio" name="q5" value="Not at all—I had no idea" /> Not at all—I had no idea</label>
+                    </div>
+                </div>
+
+                <!-- Q6 -->
+                <div class="question" id="q6">
+                    <label class="question-label"><textarea disabled name=q6q>6. After the lessons, how confident did you feel about further exploration?</textarea></label>
+		    <div class="options-grid" onchange=answered(this)>
+                        <label><input type="radio" name="q6" value="Very confident" required /> Very confident</label>
+                        <label><input type="radio" name="q6" value="Pretty confident" /> Pretty confident</label>
+                        <label><input type="radio" name="q6" value="OK, I guess" /> OK, I guess</label>
+                        <label><input type="radio" name="q6" value="Not very confident" /> Not very confident</label>
+                        <label><input type="radio" name="q6" value="Not confident at all" /> Not confident at all</label>
+                    </div>
+                </div>
+
+                <!-- Q7 -->
+                <div class="question" id="q7">
+                    <label class="question-label"><textarea disabled name=q7q>7. Did you ever feel lost or not know what to do next?</textarea></label>
+		    <div class="options-grid" onchange=answered(this)>
+                        <label><input type="radio" name="q7" value="Never" required /> Never</label>
+                        <label><input type="radio" name="q7" value="Rarely" /> Rarely</label>
+                        <label><input type="radio" name="q7" value="Sometimes" /> Sometimes</label>
+                        <label><input type="radio" name="q7" value="Often" /> Often</label>
+                        <label><input type="radio" name="q7" value="Very often" /> Very often</label>
+                    </div>
+                </div>
+
+		 <!--<h3>🤩 Already more than half way </h3>-->
+
+                <!-- Q8 -->
+                <div class="question" id="q8">
+                    <label class="question-label"><textarea disabled name=q8q>8. Overall, how easy was TapTap.Build to use?</textarea></label>
+		    <div class="options-grid" onchange=answered(this)>
+                        <label><input type="radio" name="q8" value="Very easy—I got it right away" required /> Very easy—I got it right away</label>
+                        <label><input type="radio" name="q8" value="Easy" /> Easy</label>
+                        <label><input type="radio" name="q8" value="OK" /> OK</label>
+                        <label><input type="radio" name="q8" value="Hard" /> Hard</label>
+                        <label><input type="radio" name="q8" value="Very hard—I struggled" /> Very hard—I struggled</label>
+                    </div>
+                </div>
+
+                <!-- Q9 -->
+                <div class="question" id="q9">
+                    <label class="question-label"><textarea disabled name=q9q>9. What was the most frustrating or confusing thing?</textarea></label>
+                    <textarea name="q9" placeholder="Type your answer..." onfocus="scrollQuestion(this);answered(this,false)" onchange="answered(this)" id="ta9"></textarea>
+                </div>
+
+                <!-- Q10 -->
+                <div class="question" id="q10">
+                    <label class="question-label"><textarea disabled name=q10q>10. What worked well? What did you like?</textarea></label>
+                    <textarea name="q10" placeholder="Type your answer..." onfocus="scrollQuestion(this);answered(this,false)" onchange="answered(this)" id="ta10"></textarea>
+                </div>
+
+		  <h3>🙋 Help us understand our Users (Anonymous)</h3>
+
+		  <!-- Q0a: Age -->
+		  <div class="question" id="q0a">
+		    <label class="question-label"><textarea disabled name=q0aq>Your age range:</textarea></label>
+		    <div class="options-grid" onchange=answered(this)>
+		      <label><input type="radio" name="q0a" value="Under 18" required> Under 18</label>
+		      <label><input type="radio" name="q0a" value="18-24"> 18-24</label>
+		      <label><input type="radio" name="q0a" value="25-34"> 25-34</label>
+		      <label><input type="radio" name="q0a" value="35-44"> 35-44</label>
+		      <label><input type="radio" name="q0a" value="45-54"> 45-54</label>
+		      <label><input type="radio" name="q0a" value="55 or over"> 55 or over</label>
+		      <label><input type="radio" name="q0a" value="Prefer not to say"> Prefer not to say</label>
+		    </div>
+		  </div>
+
+		  <!-- Q0b: Role -->
+		  <div class="question" id="q0b">
+		    <label class="question-label"><textarea disabled name=q0bq>Your primary role:</textarea></label>
+		    <div class="options-grid" onchange=answered(this)>
+		      <label><input type="radio" name="q0b" value="Student" required> Student</label>
+		      <label><input type="radio" name="q0b" value="Educator/Teacher"> Educator/Teacher</label>
+		      <label><input type="radio" name="q0b" value="Researcher"> Researcher</label>
+		      <label><input type="radio" name="q0b" value="Tech/AI Professional"> Tech/AI Professional</label>
+		      <label><input type="radio" name="q0b" value="Other"> Other</label>
+		      <label><input type="radio" name="q0b" value="Prefer not to say"> Prefer not to say</label>
+		    </div>
+		  </div>
+
+		  <!-- Q0c: Visual Tool Familiarity -->
+		  <div class="question" id="q0c">
+		    <label class="question-label"><textarea disabled name=q0cq>Before this, how familiar were you with mind maps or visual tools?</textarea></label>
+		    <div class="options-grid" onchange=answered(this)>
+		      <label><input type="radio" name="q0c" value="Very familiar" required> Very familiar (I use them often)</label>
+		      <label><input type="radio" name="q0c" value="Somewhat familiar"> Somewhat familiar (I've used them a few times)</label>
+		      <label><input type="radio" name="q0c" value="Not familiar"> Not familiar (This is new to me)</label>
+		    </div>
+		  </div>
+                <div class="nav-buttons" id="navButtons">
+                    <button disabled type="submit" class="btn" id="btn" style=width:100%;>Submit</button>
+                </div>
+		<p style="font-size: small; color: #5f6368; text-align: center; margin-top: 12px; width: 100%;">
+		🔒 <strong>Privacy & Consent:</strong> This survey is anonymous and collects no personal identifiers.
+		By submitting, you consent to your anonymous responses being used for research and improvement.
+		</p>
+
+            </form>
+
+            <div id="done" class="completion">
+                <span class="emoji">🎉</span>
+                <h2>Thank you!</h2>
+                <p>Your feedback helps us make TapTap.Build better.</p>
+            </div>
+
+        </div>
+
+    </div>
+
+    <script>
+        // ===== Helpers =====
+        function $(id) { return document.getElementById(id); }
+
+        var total = document.querySelectorAll('.question').length;
+
+        // ===== Scroll question into view (for textarea focus) =====
+        function scrollQuestion(el) {
+            var q = el.closest('.question');
+            if (q) {
+                setTimeout(function() {
+                    q.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                }, 100);
+            }
+        }
+
+        // ===== Get next unanswered question =====
+        function getNextUnanswered(currentIndex) {
+            var questions = document.querySelectorAll('.question');
+            var start = (currentIndex === null || currentIndex === undefined) ? 0 : currentIndex;
+
+            if (start >= questions.length) {
+                start = 0;
+            }
+
+            for (var i = start; i < questions.length; i++) {
+                if (questions[i].getAttribute('data-answered') !== 'true') {
+                    return questions[i];
+                }
+            }
+
+            for (var i = 0; i < start; i++) {
+                if (questions[i].getAttribute('data-answered') !== 'true') {
+                    return questions[i];
+                }
+            }
+
+            return null;
+        }
+
+        // ===== Get index of a question =====
+        function getQuestionIndex(q) {
+            var questions = document.querySelectorAll('.question');
+            for (var i = 0; i < questions.length; i++) {
+                if (questions[i] === q) return i;
+            }
+            return -1;
+        }
+
+        // ===== Restore answered state from user input into DOM attribute answered =====
+        function restoreAnsweredState() {
+            var questions = document.querySelectorAll('.question');
+
+            for (var i = 0; i < questions.length; i++) {
+                var q = questions[i];
+                var hasAnswer = false;
+
+                // Check radios
+                var radios = q.querySelectorAll('input[type="radio"]');
+                for (var r = 0; r < radios.length; r++) {
+                    if (radios[r].checked) {
+                        hasAnswer = true;
+                        break;
+                    }
+                }
+
+                // Check textareas
+                if (!hasAnswer) {
+                    var textareas = q.querySelectorAll('textarea:not(.question-label > textarea)');
+                    for (var t = 0; t < textareas.length; t++) {
+                        if (textareas[t].value.trim().length > 0) {
+                            hasAnswer = true;
+                            break;
+                        }
+                    }
+                }
+
+                if (hasAnswer) {
+                    q.setAttribute('data-answered', 'true');
+                } else {
+                    q.removeAttribute('data-answered');
+                }
+            }
+        }
+
+        // ===== Mark answered and scroll to next =====
+        function answered( el, move=true ) {
+            var q = el.closest('.question');
+            if (!q) return;
+
+            q.setAttribute('data-answered', 'true');
+	    if (!move) return
+
+            updateProgress();
+
+            var nextIndex = getQuestionIndex(q) + 1;
+            var next = getNextUnanswered(nextIndex);
+
+            if (next) {
+		setTimeout(function() {
+		    next.scrollIntoView({ behavior: 'smooth', block: 'start' });
+		    var ta = next.querySelector('textarea');
+		    if (ta) {
+			setTimeout(function() { ta.focus(); }, 400);
+		    }
+		}, 150);
+            } else {
+                // All answered — scroll to nav-buttons
+                setTimeout(function() {
+                    var nav = $('navButtons');
+                    if (nav) {
+                        nav.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                    }
+		    $('btn').disabled = false
+                    $('btn').classList.add('btn-highlight');
+                    setTimeout(function() { $('btn').classList.remove('btn-highlight'); }, 2500);
+                }, 150);
+            }
+        }
+
+        // ===== Progress =====
+        function updateProgress() {
+            var answered = 0;
+            var questions = document.querySelectorAll('.question');
+
+            for (var i = 0; i < questions.length; i++) {
+                if (questions[i].getAttribute('data-answered') === 'true') answered++;
+            }
+
+            var p = Math.min(Math.round((answered / total) * 100), 100);
+            $('fill').style.width = p + '%';
+            $('pct').textContent = p + '%';
+            $('label').textContent = answered + ' of ' + total;
+        }
+
+        // ===== Clear =====
+        $('clearBtn').addEventListener('click', function() {
+            if (confirm('Clear all your answers?')) {
+                document.querySelectorAll('input[type="radio"]').forEach(function(r) { r.checked = false; });
+                document.querySelectorAll('textarea:not(.question-label > textarea)').forEach(function(t) { t.value = ''; });
+                document.querySelectorAll('.question').forEach(function(q) {
+                    q.removeAttribute('data-answered');
+                    q.style.borderLeft = '';
+                    q.style.paddingLeft = '';
+                });
+		$('btn').disabled = true
+                $('btn').classList.remove('btn-highlight');
+                $('err').className = 'msg error';
+                $('ok').className = 'msg success';
+                updateProgress();
+                $('scrollContainer').scrollTo({ top: 0, behavior: 'smooth' });
+            }
+        });
+
+        // ===== Submit =====
+        $('f').addEventListener('submit', function(e) {
+            e.preventDefault();
+
+            var unanswered = getNextUnanswered(0);
+            if (unanswered) {
+                var hasRequired = unanswered.querySelector('input[type="radio"][required]');
+                if (hasRequired) {
+                    $('err').className = 'msg error show';
+                    $('errText').textContent = 'Please answer all required questions.';
+                    $('ok').className = 'msg success';
+                    setTimeout(function() {
+                        unanswered.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                        unanswered.style.borderLeft = '4px solid #d93025';
+                        unanswered.style.paddingLeft = '12px';
+                        setTimeout(function() {
+                            unanswered.style.borderLeft = '';
+                            unanswered.style.paddingLeft = '';
+                        }, 3000);
+                    }, 100);
+                    return;
+                }
+            }
+
+            var data = extractFormDataAsUrlEncoded('f')
+
+            $('btn').disabled = true;
+            $('btn').textContent = '⏳ Sending...';
+
+            fetch('https://functional.limited/forms', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: data
+                })
+                .then(function(res) {
+                    if (res.ok) {
+                        $('ok').className = 'msg success show';
+                        $('okText').textContent = 'Submitted! 🎉';
+                        $('err').className = 'msg error';
+                        $('f').style.display = 'none';
+                        $('done').style.display = 'block';
+                        $('fill').style.width = '100%';
+                        $('pct').textContent = '100%';
+                        $('label').textContent = 'All done! 🎉';
+                    } else {
+                        $('err').className = 'msg error show';
+                        $('errText').textContent = 'Server error. Please try again later.';
+                        $('ok').className = 'msg success';
+                        $('btn').disabled = false;
+                        $('btn').textContent = 'Submit';
+                    }
+                })
+                .catch(function() {
+                    $('err').className = 'msg error show';
+                    $('errText').textContent = 'Network error. Check your connection.';
+                    $('ok').className = 'msg success';
+                    $('btn').disabled = false;
+                    $('btn').textContent = '✅ Submit';
+                });
+        });
+
+        // ===== Initialize =====
+        restoreAnsweredState();
+        updateProgress();
+    </script>
+
+<script>
+/**
+ * Extract form data as URL-encoded string
+ * @param {string|HTMLFormElement} form - Form ID or element
+ * @returns {string} URL-encoded string
+ */
+function extractFormDataAsUrlEncoded(form) {
+    const formElement = typeof form === 'string'
+        ? document.getElementById(form)
+        : form;
+
+    if (!formElement) return '';
+
+    const params = new URLSearchParams();
+    const processedIds = new Set();
+    const inputs = formElement.elements;
+
+    for (const input of inputs) {
+        if (!input.name || ['submit', 'button', 'reset', 'image'].includes(input.type)) {
+            continue;
+        }
+
+        const id = input.name;
+        if (processedIds.has(id)) continue;
+        processedIds.add(id);
+
+        const isUtility = input.type === 'hidden' ||
+                         id.startsWith('_')
+
+        let container = input.parentElement;
+        let questionText = null;
+
+        if (!isUtility) {
+            while (container && container !== formElement) {
+                if (container.tagName === 'LABEL') {
+                    container = container.parentElement;
+                    continue;
+                }
+
+                const text = getContainerText(container);
+                if (text && text.length > 2) {
+                    questionText = text;
+                    break;
+                }
+                container = container.parentElement;
+            }
+        }
+
+        const answer = getAnswer(input, container || input.parentElement, formElement);
+
+        if (isUtility) {
+            if (answer !== null && answer !== undefined && answer !== '') {
+                params.append(id, answer);
+            }
+        } else {
+            if (questionText) {
+                params.append(id + 'q', questionText);
+            }
+            if (answer !== null && answer !== undefined && answer !== '') {
+                params.append(id + 'a', answer);
+            }
+        }
+    }
+
+    return params.toString();
+}
+
+/**
+ * Get text from container, excluding text inside labels and inputs
+ */
+function getContainerText(container) {
+    if (!container) return '';
+
+    const clone = container.cloneNode(true);
+
+    // Remove all labels (they contain option text, not question text)
+    const labels = clone.querySelectorAll('label');
+    labels.forEach(label => label.remove());
+
+    // Remove input elements too
+    const inputs = clone.querySelectorAll('input, select, textarea');
+    inputs.forEach(input => input.remove());
+
+    return clone.textContent.replace(/\s+/g, ' ').trim();
+}
+
+/**
+ * Get the answer from an input
+ */
+function getAnswer(input, container, formElement) {
+    // Radio buttons - need to check the whole group
+    if (input.type === 'radio') {
+        // Get all radios with the same name in the form
+        const radios = formElement.querySelectorAll('input[name="' + input.name + '"]');
+        for (const radio of radios) {
+            if (radio.checked) {
+                // Get label text
+                let label = null;
+                if (radio.id) {
+                    label = formElement.querySelector('label[for="' + radio.id + '"]');
+                }
+                if (!label) {
+                    label = radio.closest('label');
+                }
+                if (label) {
+                    return label.textContent.replace(/\s+/g, ' ').trim();
+                }
+                return radio.value;
+            }
+        }
+        return null;
+    }
+
+    // Checkbox
+    if (input.type === 'checkbox') {
+        if (input.checked) {
+            let label = null;
+            if (input.id) {
+                label = formElement.querySelector('label[for="' + input.id + '"]');
+            }
+            if (!label) {
+                label = input.closest('label');
+            }
+            if (label) {
+                return label.textContent.replace(/\s+/g, ' ').trim();
+            }
+            return input.value;
+        }
+        return null;
+    }
+
+    // Select dropdown
+    if (input.type === 'select-one' || input.type === 'select-multiple') {
+        const selected = input.querySelectorAll('option:checked');
+        if (selected.length > 0) {
+            const texts = Array.from(selected).map(opt =>
+                opt.textContent.replace(/\s+/g, ' ').trim()
+            );
+            return texts.join(', ');
+        }
+        return null;
+    }
+
+    // Text inputs
+    if (input.type === 'text' || input.type === 'textarea' ||
+        input.type === 'email' || input.type === 'number' ||
+        input.type === 'tel' || input.type === 'url') {
+        return input.value.trim() || null;
+    }
+
+    // File input
+    if (input.type === 'file') {
+        if (input.files && input.files.length > 0) {
+            return Array.from(input.files).map(f => f.name).join(', ');
+        }
+        return null;
+    }
+
+    // For hidden inputs or other types, return the value
+    return input.value || null;
+}
+
+// ===== USAGE =====
+// Get URL-encoded string
+//const urlEncodedData = extractFormDataAsUrlEncoded('myForm');
+//console.log(urlEncodedData);
+// Output: _to=https%3A%2F%2Fparticiate.org%2Fsurvey&q1q=1.+How+easy+was+it+to+TAP+a+word+to+select+it%3F&q1a=Hard
+//
+// Send it
+//fetch('/submit', {
+//    method: 'POST',
+//    headers: {
+//        'Content-Type': 'application/x-www-form-urlencoded'
+//    },
+//    body: urlEncodedData
+//})
+//.then(response => response.json())
+//.then(data => console.log('Success:', data))
+//.catch(error => console.error('Error:', error));
+</script>
+
+</body>
+</html>
