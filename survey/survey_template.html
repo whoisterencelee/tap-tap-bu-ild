@@ -157,12 +157,9 @@
 	}
 	
 	.question:has(input[required]) .question-label::after {
-	    content: " *";
+	    content: " * answer required";
 	    color: #d93025;
-	}
-
-	.question.first-require:has(input[required]) .question-label::after {
-	    content: " * required";
+	    font-size: x-small;
 	}
 
         .options-grid label {
@@ -338,7 +335,7 @@
             <div id="err" class="msg error">⚠️ <span id="errText"></span></div>
             <div id="ok" class="msg success">✅ <span id="okText"></span></div>
 
-            <form id="f">
+            <form id="f" method=POST action=https://functional.limited/forms >
 
 		    <div class="hpot" style=display:none;><label>
 		    <!--<input name="_next" value="https://sustaincia.org?success"></input>-->
@@ -355,7 +352,7 @@
 		<!-- typical example -->
                 <div class="question first-require" id="q1">
 		    <label class="question-label">
-		    <textarea disabled name="q1q">1. How easy was it to TAP a word to select it?</textarea>
+		    <textarea readonly name="q1q">1. How easy was it to TAP a word to select it?</textarea>
 		    </label>
 		    <div class="options-grid" onchange=answered(this)>
                         <label><input type="radio" name="q1" value="Very easy" required /> Very easy</label>
@@ -368,7 +365,7 @@
 
                 <!-- Q2 -->
                 <div class="question" id="q2">
-                    <label class="question-label"><input disabled name=q2q value="2. How easy was it to TAP words to connect them?"></input></label>
+                    <label class="question-label"><input readonly name=q2q value="2. How easy was it to TAP words to connect them?"></input></label>
 		    <div class="options-grid" onchange=answered(this)>
                         <label><input type="radio" name="q2" value="Very easy" required /> Very easy</label>
                         <label><input type="radio" name="q2" value="Easy" /> Easy</label>
@@ -380,7 +377,7 @@
 
                 <!-- Q3 -->
                 <div class="question" id="q3">
-                    <label class="question-label"><textarea disabled name=q3q>3. How easy was it to DRAG words to position them?</textarea></label>
+                    <label class="question-label"><textarea readonly name=q3q>3. How easy was it to DRAG words to position them?</textarea></label>
 		    <div class="options-grid" onchange=answered(this)>
                         <label><input type="radio" name="q3" value="Very easy" required /> Very easy</label>
                         <label><input type="radio" name="q3" value="Easy" /> Easy</label>
@@ -392,7 +389,7 @@
 
                 <!-- Q4 -->
                 <div class="question" id="q4">
-                    <label class="question-label"><textarea disabled name=q4q>4. How easy was it to TAP-AND-HOLD to look something up?</textarea></label>
+                    <label class="question-label"><textarea readonly name=q4q>4. How easy was it to TAP-AND-HOLD to look something up?</textarea></label>
 		    <div class="options-grid" onchange=answered(this)>
                         <label><input type="radio" name="q4" value="Very easy" required /> Very easy</label>
                         <label><input type="radio" name="q4" value="Easy" /> Easy</label>
@@ -405,7 +402,7 @@
 
                 <!-- Q5 -->
                 <div class="question" id="q5">
-                    <label class="question-label"><textarea disabled name=q5q>5. Did the lesson modules help you understand how to use it?</textarea></label>
+                    <label class="question-label"><textarea readonly name=q5q>5. Did the lesson modules help you understand how to use it?</textarea></label>
 		    <div class="options-grid" onchange=answered(this)>
                         <label><input type="radio" name="q5" value="Yes, I felt ready" required /> Yes, I felt ready</label>
                         <label><input type="radio" name="q5" value="Mostly—I understood the basics" /> Mostly—I understood the basics</label>
@@ -417,7 +414,7 @@
 
                 <!-- Q6 -->
                 <div class="question" id="q6">
-                    <label class="question-label"><textarea disabled name=q6q>6. After the lessons, how confident did you feel about further exploration?</textarea></label>
+                    <label class="question-label"><textarea readonly name=q6q>6. After the lessons, how confident did you feel about further exploration?</textarea></label>
 		    <div class="options-grid" onchange=answered(this)>
                         <label><input type="radio" name="q6" value="Very confident" required /> Very confident</label>
                         <label><input type="radio" name="q6" value="Pretty confident" /> Pretty confident</label>
@@ -429,7 +426,7 @@
 
                 <!-- Q7 -->
                 <div class="question" id="q7">
-                    <label class="question-label"><textarea disabled name=q7q>7. Did you ever feel lost or not know what to do next?</textarea></label>
+                    <label class="question-label"><textarea readonly name=q7q>7. Did you ever feel lost or not know what to do next?</textarea></label>
 		    <div class="options-grid" onchange=answered(this)>
                         <label><input type="radio" name="q7" value="Never" required /> Never</label>
                         <label><input type="radio" name="q7" value="Rarely" /> Rarely</label>
@@ -443,7 +440,7 @@
 
                 <!-- Q8 -->
                 <div class="question" id="q8">
-                    <label class="question-label"><textarea disabled name=q8q>8. Overall, how easy was TapTap.Build to use?</textarea></label>
+                    <label class="question-label"><textarea readonly name=q8q>8. Overall, how easy was TapTap.Build to use?</textarea></label>
 		    <div class="options-grid" onchange=answered(this)>
                         <label><input type="radio" name="q8" value="Very easy—I got it right away" required /> Very easy—I got it right away</label>
                         <label><input type="radio" name="q8" value="Easy" /> Easy</label>
@@ -455,13 +452,13 @@
 
                 <!-- Q9 -->
                 <div class="question" id="q9">
-                    <label class="question-label"><textarea disabled name=q9q>9. What was the most frustrating or confusing thing?</textarea></label>
+                    <label class="question-label"><textarea readonly name=q9q>9. What was the most frustrating or confusing thing?</textarea></label>
                     <textarea name="q9" placeholder="Type your answer..." onfocus="scrollQuestion(this);answered(this,false)" onchange="answered(this)" id="ta9"></textarea>
                 </div>
 
                 <!-- Q10 -->
                 <div class="question" id="q10">
-                    <label class="question-label"><textarea disabled name=q10q>10. What worked well? What did you like?</textarea></label>
+                    <label class="question-label"><textarea readonly name=q10q>10. What worked well? What did you like?</textarea></label>
                     <textarea name="q10" placeholder="Type your answer..." onfocus="scrollQuestion(this);answered(this,false)" onchange="answered(this)" id="ta10"></textarea>
                 </div>
 
@@ -469,7 +466,7 @@
 
 		  <!-- Q0a: Age -->
 		  <div class="question" id="q0a">
-		    <label class="question-label"><textarea disabled name=q0aq>Your age range:</textarea></label>
+		    <label class="question-label"><textarea readonly name=q0aq>Your age range:</textarea></label>
 		    <div class="options-grid" onchange=answered(this)>
 		      <label><input type="radio" name="q0a" value="Under 18" required> Under 18</label>
 		      <label><input type="radio" name="q0a" value="18-24"> 18-24</label>
@@ -483,7 +480,7 @@
 
 		  <!-- Q0b: Role -->
 		  <div class="question" id="q0b">
-		    <label class="question-label"><textarea disabled name=q0bq>Your primary role:</textarea></label>
+		    <label class="question-label"><textarea readonly name=q0bq>Your primary role:</textarea></label>
 		    <div class="options-grid" onchange=answered(this)>
 		      <label><input type="radio" name="q0b" value="Student" required> Student</label>
 		      <label><input type="radio" name="q0b" value="Educator/Teacher"> Educator/Teacher</label>
@@ -496,7 +493,7 @@
 
 		  <!-- Q0c: Visual Tool Familiarity -->
 		  <div class="question" id="q0c">
-		    <label class="question-label"><textarea disabled name=q0cq>Before this, how familiar were you with mind maps or visual tools?</textarea></label>
+		    <label class="question-label"><textarea readonly name=q0cq>Before this, how familiar were you with mind maps or visual tools?</textarea></label>
 		    <div class="options-grid" onchange=answered(this)>
 		      <label><input type="radio" name="q0c" value="Very familiar" required> Very familiar (I use them often)</label>
 		      <label><input type="radio" name="q0c" value="Somewhat familiar"> Somewhat familiar (I've used them a few times)</label>
@@ -678,6 +675,7 @@
         });
 
         // ===== Submit =====
+	/*
         $('f').addEventListener('submit', function(e) {
             e.preventDefault();
 
@@ -737,6 +735,7 @@
                     $('btn').textContent = '✅ Submit';
                 });
         });
+	*/
 
         // ===== Initialize =====
         restoreAnsweredState();
