@@ -48,11 +48,9 @@
         }
 
         .fixed-header h1 {
-            font-size: 18px;
         }
 
         .fixed-header h1 .sub {
-            font-size: 13px;
             font-weight: 400;
             color: #5f6368;
         }
@@ -72,7 +70,6 @@
             color: #5f6368;
             padding: 2px 12px;
             border-radius: 12px;
-            font-size: 12px;
             cursor: pointer;
             transition: background 0.2s;
         }
@@ -99,7 +96,7 @@
 
 	h3 { 
 	    background: gold; padding: 0.5em; 
-	    scroll-snap-align: start;
+	    text-align:center;
 	}
 
         .question {
@@ -107,8 +104,8 @@
         }
 
 	.paged {
-	    height: 90vh;  /* this fix pageup getting stuck */
-	    scroll-snap-align: center;
+	    height: 80vh;  /* this fix pageup getting stuck */
+	    scroll-snap-align: start;
 	    display:flex;
 	    flex-direction:column;
 	    align-items:center;
@@ -123,21 +120,8 @@
             font-weight: 600;
             display: block;
             margin-bottom: 8px;
-            font-size: 15px;
         }
 
-	.question-legend textarea,input {
-	    color:inherit;
-	    resize: none;
-	    border: 0;
-            font-weight: 600;
-            font-size: 1em;
-	    padding: 0;
-	    min-height: 1.5em;
-	    font-family: inherit;
-	    width:100%;
-	}
-	
 	.question-sent-along {
 	    display: none;
 	}
@@ -145,7 +129,6 @@
 	.question:has(input[required]) .question-legend::after {
 	    content: " * ";
 	    color: #d93025;
-	    font-size: x-small;
 	}
 
         .options-grid label {
@@ -154,7 +137,10 @@
             gap: 8px;
             padding: 4px 0;
             cursor: pointer;
-            font-size: 14px;
+	    border: 1px solid lightgrey;
+	    border-radius: 2em;
+	    margin:6px;
+	    padding:0.5em 1em;
         }
 
         .options-grid input[type="radio"] {
@@ -167,7 +153,6 @@
             padding: 8px 10px;
             border: 1px solid #ddd;
             border-radius: 6px;
-            font-size: 14px;
             font-family: inherit;
             min-height: 50px;
             resize: vertical;
@@ -183,7 +168,6 @@
             padding: 10px 28px;
             border: none;
             border-radius: 6px;
-            font-size: 16px;
             font-weight: 600;
             cursor: pointer;
             background: #1a73e8;
@@ -216,6 +200,7 @@
         }
 
         .nav-buttons {
+	    height: 90vh;
 	    padding: 1em 3em;
             margin-top: 24px;
             text-align: right;
@@ -226,7 +211,6 @@
             border-radius: 6px;
             margin-bottom: 12px;
             display: none;
-            font-size: 14px;
         }
 
         .msg.error {
@@ -252,18 +236,15 @@
         }
 
         .completion .emoji {
-            font-size: 40px;
             display: block;
         }
 
         .completion h2 {
-            font-size: 22px;
             margin: 6px 0;
         }
 
         .completion p {
             color: #5f6368;
-            font-size: 14px;
         }
 
         .bottom-spacer {
@@ -271,8 +252,9 @@
         }
 
         @media (max-width: 600px) {
-            .scroll-container {
-            }
+	    body {
+	    	font-size:1.5em;
+	    }
             .fixed-header {
                 padding: 10px 14px 6px;
             }
@@ -299,10 +281,10 @@
         <div class="fixed-header">
             <div class="top">
                 <div class="top-left">
-                    <h1>🎮 TapTap.Build <span class="sub">Usability</span></h1>
+                    <h1>🎮 TapTap.Build <span class="sub">Usability Survey</span></h1>
                     <span class="badge">2 min</span>
                 </div>
-                <button class="btn-clear" id="clearBtn" type="button">✕ Clear</button>
+		<button form=f type=reset onclick="return confirm('Clear all your answers?')" class="btn-clear" type="button">✕ Clear</button>
             </div>
         </div>
 
@@ -319,10 +301,6 @@
 		    <input name="_to" value="https://particiate.org/survey"></input>
 		    </label></div>
 
-		  <h3>
-		  ✍️ 
-		  Help us with Your Experience
-		  </h3>
 
                 <!-- Q1 -->
 		<!-- typical example -->
@@ -339,11 +317,15 @@
 			</fieldset>
 		</div>
 
+		  <h3>
+		  ✍️ 
+		  Help us with Your Experience
+		  </h3>
+
                 <!-- Q2 -->
                 <div class="question paged" id="q2" onchange=answered(this)>
 			<fieldset>
 			    <legend class=question-legend>2. How easy was it to TAP words to connect them?</legend>
-			    <!--<input class=question-sent-along readonly name=q2q value="2. How easy was it to TAP words to connect them?"></input>-->
 			    <div class="options-grid" >
 				<label><input type="radio" name="q2" value="Very easy" required /> Very easy</label>
 				<label><input type="radio" name="q2" value="Easy" /> Easy</label>
@@ -425,7 +407,6 @@
 			</fieldset>
                 </div>
 
-		 <!--<h3>🤩 Already more than half way </h3>-->
 
                 <!-- Q8 -->
                 <div class="question paged" id="q8" onchange=answered(this)>
@@ -440,6 +421,8 @@
                     </div>
 		    </fieldset>
                 </div>
+
+		 <!--<h3>🤩 Already more than half way </h3>-->
 
                 <!-- Q9 -->
                 <div class="question paged" id="q9" onchange=answered(this)>
@@ -460,8 +443,6 @@
 		    </fieldset>
                 </div>
 
-		  <h3>🙋 Help us understand our Users (Anonymous)</h3>
-
 		  <!-- Q0a: Age -->
 		  <div class="question paged" id="q0a" onchange=answered(this)>
 		  	<fieldset>
@@ -477,6 +458,9 @@
 			    </div>
 			</fieldset>
 		  </div>
+
+		  <h3>🙋 Help us understand you</h3>
+
 
 		  <!-- Q0b: Role -->
 		  <div class="question paged" id="q0b" onchange=answered(this)>
@@ -506,7 +490,7 @@
 		  </div>
 
 		<div class="nav-buttons paged" id="navButtons">
-			<button disabled form=f type="submit" class="btn" id="btn" style=width:100%;>Submit</button>
+			<button disabled form=f type="submit" class="btn" id="btn" style=width:100%;>Fill Missing Answer</button>
 			<p style="font-size: small; color: #5f6368; text-align: center; margin-top: 12px; width: 100%;">
 			🔒 <strong>Privacy & Consent:</strong> This survey is anonymous and collects no personal identifiers.
 			By submitting, you consent to your anonymous responses being used for research and improvement.
@@ -530,35 +514,38 @@
         var total = document.querySelectorAll('.question').length;
 
 	// ===== generate sent-along question ====
-	// Get all question containers
-	const questionContainers = document.querySelectorAll('.question.paged');
+	function generate_send_along(){
+		// Get all question containers
+		const questionContainers = document.querySelectorAll('.question.paged');
 
-	questionContainers.forEach(container => {
-		// Find the legend element within this container
-		const legend = container.querySelector('.question-legend');
+		questionContainers.forEach(container => {
+			// Find the legend element within this container
+			const legend = container.querySelector('.question-legend');
 
-		if (legend) {
-			// Get the legend text
-			const legendText = legend.textContent.trim();
+			if (legend) {
+				// Get the legend text
+				const legendText = legend.textContent.trim();
 
-			// Create the readonly input element
-			const input = document.createElement('input');
-			input.type = 'text';
-			input.className = 'question-sent-along';
-			input.readOnly = true;
-			input.name = container.id + 'q'; // or use a specific naming convention
-			input.value = legendText;
+				// Create the readonly input element
+				const input = document.createElement('input');
+				input.type = 'text';
+				input.className = 'question-sent-along';
+				input.disabled = true
+				input.readOnly = true;
+				input.name = container.id + 'q'; // or use a specific naming convention
+				input.defaultValue = legendText;
 
-			// Insert the input after the legend
-			// We need to find the fieldset and insert before the options-grid
-			const fieldset = container.querySelector('fieldset');
-			const optionsGrid = container.querySelector('.options-grid');
+				// Insert the input after the legend
+				// We need to find the fieldset and insert before the options-grid
+				const fieldset = container.querySelector('fieldset');
+				const optionsGrid = container.querySelector('.options-grid');
 
-			if (fieldset && optionsGrid) {
-				fieldset.insertBefore(input, optionsGrid);
+				if (fieldset && optionsGrid) {
+					fieldset.insertBefore(input, optionsGrid);
+				}
 			}
-		}
-	});
+		});
+	}  // generate_send_along
 
         // ===== Scroll question into view (for textarea focus) =====
         function scrollQuestion(el) {
@@ -672,22 +659,6 @@
             }
         }
 
-        // ===== Clear =====
-        $('clearBtn').addEventListener('click', function() {
-            if (confirm('Clear all your answers?')) {
-                document.querySelectorAll('input[type="radio"]').forEach(function(r) { r.checked = false; });
-                document.querySelectorAll('textarea:not(.question-legend > textarea)').forEach(function(t) { t.value = ''; });
-                document.querySelectorAll('.question').forEach(function(q) {
-                    q.removeAttribute('data-answered');
-                });
-		$('btn').disabled = true
-                $('btn').classList.remove('btn-highlight');
-                $('err').className = 'msg error';
-                $('ok').className = 'msg success';
-                $('f').scrollTo({ top: 0, behavior: 'smooth' });
-            }
-        });
-
         // ===== Submit =====
 	// Better to just use the form's submit, this is just the same but more flexible
 	// this can be modified if you want to send JSON
@@ -754,7 +725,8 @@
 	*/
 
         // ===== Initialize =====
-        restoreAnsweredState();
+        restoreAnsweredState()
+	generate_send_along()
     </script>
 
     <!--
