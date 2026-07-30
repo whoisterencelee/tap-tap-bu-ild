@@ -284,7 +284,7 @@
                     <h1>🎮 TapTap.Build <span class="sub">Usability Survey</span></h1>
                     <span class="badge">2 min</span>
                 </div>
-		<button form=f type=reset onclick="return confirm('Clear all your answers?')" class="btn-clear" type="button">✕ Clear</button>
+		<button form=f type=reset onclick="return clearForm()" class="btn-clear" type="button">✕ Clear</button>
             </div>
         </div>
 
@@ -428,7 +428,7 @@
                 <div class="question paged" id="q9" onchange=answered(this)>
 		    <fieldset>
                     <legend class=question-legend>9. What was the most frustrating or confusing thing?</legend>
-                    <textarea name="q9" placeholder="Type your answer..." onfocus="scrollQuestion(this);answered(this,false)" onchange="answered(this)" id="ta9"></textarea>
+                    <textarea name="q9" placeholder="Type your answer..." onblur="answered(this)" id="ta9"></textarea>
 		    <button type=button class=btn onclick=answered(this)>Next</button>
 
 		    </fieldset>
@@ -438,7 +438,7 @@
                 <div class="question paged" id="q10" onchange=answered(this)>
 		    <fieldset>
                     <legend class="question-legend">10. What worked well? What did you like?</legend>
-                    <textarea name="q10" placeholder="Type your answer..." onfocus="scrollQuestion(this);answered(this,false)" onchange="answered(this)" id="ta10"></textarea>
+                    <textarea name="q10" placeholder="Type your answer..." onblur="answered(this)" id="ta10"></textarea>
 		    <button type=button class=btn onclick=answered(this)>Next</button>
 		    </fieldset>
                 </div>
@@ -547,16 +547,6 @@
 		});
 	}  // generate_send_along
 
-        // ===== Scroll question into view (for textarea focus) =====
-        function scrollQuestion(el) {
-            var q = el.closest('.question');
-            if (q) {
-                setTimeout(function() {
-                    q.scrollIntoView({ behavior: 'smooth', block: 'start' });
-                }, 100);
-            }
-        }
-
         // ===== Get next unanswered question =====
         function getNextUnanswered(currentIndex) {
             var questions = document.querySelectorAll('.question');
@@ -658,6 +648,15 @@
                 }, 150);
             }
         }
+
+	// ===== Clear =====
+	function clearForm() {
+            if (confirm('Clear all your answers?')) {
+                document.querySelectorAll('.question').forEach(function(q) { q.removeAttribute('data-answered') } )
+                $('f').scrollTo({ top: 0, behavior: 'smooth' });
+		return true }
+	    return false
+	}  // ClearForm
 
         // ===== Submit =====
 	// Better to just use the form's submit, this is just the same but more flexible
