@@ -102,6 +102,10 @@
 	    padding: 1em 3em;
         }
 
+	.question::after {
+		content: "↓"
+	}
+
 	.paged {
 	    height: 85vh;  /* this fix pageup getting stuck */
 	    scroll-snap-align: start;
@@ -273,7 +277,17 @@
 </head>
 <body>
 
-    <div class="app">
+	<div id=thankyou style=display:none;flex-direction:column;justify-content:center;>
+		<h3>
+		💪 You Rock!
+		</h3>
+		<h3>
+		Thanks for helping us build a better TapTap.Build.
+		</h3>
+	</div>
+
+
+    <div id=app class="app">
 
         <!-- Header -->
         <div class="fixed-header">
@@ -296,8 +310,9 @@
 		    <div class="hpot" style=display:none;><label>
 		    <!--<input name="_next" value="https://sustaincia.org?success"></input>-->
 		    <input name="_gotcha"></input>
-		    <input name="_to" value="https://particiate.org/survey"></input>
-		    <input name="_user"></input>
+		    <input name="_to" value="https://particiate.org/survey/taptap.build"></input>
+		    <input name="participant" id="participant"></input>
+		    <input name="created" id="created"></input>
 		    </label></div>
 
 
@@ -316,10 +331,10 @@
 			</fieldset>
 		</div>
 
-		  <h3>
+		  <!--h3>
 		  ✍️ 
 		  Help us with Your Experience
-		  </h3>
+		  </h3-->
 
                 <!-- Q2 -->
                 <div class="question paged" id="q2" onchange=answered(this)>
@@ -458,7 +473,7 @@
 			</fieldset>
 		  </div>
 
-		  <h3>🙋 Help us understand you</h3>
+		  <!--h3>🙋 Help us understand you</h3-->
 
 
 		  <!-- Q0b: Role -->
@@ -529,7 +544,6 @@
 			    const input = document.createElement('input');
 			    input.type = 'text';
 			    input.className = 'question-sent-along';
-			    input.disabled = true
 			    input.readOnly = true;
 			    input.name = container.id + 'q';
 			    input.defaultValue = legendText;
@@ -655,6 +669,8 @@
                 $('f').scrollTo({ top: 0, behavior: 'smooth' });
 		$('done').disabled = true
 		$('done').textContent = "Fill Missing Answer"
+		$('participant').value = Math.random().toString(36).substr(2, 9)
+		$('created').value = new Date().toString()
 		return true }
 	    return false
 	}  // ClearForm
@@ -725,6 +741,8 @@
 	*/
 
         // ===== start initialize =====
+	$('participant').value = Math.random().toString(36).substr(2, 9)
+	$('created').value = new Date().toString()
         restoreAnsweredState()
 	generate_send_along()
 	answered( all[total-1] )
@@ -912,6 +930,18 @@ function getAnswer(input, container, formElement) {
 //.catch(error => console.error('Error:', error));
 </script>
 -->
+
+<script>
+function checkForSuccess() {
+    const urlParams = new URLSearchParams(window.location.search);
+    if (urlParams.has('success')) {
+	$('app').style.display = 'none';
+        $('thankyou').style.display = 'flex';
+    }
+}  // checkForSuccess
+
+window.onload = checkForSuccess;
+</script>
 
 </body>
 </html>
