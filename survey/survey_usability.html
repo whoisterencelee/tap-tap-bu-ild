@@ -15,7 +15,6 @@
             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
             background: #f6f8fa;
             height: 100vh;
-            overflow: hidden;
             display: flex;
             justify-content: center;
         }
@@ -30,9 +29,8 @@
         }
 
         .fixed-header {
-            flex-shrink: 0;
+	    height: 5vh;
             background: #fff;
-            border-bottom: 1px solid #e9ecef;
             padding: 12px 20px 8px;
             z-index: 10;
         }
@@ -50,11 +48,9 @@
         }
 
         .fixed-header h1 {
-            font-size: 18px;
         }
 
         .fixed-header h1 .sub {
-            font-size: 13px;
             font-weight: 400;
             color: #5f6368;
         }
@@ -64,7 +60,6 @@
             color: #1a73e8;
             padding: 2px 12px;
             border-radius: 12px;
-            font-size: 12px;
             font-weight: 600;
         }
 
@@ -74,7 +69,6 @@
             color: #5f6368;
             padding: 2px 12px;
             border-radius: 12px;
-            font-size: 12px;
             cursor: pointer;
             transition: background 0.2s;
         }
@@ -87,66 +81,53 @@
             background: #e8eaed;
         }
 
-        .progress-bar {
-            width: 100%;
-            height: 5px;
-            background: #e9ecef;
-            border-radius: 4px;
-            margin: 8px 0 4px;
-            overflow: hidden;
-        }
-
-        .progress-fill {
-            height: 100%;
-            width: 0%;
-            background: #1a73e8;
-            border-radius: 4px;
-            transition: width 0.3s;
-        }
-
-        .progress-text {
-            display: flex;
-            justify-content: space-between;
-            font-size: 12px;
-            color: #5f6368;
-        }
-
         .scroll-container {
-            flex: 1;
-            overflow-y: auto;
-            padding: 20px;
-            padding-bottom: 80vh;
+            overflow-y: scroll;
+            height: 95vh;
             scroll-behavior: smooth;
+            scrollbar-color: #1a73e8 lightgrey;
+	    scrollbar-width: thin;
+	    scroll-snap-type: y mandatory;
         }
 
-	h3 { background: gold; padding: 0.5em; }
+	form {
+	}
+
+	h3 { 
+	    background: gold; padding: 0.5em; 
+	    text-align:center;
+	}
 
         .question {
-            margin-bottom: 20px;
-            padding: 12px 0;
-            border-bottom: 1px solid #eee;
-	    border-left: 3px solid transparent;
-	    padding-left: 12px;
-            scroll-margin-top: 20px;
+	    padding: 1em 3em;
         }
+
+	.paged {
+	    height: 85vh;  /* this fix pageup getting stuck */
+	    scroll-snap-align: start;
+	    display:flex;
+	    flex-direction:column;
+	    align-items:center;
+	    justify-content:center;
+	}
 
         .question[data-answered="true"] {
-            border-left: 3px solid #34a853;
-            padding-left: 12px;
         }
 
-        .question-label {
+	fieldset { border: 0; }
+        .question-legend {
             font-weight: 600;
             display: block;
             margin-bottom: 8px;
-            font-size: 15px;
         }
-	
-	/* Auto-add asterisk to required questions using :has() */
-	.question:has(input[required]) .question-label::after {
-	    content: " *";
+
+	.question-sent-along {
+	    display: none;
+	}
+
+	.question:has(input[required]) .question-legend::after {
+	    content: " * ";
 	    color: #d93025;
-	    font-weight: 700;
 	}
 
         .options-grid label {
@@ -155,7 +136,10 @@
             gap: 8px;
             padding: 4px 0;
             cursor: pointer;
-            font-size: 14px;
+	    border: 1px solid lightgrey;
+	    border-radius: 2em;
+	    margin:6px;
+	    padding:0.5em 1em;
         }
 
         .options-grid input[type="radio"] {
@@ -168,7 +152,6 @@
             padding: 8px 10px;
             border: 1px solid #ddd;
             border-radius: 6px;
-            font-size: 14px;
             font-family: inherit;
             min-height: 50px;
             resize: vertical;
@@ -183,7 +166,6 @@
             padding: 10px 28px;
             border: none;
             border-radius: 6px;
-            font-size: 16px;
             font-weight: 600;
             cursor: pointer;
             background: #1a73e8;
@@ -216,10 +198,10 @@
         }
 
         .nav-buttons {
+	    height: 90vh;
+	    padding: 1em 3em;
             margin-top: 24px;
-            padding-top: 16px;
             text-align: right;
-            scroll-margin-top: 20px;
         }
 
         .msg {
@@ -227,7 +209,6 @@
             border-radius: 6px;
             margin-bottom: 12px;
             display: none;
-            font-size: 14px;
         }
 
         .msg.error {
@@ -253,18 +234,15 @@
         }
 
         .completion .emoji {
-            font-size: 40px;
             display: block;
         }
 
         .completion h2 {
-            font-size: 22px;
             margin: 6px 0;
         }
 
         .completion p {
             color: #5f6368;
-            font-size: 14px;
         }
 
         .bottom-spacer {
@@ -272,10 +250,9 @@
         }
 
         @media (max-width: 600px) {
-            .scroll-container {
-                padding: 14px;
-                padding-bottom: 80vh;
-            }
+	    body {
+	    	font-size:1.5em;
+	    }
             .fixed-header {
                 padding: 10px 14px 6px;
             }
@@ -302,223 +279,271 @@
         <div class="fixed-header">
             <div class="top">
                 <div class="top-left">
-                    <h1>🎮 TapTap.Build <span class="sub">Usability</span></h1>
+                    <h1>🎮 TapTap.Build <span class="sub">Usability Survey</span></h1>
                     <span class="badge">2 min</span>
                 </div>
-                <button class="btn-clear" id="clearBtn" type="button">✕ Clear</button>
-            </div>
-            <div class="progress-bar">
-                <div class="progress-fill" id="fill"></div>
-            </div>
-            <div class="progress-text">
-                <span id="label">0 of 10</span>
-                <span id="pct">0%</span>
+		<button form=f type=reset onclick="return clearForm()" class="btn-clear" type="button">✕ Clear</button>
             </div>
         </div>
 
         <!-- Scroll Container -->
-        <div class="scroll-container" id="scrollContainer">
+	<form id="f" class=scroll-container method=POST action=https://functional.limited/forms >
 
             <div id="err" class="msg error">⚠️ <span id="errText"></span></div>
             <div id="ok" class="msg success">✅ <span id="okText"></span></div>
 
-            <form id="f">
 
 		    <div class="hpot" style=display:none;><label>
 		    <!--<input name="_next" value="https://sustaincia.org?success"></input>-->
 		    <input name="_gotcha"></input>
 		    <input name="_to" value="https://particiate.org/survey"></input>
+		    <input name="_user"></input>
 		    </label></div>
+
+
+                <!-- Q1 -->
+		<!-- typical example -->
+                <div class="question paged" id="q1" onchange=answered(this)>
+			<fieldset>
+			    <legend class="question-legend">How easy was it to TAP a word to select it? </legend>
+			    <div class="options-grid">
+				<label><input type="radio" name="q1" value="Very easy" required /> Very easy</label>
+				<label><input type="radio" name="q1" value="Easy" /> Easy</label>
+				<label><input type="radio" name="q1" value="OK" /> OK</label>
+				<label><input type="radio" name="q1" value="Hard" /> Hard</label>
+				<label><input type="radio" name="q1" value="Very hard" /> Very hard</label>
+			    </div>
+			</fieldset>
+		</div>
 
 		  <h3>
 		  ✍️ 
 		  Help us with Your Experience
 		  </h3>
 
-                <!-- Q1 -->
-                <div class="question" id="q1" onchange=answered(this)>
-                    <span class="question-label">1. How easy was it to TAP a word to select it? </span>
-		    <div class="options-grid">
-                        <label><input type="radio" name="q1" value="Very easy" required /> Very easy</label>
-                        <label><input type="radio" name="q1" value="Easy" /> Easy</label>
-                        <label><input type="radio" name="q1" value="OK" /> OK</label>
-                        <label><input type="radio" name="q1" value="Hard" /> Hard</label>
-                        <label><input type="radio" name="q1" value="Very hard" /> Very hard</label>
-                    </div>
-                </div>
-
                 <!-- Q2 -->
-                <div class="question" id="q2">
-                    <span class="question-label">2. How easy was it to TAP words to connect them? </span>
-		    <div class="options-grid" onchange=answered(this)>
-                        <label><input type="radio" name="q2" value="Very easy" required /> Very easy</label>
-                        <label><input type="radio" name="q2" value="Easy" /> Easy</label>
-                        <label><input type="radio" name="q2" value="OK" /> OK</label>
-                        <label><input type="radio" name="q2" value="Hard" /> Hard</label>
-                        <label><input type="radio" name="q2" value="Very hard" /> Very hard</label>
-                    </div>
+                <div class="question paged" id="q2" onchange=answered(this)>
+			<fieldset>
+			    <legend class=question-legend>How easy was it to TAP words to connect them?</legend>
+			    <div class="options-grid" >
+				<label><input type="radio" name="q2" value="Very easy" required /> Very easy</label>
+				<label><input type="radio" name="q2" value="Easy" /> Easy</label>
+				<label><input type="radio" name="q2" value="OK" /> OK</label>
+				<label><input type="radio" name="q2" value="Hard" /> Hard</label>
+				<label><input type="radio" name="q2" value="Very hard" /> Very hard</label>
+			    </div>
+			</fieldset>
                 </div>
 
                 <!-- Q3 -->
-                <div class="question" id="q3">
-                    <span class="question-label">3. How easy was it to DRAG words to position them? </span>
-		    <div class="options-grid" onchange=answered(this)>
-                        <label><input type="radio" name="q3" value="Very easy" required /> Very easy</label>
-                        <label><input type="radio" name="q3" value="Easy" /> Easy</label>
-                        <label><input type="radio" name="q3" value="OK" /> OK</label>
-                        <label><input type="radio" name="q3" value="Hard" /> Hard</label>
-                        <label><input type="radio" name="q3" value="Very hard" /> Very hard</label>
-                    </div>
+                <div class="question paged" id="q3" onchange=answered(this)>
+			<fieldset>
+				<legend class=question-legend>How easy was it to DRAG words to position them?</legend>
+				<div class="options-grid" >
+					<label><input type="radio" name="q3" value="Very easy" required /> Very easy</label>
+					<label><input type="radio" name="q3" value="Easy" /> Easy</label>
+					<label><input type="radio" name="q3" value="OK" /> OK</label>
+					<label><input type="radio" name="q3" value="Hard" /> Hard</label>
+					<label><input type="radio" name="q3" value="Very hard" /> Very hard</label>
+				</div>
+			</fieldset>
                 </div>
 
                 <!-- Q4 -->
-                <div class="question" id="q4">
-                    <span class="question-label">4. How easy was it to TAP-AND-HOLD to look something up? </span>
-		    <div class="options-grid" onchange=answered(this)>
-                        <label><input type="radio" name="q4" value="Very easy" required /> Very easy</label>
-                        <label><input type="radio" name="q4" value="Easy" /> Easy</label>
-                        <label><input type="radio" name="q4" value="OK" /> OK</label>
-                        <label><input type="radio" name="q4" value="Hard" /> Hard</label>
-                        <label><input type="radio" name="q4" value="Very hard" /> Very hard</label>
-                        <label><input type="radio" name="q4" value="I didn't use this" /> I didn't use this</label>
-                    </div>
+                <div class="question paged" id="q4" onchange=answered(this)>
+			<fieldset>
+			    <legend class=question-legend>How easy was it to TAP-AND-HOLD to look something up?</legend>
+			    <div class="options-grid" >
+				<label><input type="radio" name="q4" value="Very easy" required /> Very easy</label>
+				<label><input type="radio" name="q4" value="Easy" /> Easy</label>
+				<label><input type="radio" name="q4" value="OK" /> OK</label>
+				<label><input type="radio" name="q4" value="Hard" /> Hard</label>
+				<label><input type="radio" name="q4" value="Very hard" /> Very hard</label>
+				<label><input type="radio" name="q4" value="I didn't use this" /> I didn't use this</label>
+			    </div>
+		    </fieldset>
                 </div>
 
                 <!-- Q5 -->
-                <div class="question" id="q5">
-                    <span class="question-label">5. Did the lesson modules help you understand how to use it? </span>
-		    <div class="options-grid" onchange=answered(this)>
-                        <label><input type="radio" name="q5" value="Yes, I felt ready" required /> Yes, I felt ready</label>
-                        <label><input type="radio" name="q5" value="Mostly—I understood the basics" /> Mostly—I understood the basics</label>
-                        <label><input type="radio" name="q5" value="A little—I was still confused" /> A little—I was still confused</label>
-                        <label><input type="radio" name="q5" value="Not really—I was still confused" /> Not really—I was still confused</label>
-                        <label><input type="radio" name="q5" value="Not at all—I had no idea" /> Not at all—I had no idea</label>
-                    </div>
+                <div class="question paged" id="q5" onchange=answered(this)>
+			<fieldset>
+			<legend class=question-legend>Did the lesson modules help you understand how to use it?</legend>
+			<div class="options-grid" >
+				<label><input type="radio" name="q5" value="Yes, I felt ready" required /> Yes, I felt ready</label>
+				<label><input type="radio" name="q5" value="Mostly—I understood the basics" /> Mostly—I understood the basics</label>
+				<label><input type="radio" name="q5" value="A little—I was still confused" /> A little—I was still confused</label>
+				<label><input type="radio" name="q5" value="Not really—I was still confused" /> Not really—I was still confused</label>
+				<label><input type="radio" name="q5" value="Not at all—I had no idea" /> Not at all—I had no idea</label>
+			</div>
+			</fieldset>
                 </div>
 
                 <!-- Q6 -->
-                <div class="question" id="q6">
-                    <span class="question-label">6. After the lessons, how confident did you feel about further exploration? </span>
-		    <div class="options-grid" onchange=answered(this)>
-                        <label><input type="radio" name="q6" value="Very confident" required /> Very confident</label>
-                        <label><input type="radio" name="q6" value="Pretty confident" /> Pretty confident</label>
-                        <label><input type="radio" name="q6" value="OK, I guess" /> OK, I guess</label>
-                        <label><input type="radio" name="q6" value="Not very confident" /> Not very confident</label>
-                        <label><input type="radio" name="q6" value="Not confident at all" /> Not confident at all</label>
-                    </div>
+                <div class="question paged" id="q6" onchange=answered(this)>
+			<fieldset>
+			    <legend class=question-legend>After the lessons, how confident did you feel about further exploration?</legend>
+			    <div class="options-grid" >
+				<label><input type="radio" name="q6" value="Very confident" required /> Very confident</label>
+				<label><input type="radio" name="q6" value="Pretty confident" /> Pretty confident</label>
+				<label><input type="radio" name="q6" value="OK, I guess" /> OK, I guess</label>
+				<label><input type="radio" name="q6" value="Not very confident" /> Not very confident</label>
+				<label><input type="radio" name="q6" value="Not confident at all" /> Not confident at all</label>
+			    </div>
+			</fieldset>
                 </div>
 
                 <!-- Q7 -->
-                <div class="question" id="q7">
-                    <span class="question-label">7. Did you ever feel lost or not know what to do next? </span>
-		    <div class="options-grid" onchange=answered(this)>
-                        <label><input type="radio" name="q7" value="Never" required /> Never</label>
-                        <label><input type="radio" name="q7" value="Rarely" /> Rarely</label>
-                        <label><input type="radio" name="q7" value="Sometimes" /> Sometimes</label>
-                        <label><input type="radio" name="q7" value="Often" /> Often</label>
-                        <label><input type="radio" name="q7" value="Very often" /> Very often</label>
-                    </div>
+                <div class="question paged" id="q7" onchange=answered(this)>
+			<fieldset>
+			    <legend class="question-legend">Did you ever feel lost or not know what to do next?</legend>
+			    <div class="options-grid" >
+				<label><input type="radio" name="q7" value="Never" required /> Never</label>
+				<label><input type="radio" name="q7" value="Rarely" /> Rarely</label>
+				<label><input type="radio" name="q7" value="Sometimes" /> Sometimes</label>
+				<label><input type="radio" name="q7" value="Often" /> Often</label>
+				<label><input type="radio" name="q7" value="Very often" /> Very often</label>
+			    </div>
+			</fieldset>
                 </div>
 
-		 <!--<h3>🤩 Already more than half way </h3>-->
 
                 <!-- Q8 -->
-                <div class="question" id="q8">
-                    <span class="question-label">8. Overall, how easy was TapTap.Build to use? </span>
-		    <div class="options-grid" onchange=answered(this)>
+                <div class="question paged" id="q8" onchange=answered(this)>
+		    <fieldset>
+                    <legend class=question-legend>Overall, how easy was TapTap.Build to use?</legend>
+		    <div class="options-grid" >
                         <label><input type="radio" name="q8" value="Very easy—I got it right away" required /> Very easy—I got it right away</label>
                         <label><input type="radio" name="q8" value="Easy" /> Easy</label>
                         <label><input type="radio" name="q8" value="OK" /> OK</label>
                         <label><input type="radio" name="q8" value="Hard" /> Hard</label>
                         <label><input type="radio" name="q8" value="Very hard—I struggled" /> Very hard—I struggled</label>
                     </div>
+		    </fieldset>
                 </div>
 
+		 <!--<h3>🤩 Already more than half way </h3>-->
+
                 <!-- Q9 -->
-                <div class="question" id="q9">
-                    <span class="question-label">9. What was the most frustrating or confusing thing?</span>
-                    <textarea name="q9" placeholder="Type your answer..." onfocus="scrollQuestion(this);answered(this,false)" onchange="answered(this)" id="ta9"></textarea>
+                <div class="question paged" id="q9" onchange=answered(this)>
+		    <fieldset>
+                    <legend class=question-legend>What was the most frustrating or confusing thing?</legend>
+                    <textarea name="q9" placeholder="Type your answer..." onblur="answered(this)" id="ta9"></textarea>
+		    <button type=button class=btn onclick=answered(this)>Next</button>
+
+		    </fieldset>
                 </div>
 
                 <!-- Q10 -->
-                <div class="question" id="q10">
-                    <span class="question-label">10. What worked well? What did you like?</span>
-                    <textarea name="q10" placeholder="Type your answer..." onfocus="scrollQuestion(this);answered(this,false)" onchange="answered(this)" id="ta10"></textarea>
+                <div class="question paged" id="q10" onchange=answered(this)>
+		    <fieldset>
+                    <legend class="question-legend">What worked well? What did you like?</legend>
+                    <textarea name="q10" placeholder="Type your answer..." onblur="answered(this)" id="ta10"></textarea>
+		    <button type=button class=btn onclick=answered(this)>Next</button>
+		    </fieldset>
                 </div>
 
-		  <h3>🙋 Help us understand our Users (Anonymous)</h3>
-
 		  <!-- Q0a: Age -->
-		  <div class="question" id="q0a">
-		    <span class="question-label">Your age range:</span>
-		    <div class="options-grid" onchange=answered(this)>
-		      <label><input type="radio" name="q0a" value="Under 18" required> Under 18</label>
-		      <label><input type="radio" name="q0a" value="18-24"> 18-24</label>
-		      <label><input type="radio" name="q0a" value="25-34"> 25-34</label>
-		      <label><input type="radio" name="q0a" value="35-44"> 35-44</label>
-		      <label><input type="radio" name="q0a" value="45-54"> 45-54</label>
-		      <label><input type="radio" name="q0a" value="55 or over"> 55 or over</label>
-		      <label><input type="radio" name="q0a" value="Prefer not to say"> Prefer not to say</label>
-		    </div>
+		  <div class="question paged" id="q0a" onchange=answered(this)>
+		  	<fieldset>
+			    <legend class=question-legend>Your age range:</legend>
+			    <div class="options-grid" >
+			      <label><input type="radio" name="q0a" value="Under 18" required> Under 18</label>
+			      <label><input type="radio" name="q0a" value="18-24"> 18-24</label>
+			      <label><input type="radio" name="q0a" value="25-34"> 25-34</label>
+			      <label><input type="radio" name="q0a" value="35-44"> 35-44</label>
+			      <label><input type="radio" name="q0a" value="45-54"> 45-54</label>
+			      <label><input type="radio" name="q0a" value="55 or over"> 55 or over</label>
+			      <label><input type="radio" name="q0a" value="Prefer not to say"> Prefer not to say</label>
+			    </div>
+			</fieldset>
 		  </div>
 
+		  <h3>🙋 Help us understand you</h3>
+
+
 		  <!-- Q0b: Role -->
-		  <div class="question" id="q0b">
-		    <span class="question-label">Your primary role:</span>
-		    <div class="options-grid" onchange=answered(this)>
-		      <label><input type="radio" name="q0b" value="Student" required> Student</label>
-		      <label><input type="radio" name="q0b" value="Educator/Teacher"> Educator/Teacher</label>
-		      <label><input type="radio" name="q0b" value="Researcher"> Researcher</label>
-		      <label><input type="radio" name="q0b" value="Tech/AI Professional"> Tech/AI Professional</label>
-		      <label><input type="radio" name="q0b" value="Other"> Other</label>
-		      <label><input type="radio" name="q0b" value="Prefer not to say"> Prefer not to say</label>
-		    </div>
+		  <div class="question paged" id="q0b" onchange=answered(this)>
+		      <fieldset>
+			    <legend class=question-legend>Your primary role:</legend>
+			    <div class="options-grid" >
+			      <label><input type="radio" name="q0b" value="Student" required> Student</label>
+			      <label><input type="radio" name="q0b" value="Educator/Teacher"> Educator/Teacher</label>
+			      <label><input type="radio" name="q0b" value="Researcher"> Researcher</label>
+			      <label><input type="radio" name="q0b" value="Tech/AI Professional"> Tech/AI Professional</label>
+			      <label><input type="radio" name="q0b" value="Other"> Other</label>
+			      <label><input type="radio" name="q0b" value="Prefer not to say"> Prefer not to say</label>
+			    </div>
+		      </fieldset>
 		  </div>
 
 		  <!-- Q0c: Visual Tool Familiarity -->
-		  <div class="question" id="q0c">
-		    <span class="question-label">Before this, how familiar were you with mind maps or visual tools?</span>
-		    <div class="options-grid" onchange=answered(this)>
-		      <label><input type="radio" name="q0c" value="Very familiar" required> Very familiar (I use them often)</label>
-		      <label><input type="radio" name="q0c" value="Somewhat familiar"> Somewhat familiar (I've used them a few times)</label>
-		      <label><input type="radio" name="q0c" value="Not familiar"> Not familiar (This is new to me)</label>
-		    </div>
+		  <div class="question paged" id="q0c" onchange=answered(this)>
+		    <fieldset>
+			    <legend class=question-legend>Before this, how familiar were you with mind maps or visual tools?</legend>
+			    <div class="options-grid" >
+			      <label><input type="radio" name="q0c" value="Very familiar" required> Very familiar (I use them often)</label>
+			      <label><input type="radio" name="q0c" value="Somewhat familiar"> Somewhat familiar (I've used them a few times)</label>
+			      <label><input type="radio" name="q0c" value="Not familiar"> Not familiar (This is new to me)</label>
+			    </div>
+		    </fieldset>
 		  </div>
-                <div class="nav-buttons" id="navButtons">
-                    <button disabled type="submit" class="btn" id="btn" style=width:100%;>Submit</button>
-                </div>
-		<p style="font-size: small; color: #5f6368; text-align: center; margin-top: 12px; width: 100%;">
-		🔒 <strong>Privacy & Consent:</strong> This survey is anonymous and collects no personal identifiers.
-		By submitting, you consent to your anonymous responses being used for research and improvement.
-		</p>
 
-            </form>
+		<div class="nav-buttons paged" id="navButtons">
+			<button disabled form=f type="submit" class="btn" id="done" style=width:100%;>Fill Missing Answer</button>
+			<p style="font-size: small; color: #5f6368; text-align: center; margin-top: 12px; width: 100%;">
+			🔒 <strong>Privacy & Consent:</strong> This survey is anonymous and collects no personal identifiers.
+			By submitting, you consent to your anonymous responses being used for research and improvement.
+			</p>
+		</div>
 
-            <div id="done" class="completion">
-                <span class="emoji">🎉</span>
-                <h2>Thank you!</h2>
-                <p>Your feedback helps us make TapTap.Build better.</p>
-            </div>
-
-        </div>
-
-    </div>
+		<div id="done" class="completion">
+		<span class="emoji">🎉</span>
+		<h2>Thank you!</h2>
+		<p>Your feedback helps us make TapTap.Build better.</p>
+		</div>
+	</form>
+    </div> <!-- app -->
 
     <script>
-        // ===== Helpers =====
-        function $(id) { return document.getElementById(id); }
+    function $(id) { return document.getElementById(id); }
+    </script>
 
-        var total = document.querySelectorAll('.question').length;
+    <script>
+    var all = document.querySelectorAll('.question')
+    var total = all.length
 
-        // ===== Scroll question into view (for textarea focus) =====
-        function scrollQuestion(el) {
-            var q = el.closest('.question');
-            if (q) {
-                setTimeout(function() {
-                    q.scrollIntoView({ behavior: 'smooth', block: 'start' });
-                }, 100);
-            }
-        }
+    // ===== generate sent-along question ====
+    function generate_send_along(){
+	    // Get all question containers
+	    const questionContainers = document.querySelectorAll('.question.paged');
+
+	    questionContainers.forEach(container => {
+			    // Find the legend element within this container
+			    const legend = container.querySelector('.question-legend');
+
+			    if (legend) {
+			    // Get the legend text
+			    const legendText = legend.textContent.trim();
+
+			    // Create the readonly input element
+			    const input = document.createElement('input');
+			    input.type = 'text';
+			    input.className = 'question-sent-along';
+			    input.disabled = true
+			    input.readOnly = true;
+			    input.name = container.id + 'q';
+			    input.defaultValue = legendText;
+
+			    // Insert the input after the legend
+			    const fieldset = container.querySelector('fieldset');
+			    const optionsGrid = container.querySelector('.options-grid');
+
+			    if (fieldset && optionsGrid) {
+				    fieldset.insertBefore(input, optionsGrid);
+			    }
+			    }
+	    });
+    }  // generate_send_along
 
         // ===== Get next unanswered question =====
         function getNextUnanswered(currentIndex) {
@@ -589,15 +614,13 @@
             }
         }
 
-        // ===== Mark answered and scroll to next =====
+        // ===== answered and scroll to next =====
         function answered( el, move=true ) {
             var q = el.closest('.question');
             if (!q) return;
 
             q.setAttribute('data-answered', 'true');
 	    if (!move) return
-
-            updateProgress();
 
             var nextIndex = getQuestionIndex(q) + 1;
             var next = getNextUnanswered(nextIndex);
@@ -611,54 +634,35 @@
 		    }
 		}, 150);
             } else {
-                // All answered — scroll to nav-buttons
+                // All answered — scroll to done buttons
+		$( 'done' ).textContent = "Submit"
                 setTimeout(function() {
                     var nav = $('navButtons');
                     if (nav) {
                         nav.scrollIntoView({ behavior: 'smooth', block: 'start' });
                     }
-		    $('btn').disabled = false
-                    $('btn').classList.add('btn-highlight');
-                    setTimeout(function() { $('btn').classList.remove('btn-highlight'); }, 2500);
+		    $('done').disabled = false
+                    $('done').classList.add('btn-highlight');
+                    setTimeout(function() { $('done').classList.remove('btn-highlight'); }, 2500);
                 }, 150);
             }
-        }
+        }  // answered
 
-        // ===== Progress =====
-        function updateProgress() {
-            var answered = 0;
-            var questions = document.querySelectorAll('.question');
-
-            for (var i = 0; i < questions.length; i++) {
-                if (questions[i].getAttribute('data-answered') === 'true') answered++;
-            }
-
-            var p = Math.min(Math.round((answered / total) * 100), 100);
-            $('fill').style.width = p + '%';
-            $('pct').textContent = p + '%';
-            $('label').textContent = answered + ' of ' + total;
-        }
-
-        // ===== Clear =====
-        $('clearBtn').addEventListener('click', function() {
+	// ===== Clear =====
+	function clearForm() {
             if (confirm('Clear all your answers?')) {
-                document.querySelectorAll('input[type="radio"]').forEach(function(r) { r.checked = false; });
-                document.querySelectorAll('textarea').forEach(function(t) { t.value = ''; });
-                document.querySelectorAll('.question').forEach(function(q) {
-                    q.removeAttribute('data-answered');
-                    q.style.borderLeft = '';
-                    q.style.paddingLeft = '';
-                });
-		$('btn').disabled = true
-                $('btn').classList.remove('btn-highlight');
-                $('err').className = 'msg error';
-                $('ok').className = 'msg success';
-                updateProgress();
+                document.querySelectorAll('.question').forEach(function(q) { q.removeAttribute('data-answered') } )
                 $('f').scrollTo({ top: 0, behavior: 'smooth' });
-            }
-        });
+		$('done').disabled = true
+		$('done').textContent = "Fill Missing Answer"
+		return true }
+	    return false
+	}  // ClearForm
 
         // ===== Submit =====
+	// Better to just use the form's submit, this is just the same but more flexible
+	// this can be modified if you want to send JSON
+	/*
         $('f').addEventListener('submit', function(e) {
             e.preventDefault();
 
@@ -718,12 +722,15 @@
                     $('btn').textContent = '✅ Submit';
                 });
         });
+	*/
 
-        // ===== Initialize =====
-        restoreAnsweredState();
-        updateProgress();
+        // ===== start initialize =====
+        restoreAnsweredState()
+	generate_send_along()
+	answered( all[total-1] )
     </script>
 
+    <!--
 <script>
 /**
  * Extract form data as URL-encoded string
@@ -904,6 +911,7 @@ function getAnswer(input, container, formElement) {
 //.then(data => console.log('Success:', data))
 //.catch(error => console.error('Error:', error));
 </script>
+-->
 
 </body>
 </html>
