@@ -90,7 +90,7 @@
 		<div style=position:absolute;width:100vw;top:2vh;left:0;display:none;flex-direction:row;align-items:center;justify-content:center; display-value=flex>
 			how &emsp;
 			<a href=https://particiate.org/taptap.build.paper target=_blank>why</a>&emsp;
-			<a href=./survey/survey_usability.html target=_blank>feedback</a>
+			<a href=./survey/survey_usability.html target=_blank onclick="checkLessonCompletion(lesson_feedback=true)">feedback</a>
 		</div>
 		<div style=position:absolute;width:100vw;top:3vh;left:0;display:none;flex-direction:column;align-items:center;z-index:-1; display-value=flex>
 			<p style=text-align:center;>
@@ -131,8 +131,8 @@
 	</div>
 
 	<div class=unselectable style=position:absolute;width:100vw;height:100vh;display:flex;align-items:center;color:lightgrey;z-index:-2;font-family:Geoform-HeavyItalic;opacity:0.4;line-height:1.2em;flex-direction:column;justify-content:center;word-break:break-all;word-spacing:0.4em;overflow:hidden;>
-		<div id=backgroundWord style=line-height:0.8em;text-align:center;width:100vw;background:white;font-family:Geoform-HeavyItalic;word-break:keep-all;>
-			TAPTAP<BR />BUILD
+		<div id=backgroundWord style=line-height:0.8em;text-align:center;width:100vw;background:white;font-family:Geoform-HeavyItalic;word-break:break-word;>
+			taptap build
 		</div>
 		<script>
 			function getWideTextWidth(text, fontSize = "12px", fontFamily = "Arial") {
@@ -148,12 +148,18 @@
 				document.body.removeChild(svg);
 				return width;
 			}
-		var textwidth = 0
-		for( var fontSize = 12 ; textwidth < window.innerWidth ; fontSize = fontSize + 2 ){
-			textwidth = Math.floor( getWideTextWidth("TAPTAP ", fontSize + "px", "Geoform-HeavyItalic" ) ) 
-			var d = document.getElementById( "backgroundWord" )
-			d.style.fontSize = ( fontSize - 2 ) + "px"
-		}
+			function setBackgroundWord( wideText = "taptap build" ){
+				var textwidth = 0
+				var longestWord = wideText.split(/\s/).reduce( ( longest , current ) => 
+						current.length > longest.length ? current.substring(0,15) : longest )
+				for( var fontSize = 12 ; textwidth < window.innerWidth ; fontSize = fontSize + 2 ){
+					textwidth = Math.floor( getWideTextWidth( longestWord + "_" , fontSize + "px", "Geoform-HeavyItalic" ) ) 
+					var d = document.getElementById( "backgroundWord" )
+					d.style.fontSize = ( fontSize ) + "px"
+					d.textContent = wideText
+				}
+			}
+			setBackgroundWord()
 		</script>
 	</div>
 
@@ -381,7 +387,6 @@
 	    }
     }
 
-    lesson_holding_words = false
     function openWikipedia(searchTerm) {
 		 checkLessonCompletion(lesson_holding_words=true)  // <--- lesson module
 	    // Clean the search term (Wikipedia URLs don't like spaces)
@@ -887,7 +892,7 @@ let lessons = [
 	},
 	{
 		id: "step2",
-		title: "Advanced Combinations",
+		title: "Complex Combinations",
 		description: "👩‍🏫 Combine Heat, Water and Engine to create Steam Engine",
 		requiredNodes: ["Water", "Heat", "Engine"],
 		targetNodes: ["Steam engine"],
@@ -897,10 +902,10 @@ let lessons = [
 	{
 		id: "step3",
 		title: "Adding your own Node",
-		description: "👩‍🏫 Double click on empty space to add the word 'Wheel'",
+		description: "👩‍🏫 Double tap on empty space to add the word 'Wheel'",
 		requiredNodes: [],
 		targetNodes: ["Wheel"],
-		hint: "Double click anywhere to add a new word",
+		hint: "Double tap anywhere to add a new word",
 		nextLesson: "step4",
 	},
 	{
@@ -933,7 +938,7 @@ let lessons = [
 	{
 		id: "step7",
 		title: "Advance features",
-		description: "👩‍🏫 See more features by clicking taptap.build on the top now",
+		description: "👩‍🏫 See more features by tapping taptap.build ↑",
 		requiredNodes: [],
 		targetNodes: () => {
 			if( !lessonTimer ) lessonTimer = setInterval( ()=>checkLessonCompletion() , 1000 )
@@ -957,12 +962,12 @@ let lessons = [
 	},
 	{
 		id: "step9",
-		title: "",
+		title: "Feed back",
 		description: "👩‍🏫 Give us feedback ↑",
 		requiredNodes: () => showHide( document.getElementById('help') , "force" ),
 		targetNodes:  () => {
 			showHide( document.getElementById('help') , "force" )
-			return false && lesson_feedback
+			return lesson_feedback
 		},
 		hint: "",
 		nextLesson: "end",
@@ -981,8 +986,8 @@ let lessons = [
 let currentLesson = "step1";
 let lessonNodes = []; // Track nodes created for lesson completion
 
-
-
+    lesson_holding_words = false
+    lesson_feedback = false
 
 function checkLessonCompletion() {
 	const lesson = lessons.find(l => l.id === currentLesson);
@@ -1033,12 +1038,7 @@ function updateLessonUI() {
 	const lesson = lessons.find(l => l.id === currentLesson);
 	if (!lesson) return;
 
-	// Update background word or UI element with lesson hint
-	const backgroundWord = document.getElementById("backgroundWord");
-	//backgroundWord.innerHTML = `Lesson: ${lesson.title}<br>${lesson.hint}`;
-	backgroundWord.innerHTML = `${lesson.title}`;
-
-
+	setBackgroundWord( lesson.title )
 
 }  // updateLessonUI
 
