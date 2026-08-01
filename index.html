@@ -86,10 +86,16 @@
 <body>
 	<div id=menu class=unselectable style=position:absolute;top:1em;width:100vw;text-align:center;font-size:x-small;display:flex;justify-content:center;font-family:Geoform; >
 		<div id=help onclick=showHide(event.currentTarget)><loading>taptap.build</loading>
-		<div style=position:absolute;width:100vw;top:2vh;left:0;display:none;flex-direction:column;align-items:center;z-index:-1; display-value=flex>
+		<!-- menu -->
+		<div style=position:absolute;width:100vw;top:2vh;left:0;display:none;flex-direction:row;align-items:center;justify-content:center; display-value=flex>
+			how &emsp;
+			<a href=https://particiate.org/taptap.build.paper target=_blank>why</a>&emsp;
+			<a href=./survey/survey_usability.html target=_blank>feedback</a>
+		</div>
+		<div style=position:absolute;width:100vw;top:3vh;left:0;display:none;flex-direction:column;align-items:center;z-index:-1; display-value=flex>
 			<p style=text-align:center;>
 
-							Tap powered world building<br /><br />
+							Tap powered world building
 			</p>
 
 		<style>
@@ -100,30 +106,33 @@
 		<table id=helptable style="text-align:left;border-spacing:10px 0;max-width:80vw" >
 			<tr> <td colspan=2 style=text-align:center;> <u> actions </u> </td> </tr>
 			<tr> <td> tap tap</td> <td> anywhere to create a new word</td></tr>
-			<tr> <td> tap </td>	<td> word(s) to break or merge to create entirely new combinations </td> </tr>
-			<tr> <td> watch </td> <td>as the AI takes a little time to considers </td> </tr>
+			<tr> <td> tap words</td>	<td> to merge and make new combinations </td> </tr>
+			<tr> <td> tap a word</td>	<td> to break it down </td> </tr>
+			<tr> <td> watch </td> 		<td>as the AI takes a little time to consider </td> </tr>
 			<tr> <td> drag </td>		<td> move words around to perfect your design </td> </tr>
 			<tr> <td> delete </td>		<td> drag words to the edge to remove them </td> </tr>
-			<tr> <td> hold </td>		<td> on a word to read wikipedia </td> </tr>
-			<tr> <td> :remix ... </td>	<td> tap to remix ...how... </td> </tr>
-			<tr> <td> :whatif ... </td>	<td> tap to imagine ..whatif.. </td> </tr>
+			<tr> <td> tap & hold </td>	<td> on a word to read wikipedia </td> </tr>
+			<tr> <td colspan=2 style=text-align:center;> <u> commands </u> </td> </tr>
+			<tr> <td> :help </td>		<td> type to show this </td> </tr>
+			<!--<tr> <td> :remix ... </td>	<td> chain tap to change layout ...how... </td> </tr>-->
+			<tr> <td> :whatif ... </td>	<td> chain tap to imagine ...a different layout... </td> </tr>
 			<tr> <td> :save </td>		<td> save file for big world </td></tr>
-			<tr> <td> :load </td>		<td> load world file </td> </tr>
+			<tr> <td> :load </td>		<td> load big world file </td> </tr>
 			<tr> <td> :clear </td>		<td> restart with a blank world </td> </tr>
-			<tr> <td> :share </td>		<td> with a link to your world </td> </tr>
-			<tr> <td> :help </td>		<td> type to show this or tap taptap.build on top to close </td> </tr>
+			<tr> <td> :share </td>		<td> with a link to your small world </td> </tr>
 		</table>
 
-						<p>send feedback to taptapbuild@<span style=display:none;>email</span>sustaincia.<span style=display:none;>domain</span>org</p>
+						<p> tap taptap.build on top to close </p>
       
 		</div>
-	</div><!--showHide--> &emsp;
+	</div>
+	&emsp;
 	<div onclick="share()">share</div>
 	</div>
 
-	<div class=unselectable style=position:absolute;width:100vw;height:100vh;display:flex;align-items:center;color:lightgrey;z-index:-1;font-family:Geoform-HeavyItalic;opacity:0.12;line-height:1.2em;flex-direction:column;justify-content:center;word-break:break-all;word-spacing:0.4em;overflow:hidden;>
+	<div class=unselectable style=position:absolute;width:100vw;height:100vh;display:flex;align-items:center;color:lightgrey;z-index:-2;font-family:Geoform-HeavyItalic;opacity:0.4;line-height:1.2em;flex-direction:column;justify-content:center;word-break:break-all;word-spacing:0.4em;overflow:hidden;>
 		<div id=backgroundWord style=line-height:0.8em;text-align:center;width:100vw;background:white;font-family:Geoform-HeavyItalic;word-break:keep-all;>
-			TAPTAP<BR />CRAFT
+			TAPTAP<BR />BUILD
 		</div>
 		<script>
 			function getWideTextWidth(text, fontSize = "12px", fontFamily = "Arial") {
@@ -151,12 +160,12 @@
   <svg id="graph" class=unselectable ></svg>
   <script>
 
-	  function showHide( container ){
+	  function showHide( container , force ){
 		  var c = container.childNodes
 		  for( var n = 0 ; n < c.length ; n++ ){
 			  let cn = c [ n ]
 			  let d = cn?.getAttribute ? cn.getAttribute( "display-value" ) : null
-			  if( d && cn.style ) cn.style.display = cn.style.display == 'none' ? d : 'none'
+			  if( d && cn.style ) cn.style.display = force ? d : ( cn.style.display == 'none' ? d : 'none' )
 		  }
 	  }
 
@@ -182,7 +191,7 @@
     // Sample data: nodes and links
     let nodes = [
 	    // {"i":2013,"x":26,"y":40,"n":"Heat"},{"i":2018,"x":169,"y":400,"n":"Water"},
-	    // {"i":2030,"x":50,"y":10,"n":"@step1 What happens if you tap on Water and Heat?"}
+	    // {"i":2030,"x":50,"y":10,"n":"👩‍🏫 What happens if you tap on Water and Heat?"}
     ]
     let links = [
 	    //{ "s": 2013, "t": 2030 }
@@ -372,7 +381,9 @@
 	    }
     }
 
+    lesson_holding_words = false
     function openWikipedia(searchTerm) {
+		 checkLessonCompletion(lesson_holding_words=true)  // <--- lesson module
 	    // Clean the search term (Wikipedia URLs don't like spaces)
 	    const encodedTerm = encodeURIComponent(searchTerm.replace(/\s+/g, '_'));
 	    const wikiUrl = `https://en.wikipedia.org/wiki/${encodedTerm}`;
@@ -868,7 +879,7 @@ let lessons = [
 	{
 		id: "step1",
 		title: "Basic Combination",
-		description: "@step1 What happens if you tap on\n Water and Heat, as quickly as you can?",
+		description: "👩‍🏫 What happens if you tap on\n Water and Heat, as quickly as you can?",
 		requiredNodes: ["Water", "Heat"],
 		targetNodes: ["Steam"],
 		hint: "Select both Water and Heat nodes and wait for the result",
@@ -877,7 +888,7 @@ let lessons = [
 	{
 		id: "step2",
 		title: "Advanced Combinations",
-		description: "@step2 Combine Heat, Water and Engine to create Steam Engine",
+		description: "👩‍🏫 Combine Heat, Water and Engine to create Steam Engine",
 		requiredNodes: ["Water", "Heat", "Engine"],
 		targetNodes: ["Steam engine"],
 		hint: "Try combining more than two elements",
@@ -886,7 +897,7 @@ let lessons = [
 	{
 		id: "step3",
 		title: "Adding your own Node",
-		description: "@step3 Double click on empty space to add the word 'Wheel'",
+		description: "👩‍🏫 Double click on empty space to add the word 'Wheel'",
 		requiredNodes: [],
 		targetNodes: ["Wheel"],
 		hint: "Double click anywhere to add a new word",
@@ -895,7 +906,7 @@ let lessons = [
 	{
 		id: "step4",
 		title: "Make a transportation",
-		description: "@step4 See if you can make a transportation with what you already have",
+		description: "👩‍🏫 See if you can make a transportation with what you already have",
 		requiredNodes: ["Steam engine", "Wheel"],  // Wheel was already created but we keep incase user removed
 		targetNodes: ["Transportation"] ,
 		hint: "Select both Steam Engine and Wheel nodes and wait for the result",
@@ -903,17 +914,26 @@ let lessons = [
 	},
 	{
 		id: "step5",
-		title: "Removing words",
-		description: "@step5 Drag the word 'Remove' to the edge",
-		requiredNodes: ["Remove"],
-		targetNodes: () => !nodes.some(node => node.n === "Remove" ),
+		title: "Holding words",
+		description: "👩‍🏫 Try to tap and hold the word 'Transportation'",
+		requiredNodes: ["Transportation"],
+		targetNodes: () => lesson_holding_words,
 		hint: "Dragging any word to any edge should remove the word",
 		nextLesson: "step6",
 	},
 	{
 		id: "step6",
+		title: "Removing words",
+		description: "👩‍🏫 Drag the word 'Remove' to the edge",
+		requiredNodes: ["Remove"],
+		targetNodes: () => !nodes.some(node => node.n === "Remove" ),
+		hint: "Dragging any word to any edge should remove the word",
+		nextLesson: "step7",
+	},
+	{
+		id: "step7",
 		title: "Advance features",
-		description: "@step6 See more features by clicking taptap.build on the top now",
+		description: "👩‍🏫 See more features by clicking taptap.build on the top now",
 		requiredNodes: [],
 		targetNodes: () => {
 			if( !lessonTimer ) lessonTimer = setInterval( ()=>checkLessonCompletion() , 1000 )
@@ -924,15 +944,27 @@ let lessons = [
 			return false
 		},
 		hint: "Tap taptap.build at the top ",
-		nextLesson: "step7",
+		nextLesson: "step8",
 	},
 	{
-		id: "step7",
+		id: "step8",
 		title: "Clear the way",
-		description: "@step7 Add the command ':clear' \n----\n that is typing 'colon' + 'clear'\n----\n to starting building your world",
+		description: "👩‍🏫 Add the command ':clear' \n that's tap tap and \n typing 'colon' + 'clear' \n to starting building your world",
 		requiredNodes: [],
 		targetNodes: () => nodes.length == 1,
 		hint: "that's colon plus clear",
+		nextLesson: "step9",
+	},
+	{
+		id: "step9",
+		title: "",
+		description: "👩‍🏫 Give us feedback ↑",
+		requiredNodes: () => showHide( document.getElementById('help') , "force" ),
+		targetNodes:  () => {
+			showHide( document.getElementById('help') , "force" )
+			return false && lesson_feedback
+		},
+		hint: "",
 		nextLesson: "end",
 	},
 	{
@@ -1021,12 +1053,15 @@ function startLesson(lessonId = "step1" ) {
 		nodes.push({
 			i: ++nodeID,
 			x: 50,
-			y: 10,
+			y: 7,
 			n: lesson.description
 		});
 	}
 	if (lesson && lesson.requiredNodes) {
 		// Ensure required nodes are present
+
+		if( typeof lesson.requiredNodes == 'function' ) lesson.requiredNodes()
+		else
 		lesson.requiredNodes.forEach(reqNode => {
 			if (!nodes.some(n => n.n === reqNode)) {
 				// Add missing required node at random position
