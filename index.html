@@ -88,7 +88,7 @@
 		<div id=help onclick=showHide(event.currentTarget)><loading>taptap.build</loading>
 		<!-- menu -->
 		<div style=position:absolute;width:100vw;top:2vh;left:0;display:none;flex-direction:row;align-items:center;justify-content:center; display-value=flex>
-			how &emsp;
+			how&emsp;
 			<a href=https://particiate.org/taptap.build.paper target=_blank>why</a>&emsp;
 			<a href=./survey/survey_usability.html target=_blank onclick="checkLessonCompletion(lesson_feedback=true)">feedback</a>
 		</div>
@@ -130,36 +130,53 @@
 	<div onclick="share()">share</div>
 	</div>
 
-	<div class=unselectable style=position:absolute;width:100vw;height:100vh;display:flex;align-items:center;color:lightgrey;z-index:-2;font-family:Geoform-HeavyItalic;opacity:0.4;line-height:1.2em;flex-direction:column;justify-content:center;word-break:break-all;word-spacing:0.4em;overflow:hidden;>
-		<div id=backgroundWord style=line-height:0.8em;text-align:center;width:100vw;background:white;font-family:Geoform-HeavyItalic;word-break:break-word;>
-			taptap build
+	<style>
+	.fade {
+		transition: opacity 1.0s ease-in-out;
+	}
+	</style>
+	<div class=unselectable style=position:absolute;width:100vw;height:100vh;display:flex;align-items:center;color:lightgrey;z-index:-2;font-family:Geoform-HeavyItalic;line-height:1.2em;flex-direction:column;justify-content:center;word-spacing:0.4em;>
+		<div id=backgroundWord style=line-height:0.8em;text-align:center;font-family:Geoform-HeavyItalic;opacity:0.4; class=fade>
+			<!--taptap .build-->
 		</div>
 		<script>
-			function getWideTextWidth(text, fontSize = "12px", fontFamily = "Arial") {
-				// Create a temporary SVG text element to measure width
-				const svg = document.createElementNS("http://www.w3.org/2000/svg", "svg");
-				const textElement = document.createElementNS("http://www.w3.org/2000/svg", "text");
-				textElement.setAttribute("font-family", fontFamily);
-				textElement.setAttribute("font-size", fontSize);
-				textElement.textContent = text;
-				svg.appendChild(textElement);
-				document.body.appendChild(svg);
-				const width = textElement.getComputedTextLength();
-				document.body.removeChild(svg);
-				return width;
-			}
-			function setBackgroundWord( wideText = "taptap build" ){
-				var textwidth = 0
-				var longestWord = wideText.split(/\s/).reduce( ( longest , current ) => 
-						current.length > longest.length ? current.substring(0,15) : longest )
-				for( var fontSize = 12 ; textwidth < window.innerWidth ; fontSize = fontSize + 2 ){
-					textwidth = Math.floor( getWideTextWidth( longestWord + "_" , fontSize + "px", "Geoform-HeavyItalic" ) ) 
-					var d = document.getElementById( "backgroundWord" )
-					d.style.fontSize = ( fontSize ) + "px"
-					d.textContent = wideText
+		function getWideTextSize(text, fontSize, maxWidth) {
+		    const d = document.getElementById("backgroundWord");
+		    d.style.fontSize = fontSize;
+		    d.style.maxWidth = maxWidth + "px";
+		    d.style.width = "auto";
+		    d.textContent = text;
+		    d.offsetHeight;
+		    return {
+			height: d.offsetHeight,
+			width: d.scrollWidth
+		    };
+		}
+
+		function setBackgroundWord(wideText = "taptap .build") {
+		    const d = document.getElementById("backgroundWord");
+		    d.style.opacity = 0 // fade out whatever was previously
+		    const maxWidth = Math.floor(window.innerWidth * 0.85)
+		    const maxHeight = Math.floor(window.innerHeight * 0.85)
+		    let optimal = 4;
+		    setTimeout(() => {
+			    // Start from biggest and work backwards
+			    for (let size = 300; size >= 4; size -= 0.5) {
+				const { height, width } = getWideTextSize( wideText, size + "pt", maxWidth);
+
+				// Add 1px tolerance for sub-pixel rendering
+				if (height <= maxHeight && width <= maxWidth + 1 ) { // avoid sub-pixel comparison
+				    optimal = size;
+				    break;
 				}
-			}
-			setBackgroundWord()
+			    }
+			    d.style.fontSize = optimal + "pt";
+			    d.style.maxWidth = maxWidth + "px";
+			    d.style.margin = "0 auto";
+			    d.textContent = wideText;
+			    d.style.opacity = 0.4;
+		    }, 2000);
+		}
 		</script>
 	</div>
 
@@ -974,7 +991,7 @@ let lessons = [
 	},
 	{
 		id: "end",
-		title: "",
+		title: "taptap .build",
 		description: "",
 		requiredNodes: [],
 		targetNodes: () => true,
@@ -983,7 +1000,7 @@ let lessons = [
 	},
 ];
 
-let currentLesson = "step1";
+let currentLesson = localStorage.getItem('nextLesson') || "step1"
 let lessonNodes = []; // Track nodes created for lesson completion
 
     lesson_holding_words = false
@@ -1078,14 +1095,9 @@ function startLesson(lessonId = "step1" ) {
 	changeGraph();
 }  // startLesson
 
-// On page load, check for saved lesson state
+// On page load, need this because maybe no nodes
 window.addEventListener('load', () => {
-	const savedLesson = localStorage.getItem('nextLesson');
-	if (savedLesson && lessons.find(l => l.id === savedLesson)) {
-		startLesson(savedLesson);
-	} else {
-		startLesson("step1");
-	}
+	startLesson( currentLesson )
 } )
 
 </script>
