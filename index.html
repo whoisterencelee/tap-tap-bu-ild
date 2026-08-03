@@ -136,7 +136,7 @@
 		transition: opacity 1.0s ease-in-out;
 	}
 	</style>
-	<div id=board class=unselectable style=position:absolute;width:100vw;height:100vh;display:flex;align-items:center;color:lightgrey;z-index:-2;font-family:Geoform-HeavyItalic;line-height:1.2em;flex-direction:column;justify-content:center;word-spacing:0.4em;background-size:cover;>
+	<div id=board class=unselectable style="position:absolute;width:100vw;height:100vh;display:flex;align-items:center;color:lightgrey;z-index:-2;font-family:Geoform-HeavyItalic;line-height:1.2em;flex-direction:column;justify-content:center;word-spacing:0.4em;background-size:100vw 100vh;">
 		<div id=backgroundWord style=line-height:0.8em;text-align:center;font-family:Geoform-HeavyItalic;opacity:0.4; class=fade>
 			<!--taptap .build-->
 		</div>
@@ -224,7 +224,7 @@
 
     // Data storage
     function saveGraph(){ 
-	    let data = JSON.stringify( { nodes : nodes , links : links , settings : { width : width , height : height } } )
+	    let data = JSON.stringify( { nodes : nodes , links : links , board : document.getElementById('board').style.backgroundImage , settings : { width : width , height : height } } )
 	    localStorage.setItem( 'sustainableCraft' , data ) 
 	    return data
     }
@@ -237,6 +237,7 @@
 			 nodes = graphData.nodes
 			 links = graphData.links
 			 nodeID = nodes.reduce( ( a , b ) => a > b.i ? a : b.i  , nodeID ? nodeID : 1978 ) // find the biggest nodeID
+			 document.getElementById('board').style.backgroundImage = graphData.board
 			 return true
 		 }catch(e){
 			 console.error( "loadGraph error", e )
@@ -728,7 +729,7 @@
 			      if( c.n.match( /^(:remix|:whatif)/ ) ) layoutPrompt += c.n.split( /^(:remix|:whatif)/ )[2] + ". "
 			      else if( c.n.match( /^:board/ ) ){
 			      		boardURL = c.n.split( /^:board/ )[1]
-					if( boardURL === "" ) boardURL = './templates/project_organizer.jpg'
+					if( boardURL === "" ) boardURL = './boards/project_organizer.jpg'
 			      } else if( !c.n.match( /^:/ ) ) return true
 			      return false  // removes all commands
 		      })
