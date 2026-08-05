@@ -441,7 +441,7 @@
                 <!-- Q9 -->
                 <div class="question paged" id="q9" onchange=answered(this)>
 		    <fieldset>
-                    <legend class=question-legend>What was the most frustrating or confusing thing?</legend>
+                    <legend class=question-legend>What was the most frustrating or confusing thing, how would you change it?</legend>
                     <textarea name="q9" placeholder="Type your answer..." onblur="answered(this)" id="ta9"></textarea>
 		    <button type=button class=btn onclick=answered(this)>Next</button>
 
@@ -504,7 +504,7 @@
 		  </div>
 
 		<div class="nav-buttons paged" id="navButtons">
-			<button disabled form=f type="submit" class="btn" id="done" style=width:100%;>Fill Missing Answer</button>
+			<button disabled form=f type="submit" class="btn" id="done" style=width:100%;>Fill Missing Answer Before Submit</button>
 			<p style="font-size: small; color: #5f6368; text-align: center; margin-top: 12px; width: 100%;">
 			🔒 <strong>Privacy & Consent:</strong> This survey is anonymous and collects no personal identifiers.
 			By submitting, you consent to your anonymous responses being used for research and improvement.
@@ -668,7 +668,7 @@
                 document.querySelectorAll('.question').forEach(function(q) { q.removeAttribute('data-answered') } )
                 $('f').scrollTo({ top: 0, behavior: 'smooth' });
 		$('done').disabled = true
-		$('done').textContent = "Fill Missing Answer"
+		$('done').textContent = "Fill Missing Answer Before Submit"
 		$('participant').value = Math.random().toString(36).substr(2, 9)
 		$('created').value = new Date().toString()
 		return true }
