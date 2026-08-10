@@ -105,7 +105,7 @@
 		</style>
 		<table id=helptable style="text-align:left;border-spacing:10px 0;max-width:80vw" >
 			<tr> <td colspan=2 style=text-align:center;> <u> actions </u> </td> </tr>
-			<tr> <td> tap tap</td> <td> anywhere to create a new word</td></tr>
+			<tr> <td> tap tap</td> <td> anywhere to create a new word or command </td></tr>
 			<tr> <td> tap words</td>	<td> to merge and make new combinations </td> </tr>
 			<tr> <td> tap a word</td>	<td> to break it down </td> </tr>
 			<tr> <td> watch </td> 		<td>as the AI takes a little time to consider </td> </tr>
@@ -114,13 +114,15 @@
 			<tr> <td> tap & hold </td>	<td> on a word to read wikipedia </td> </tr>
 			<tr> <td colspan=2 style=text-align:center;> <u> commands </u> </td> </tr>
 			<tr> <td> :help </td>		<td> type to show this </td> </tr>
-			<!--<tr> <td> :remix ... </td>	<td> chain tap to change layout ...how... </td> </tr>-->
-			<tr> <td> :whatif ... </td>	<td> chain tap to imagine ...a different layout... </td> </tr>
-			<tr> <td> :board ... </td>	<td> tap to set background board to ...http://... </td> </tr>
 			<tr> <td> :save </td>		<td> save file for big world </td></tr>
 			<tr> <td> :load </td>		<td> load big world file </td> </tr>
 			<tr> <td> :clear </td>		<td> restart with a blank world </td> </tr>
 			<tr> <td> :share </td>		<td> with a link to your small world </td> </tr>
+			<!--<tr> <td colspan=2 style=text-align:center;> <u> prompts </u> </td> </tr>-->
+			<!--<tr> <td> :remix ... </td>	<td> chain tap to change layout ...how... </td> </tr>-->
+			<tr> <td> :whatif ... </td>	<td> chain tap to imagine ...a different layout... </td> </tr>
+			<tr> <td> :board ... </td>	<td> tap to set background board to ...http://... </td> </tr>
+			<tr> <td> @ ... </td>           <td> tap multiple words and this to create @bstract group </td> </tr>
 		</table>
 
 						<p> tap taptap.build on top to close </p>
@@ -736,7 +738,9 @@
 		      if( layoutPrompt != "" ) return runLayout( layoutPrompt , selectedItems )
 		      else if( boardURL != "" ){
 				stopShaking()
-		      		document.getElementById( 'board' ).style.backgroundImage = `url('${boardURL}')`
+				if( `url("${boardURL}")` == document.getElementById('board').style.backgroundImage ) boardURL = ""  // toggle
+				document.getElementById( 'board' ).style.backgroundImage = `url("${boardURL}")`
+				saveGraph()
 				return
 		      }
 
