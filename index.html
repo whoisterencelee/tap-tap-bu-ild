@@ -117,12 +117,12 @@
 			<tr> <td> :save </td>		<td> save file for big world </td></tr>
 			<tr> <td> :load </td>		<td> load big world file </td> </tr>
 			<tr> <td> :clear </td>		<td> restart with a blank world </td> </tr>
-			<tr> <td> :share </td>		<td> with a link to your small world </td> </tr>
+			<tr> <td> :share </td>		<td> a link to your small world </td> </tr>
 			<!--<tr> <td colspan=2 style=text-align:center;> <u> prompts </u> </td> </tr>-->
 			<!--<tr> <td> :remix ... </td>	<td> chain tap to change layout ...how... </td> </tr>-->
 			<tr> <td> :whatif ... </td>	<td> chain tap to imagine ...a different layout... </td> </tr>
-			<tr> <td> :board ... </td>	<td> tap to set background board to ...http://... </td> </tr>
-			<tr> <td> @ ... </td>           <td> tap multiple words and this to create @bstract group </td> </tr>
+			<tr> <td> :board ... </td>	<td> tap to set background board to ...https://... </td> </tr>
+			<tr> <td> @ ... </td>           <td> tap with other words to create @bstract group </td> </tr>
 		</table>
 
 						<p> tap taptap.build on top to close </p>
@@ -135,7 +135,7 @@
 
 	<style>
 	.fade {
-		transition: opacity 1.0s ease-in-out;
+		transition: opacity 0.6s ease-in-out;
 	}
 	</style>
 	<div id=board class=unselectable style="position:absolute;width:100vw;height:100vh;display:flex;align-items:center;color:lightgrey;z-index:-2;font-family:Geoform-HeavyItalic;line-height:1.2em;flex-direction:column;justify-content:center;word-spacing:0.4em;background-size:100vw 100vh;">
@@ -156,7 +156,7 @@
 		    };
 		}
 
-		function setBackgroundWord(wideText = "taptap .build") {
+		function setBackgroundWord( wideText = document.getElementById("backgroundWord").textContent ) {
 		    const d = document.getElementById("backgroundWord");
 		    d.style.opacity = 0 // fade out whatever was previously
 		    const maxWidth = Math.floor(window.innerWidth * 0.85)
@@ -197,9 +197,10 @@
 
     window.addEventListener('resize', () => {
 	    // Update width/height variables
-	    width = window.innerWidth;
-	    height = window.innerHeight;
-	    changeGraph(); // Redraw with new dimensions
+	    width = window.innerWidth
+	    height = window.innerHeight
+	    setBackgroundWord()
+	    changeGraph() // Redraw with new dimensions
     })
 
     // Convert pixel to percentage coordinates
@@ -303,7 +304,7 @@
 		  try {
 			  if( navigator.share ){
 				  await navigator.share( {
-					  title : "Tap Tap Craft" ,
+					  title : "TapTap.Build" ,
 					  text : "Building Worlds" ,
 					  url : s
 				  } )
@@ -944,7 +945,7 @@ let lessons = [
 	},
 	{
 		id: "step4",
-		title: "Make a transportation",
+		title: "To Make a transportation",
 		description: "👩‍🏫 See if you can make a transportation with what you already have",
 		requiredNodes: ["Steam engine", "Wheel"],  // Wheel was already created but we keep incase user removed
 		targetNodes: ["Transportation"] ,
@@ -953,16 +954,16 @@ let lessons = [
 	},
 	{
 		id: "step5",
-		title: "Holding words",
+		title: "Holding word",
 		description: "👩‍🏫 Try to tap and hold the word 'Transportation'",
 		requiredNodes: ["Transportation"],
 		targetNodes: () => lesson_holding_words,
-		hint: "Dragging any word to any edge should remove the word",
+		hint: "Holding a word takes you out to wikipedia",
 		nextLesson: "step6",
 	},
 	{
 		id: "step6",
-		title: "Removing words",
+		title: "Removing word",
 		description: "👩‍🏫 Drag the word 'Remove' to the edge",
 		requiredNodes: ["Remove"],
 		targetNodes: () => !nodes.some(node => node.n === "Remove" ),
@@ -987,8 +988,8 @@ let lessons = [
 	},
 	{
 		id: "step8",
-		title: "Clear the way",
-		description: "👩‍🏫 Add the command ':clear' \n that's tap tap and \n typing 'colon' + 'clear' \n to starting building your world",
+		title: "Clear",
+		description: "👩‍🏫 Add the command ':clear' \n that's tap tap and \n typing 'colon' + 'clear'",
 		requiredNodes: [],
 		targetNodes: () => nodes.length == 1,
 		hint: "that's colon plus clear",
@@ -1054,7 +1055,7 @@ function completeLesson(lessonId) {
 	if (lesson.nextLesson && lessons.find(l => l.id === lesson.nextLesson)) {
 
 		// Show completion message
-		alert(`Lesson Complete: You can now do ${lesson.title}`);
+		setBackgroundWord(`you can now do ${lesson.title}`);
 
 		currentLesson = lesson.nextLesson;
 
@@ -1064,17 +1065,6 @@ function completeLesson(lessonId) {
 		startLesson(currentLesson);
 	}
 }  // completeLesson
-
-
-
-
-function updateLessonUI() {
-	const lesson = lessons.find(l => l.id === currentLesson);
-	if (!lesson) return;
-
-	setBackgroundWord( lesson.title )
-
-}  // updateLessonUI
 
 
 function startLesson(lessonId = "step1" ) {
@@ -1108,7 +1098,8 @@ function startLesson(lessonId = "step1" ) {
 			}
 		});
 	}
-	updateLessonUI();
+	if( lesson.id != "end" ) setBackgroundWord( `try ${lesson.title}` )
+	else setBackgroundWord( lesson.title )
 	changeGraph();
 }  // startLesson
 
