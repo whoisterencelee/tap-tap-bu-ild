@@ -6,30 +6,24 @@
   <rect x="0" y="0" width="1000" height="667" fill="#F9F6F0" rx="10"/>
 
   <!-- Top Header Box -->
-  <rect x="20" y="20" width="960" height="85" fill="none" stroke="#CBB495" stroke-width="2" rx="5"/>
-  <text x="35" y="65" font-family="Arial, sans-serif" font-size="36" font-weight="bold" fill="#1A2B3C">PROJECT NAME</text>
-  <text x="35" y="92" font-family="Arial, sans-serif" font-size="20" fill="#6E7B85">Hardware Project Organizer</text>
+  <rect x="20" y="25" width="960" height="85" fill="none" stroke="#CBB495" stroke-width="2" rx="5"/>
+  <text x="35" y="55" font-family="Arial, sans-serif" font-size="24" font-weight="bold" fill="#1A2B3C">PROJECT ORGANIZER</text>
 
   <!-- PARTS LIST -->
   <rect x="20" y="120" width="280" height="525" fill="#4A6577" rx="6"/>
   <text x="45" y="155" font-family="Arial, sans-serif" font-size="24" font-weight="bold" fill="#FFFFFF">PARTS LIST</text>
-  <line x1="45" y1="165" x2="100" y2="165" stroke="#D18D47" stroke-width="3"/>
 
   <!-- SCHEMATICS -->
   <rect x="320" y="120" width="320" height="260" fill="#FDFBF7" stroke="#97A9B5" stroke-width="1.5" rx="6"/>
-  <text x="480" y="165" font-family="Arial, sans-serif" font-size="24" font-weight="bold" fill="#1A2B3C" text-anchor="middle">SCHEMATICS</text>
-  <line x1="445" y1="175" x2="515" y2="175" stroke="#D18D47" stroke-width="3"/>
+  <text x="480" y="155" font-family="Arial, sans-serif" font-size="24" font-weight="bold" fill="#1A2B3C" text-anchor="middle">SCHEMATICS</text>
 
   <!-- TASKS -->
-  <rect x="660" y="120" width="320" height="260" fill="#FDFBF7" stroke="#97A9B5" stroke-width="1.5" rx="6"/>
-  <text x="680" y="165" font-family="Arial, sans-serif" font-size="24" font-weight="bold" fill="#1A2B3C">TASKS</text>
-
-  <!-- TIMELINE -->
-  <rect x="320" y="395" width="320" height="250" fill="#FDFBF7" stroke="#97A9B5" stroke-width="1.5" rx="6"/>
-  <text x="480" y="435" font-family="Arial, sans-serif" font-size="26" font-weight="bold" fill="#D18D47" text-anchor="middle">TIMELINE</text>
-  <line x1="355" y1="445" x2="605" y2="445" stroke="#D18D47" stroke-width="2"/>
+  <rect x="660" y="120" width="320" height="525" fill="#CBB495" rx="6"/>
+  <text x="680" y="155" font-family="Arial, sans-serif" font-size="24" font-weight="bold" fill="#1A2B3C">TASKS</text>
+  <line x1="680" y1="390" x2="970" y2="390" stroke="#4A6577" stroke-width="2"/>
 
   <!-- NOTES -->
-  <rect x="660" y="395" width="320" height="250" fill="#FDFBF7" stroke="#97A9B5" stroke-width="1.5" rx="6"/>
-  <text x="680" y="435" font-family="Arial, sans-serif" font-size="24" font-weight="bold" fill="#1A2B3C" font-style="italic">NOTES</text>
+  <rect x="320" y="395" width="320" height="250" fill="#FDFBF7" stroke="#97A9B5" stroke-width="1.5" rx="6"/>
+  <text x="480" y="430" font-family="Arial, sans-serif" font-size="26" font-weight="bold" fill="#A2B3C" text-anchor="middle">NOTES</text>
+
 </svg>
