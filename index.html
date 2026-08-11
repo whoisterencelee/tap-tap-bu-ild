@@ -608,12 +608,12 @@
     }  // updateGraph
 
     // Initialize
-    updateGraph();
+    updateGraph()
 
     // Double click create new node
-    svg.on("dblclick", (event) => {
+    svg.on( "dblclick" , ( event ) => {
 
-	      if( event.target.id != "graph" ) return event.stopPropagation()// prevent multiple triggering
+	      if( event.target.id != "graph" ) return event.stopPropagation()  // prevent multiple triggering
 
 	      // Remove any existing input nodes first
 	      svg.selectAll(".input-node").remove();
@@ -670,41 +670,47 @@
 	    // Finalize node creation
 	    function createNode( e ) {
 		    if (e.key === "Enter" ){
-			    if( e.target.value.trim() ) {
-				    let item = e.target.value.trim()
+			    let word = e.target.value.trim()
+			    inputGroup.remove()
 
-				    let command = item.toLowerCase()
-				    let keepNode = false
-				    if( command.match( /^:/ ) ){
+			    if( word ) {  // check empty input
+
+				    if( word.match( /^:/ ) ){  // command
+
+					    let command = word.toLowerCase()
+					    let keepNode = false
+
 					    if( command === ":help" ) showHide( document.getElementById( "help" ) )
+					    
 					    else if( command.match( /^(:remix|:whatif)/ ) && typeof runLayout == "function" ) keepNode = true
+
 					    else if( command.match( /^:board/ ) ) keepNode = true
+
 					    else if( command.match( /^:clear/ ) ) return clearGraph()
+					    
 					    else if( command.match( /^:save/ ) ) download( saveGraph() ) 
+					    
 					    else if( command.match( /^:load/ ) ) upload()
+					    
 					    else if( command.match( /^:share/ ) ) share()
 
-					    if( !keepNode ){
-						    inputGroup.remove()
-						    return
-					    }
+					    if( !keepNode ) return
 				    } // command
 
-				    item = item.charAt(0).toUpperCase() + item.slice(1).toLowerCase();
+				    word = word.charAt(0).toUpperCase() + word.slice(1).toLowerCase();
 				    nodes.push({
 					    i: ++nodeID,
 					    x: x,
 					    y: y,
-					    n: item
+					    n: word
 				    });
 
 				    changeGraph();
-			    }
-			    inputGroup.remove();
-		    } else if (e.key === "Escape") {
-			    inputGroup.remove();
-		    }
-	    }
+
+			    }  // if word
+
+		    } else if (e.key === "Escape") inputGroup.remove();
+	    }  // createNode
 
 	    input.addEventListener("keydown", createNode )
 	    input.addEventListener("blur", function( e ){ e.key="Enter"; createNode( e ) })
