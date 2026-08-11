@@ -452,6 +452,7 @@
 
 	  function stopSound( effect = 'click' ){
 		  sounds[ effect ].pause()
+		  sounds[ effect ].currentTime = 0
 	  }
 
     // Layering
