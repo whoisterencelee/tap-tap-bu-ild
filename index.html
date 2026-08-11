@@ -741,7 +741,7 @@
 			      if( c.n.match( /^(:remix|:whatif)/ ) ) layoutPrompt += c.n.split( /^(:remix|:whatif)/ )[2] + ". "
 			      else if( c.n.match( /^:board/ ) ){
 			      		boardURL = c.n.split( /^:board/ )[1]
-					if( boardURL === "" ) boardURL = './boards/project_organizer.jpg'
+					if( boardURL === "" ) boardURL = './boards/project_organizer.svg'
 			      } else if( !c.n.match( /^:/ ) ) return true
 			      return false  // removes all commands
 		      })
