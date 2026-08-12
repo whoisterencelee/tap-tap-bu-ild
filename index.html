@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <title>Tap Tap Craft</title>
+  <title>TapTap.Build</title>
   <script src="https://d3js.org/d3.v7.min.js"></script>
   <meta name="viewport" content="width=device-width,initial-scale=1" />
   <meta name="description" content="" />
@@ -122,9 +122,9 @@
 			<tr style=height:1em;></tr>
 			<tr> <td colspan=2 style=text-align:center;> <u> tap activated commands </u> </td> </tr>
 			<!--<tr> <td> :remix ... </td>	<td> change layout ...how... </td> </tr>-->
-			<tr> <td> :whatif ... </td>	<td> chain-able to check ...a different layout... </td> </tr>
-			<tr> <td> :board ... </td>	<td> toogle background to ...https://... </td> </tr>
-			<tr> <td> @ ... </td>           <td> tap words to create abstract group </td> </tr>
+			<tr> <td> :board ... </td>	<td> toogle background to <a href=https://github.com/whoisterencelee/tap-tap-bu-ild/tree/main/boards>...https://...</a> </td> </tr>
+			<tr> <td> :whatif ... </td>	<td> chain-able to imagine ...a different layout... </td> </tr>
+			<tr> <td> @ ... </td>           <td> tap last to collect into a group </td> </tr>
 		</table>
 
 						<p> tap "taptap.build" to close </p>
@@ -264,7 +264,7 @@
 	    let down = URL.createObjectURL( blob )
 	    let a = document.createElement( 'a' )
 	    a.href = down
-	    a.download = 'taptapcraft-' + getTimestamp() + '.json'
+	    a.download = 'taptapbuild-' + getTimestamp() + '.json'
 	    a.click()
 	    URL.revokeObjectURL( down )
     } // download
@@ -592,11 +592,11 @@
 
 		    // Toggle selection directly via D3
 		    const nodeGroup = d3.select(this);
-		    const isSelected = nodeGroup.classed("selected");
-		    nodeGroup.classed("selected", !isSelected);
+		    const wasSelected = nodeGroup.classed("selected");
+		    nodeGroup.classed("selected", !wasSelected);
 
 		    // Update array (no ID needed - uses object reference)
-		    if (isSelected) {
+		    if (wasSelected) {
 			    selectedNodes = selectedNodes.filter(n => n !== d); // Remove by reference
 		    } else {
 			    selectedNodes.push(d); // Add by reference
@@ -673,6 +673,7 @@
 	    // Finalize node creation
 	    function createNode( e ) {
 		    if (e.key === "Enter" ){
+
 			    let word = e.target.value.trim()
 			    inputGroup.remove()
 
@@ -682,19 +683,12 @@
 
 					    let command = word.toLowerCase()
 					    let keepNode = false
-
 					    if( command === ":help" ) showHide( document.getElementById( "help" ) )
-					    
 					    else if( command.match( /^(:remix|:whatif)/ ) && typeof runLayout == "function" ) keepNode = true
-
 					    else if( command.match( /^:board/ ) ) keepNode = true
-
 					    else if( command.match( /^:clear/ ) ) return clearGraph()
-					    
 					    else if( command.match( /^:save/ ) ) download( saveGraph() ) 
-					    
 					    else if( command.match( /^:load/ ) ) upload()
-					    
 					    else if( command.match( /^:share/ ) ) share()
 
 					    if( !keepNode ) return
@@ -737,11 +731,43 @@
 		      let selectedItems = Array.from( selectedNodes )
 		      selectedNodes = [];
 		      let selectedLast = selectedItems[ selectedItems.length - 1 ]
-			
+
 		      // loading
 		      crafting++
 		      let loading = document.getElementsByTagName( "loading" )
 		      for( var d = 0 ; d < loading.length ; d++ ){ loading[ d ].classList.add( 'blink' ) }
+
+		      // abstraction
+		      if( selectedLast.n.match( /^@/ ) ){
+		      		var abstractNode = selectedLast
+				if( !abstractNode.a ) abstractNode.a = []
+
+				// in order to make the abstraction the z-highest node
+				// we need to remove it and add it back to nodes and links
+		      		nodes = nodes.filter( n => n !== abstractNode )
+				var priorId = abstractNode.i
+				abstractNode.i = ++nodeID
+				nodes.push( abstractNode )
+				links = links.forEach( n => {
+					if( n.t == priorId ) n.t == abstractNode.i
+					else if( n.s == priorId ) n.s == abstractNode.i 
+				})
+
+				// take all other nodes and put it behind last node
+				selectedItems.filter( n => n !== abstractNode )
+				selectedItems.forEach( n => {
+					abstractNode.a.push( { i: n.i , x: n.x - abstractNode.x , y: n.y - abstractNode.y } )  // make them relative
+					n.x = abstractNode.x
+					n.y = abstractNode.y
+
+				} )	
+				stopShaking()
+				changeGraph()
+		      		return
+			}
+		      
+		      // else
+		      // expand all abstractions
 
 		      // commands
 		      let layoutPrompt = ""
@@ -751,7 +777,8 @@
 			      else if( c.n.match( /^:board/ ) ){
 			      		boardURL = c.n.split( /^:board/ )[1]
 					if( boardURL === "" ) boardURL = './boards/project_organizer.svg'
-			      } else if( !c.n.match( /^:/ ) ) return true
+
+			      } else if( !c.n.match( /^:/ ) ) return true  // keep the real words
 			      return false  // removes all commands
 		      })
 		      if( layoutPrompt != "" ) return runLayout( layoutPrompt , selectedItems )
@@ -826,7 +853,7 @@
 			      console.error( 'Network error: ' , error )
 		      })
 
-	      }, 2000);
+	      }, 2000)  // setTimeout
     }
 		      
 </script>
@@ -918,11 +945,12 @@ function runLayout( layoutPrompt , selectedItems ) {
 
 }  // runLayout
 
-function stopShaking(){
-	var selectedDOM = svg.selectAll(".node-group.selected")
-	selectedDOM.classed( "selected shake", false )
-	let loading = document.getElementsByTagName( "loading" )
-	if( --crafting < 1 ) for( var d = 0 ; d < loading.length ; d++ ){ loading[ d ].classList.remove( 'blink' ) }
+function stopShaking( selectedDOM = svg.selectAll( ".node-group.selected" ) ){
+	if( --crafting < 1 ){
+		selectedDOM.classed( "selected shake", false )
+		let loading = document.getElementsByTagName( "loading" )
+		for( var d = 0 ; d < loading.length ; d++ ){ loading[ d ].classList.remove( 'blink' ) }
+	} // --crafting
 }  // stopShaking
 
 </script>
