@@ -458,8 +458,6 @@
 		  sounds[ effect ].currentTime = 0
 	  }
 
-</script><script>
-
     // Layering
     svg.append("g").attr("class", "links-layer")
     svg.append("g").attr("class", "nodes-layer")
@@ -772,12 +770,17 @@
 
 					selectedItems.pop()
 
-					// remove duplicate
+					// remove duplicate from abstraction and selectedItems
 					selectedItems = selectedItems.filter( n => {
-						return !abstractNode.a.c.includes( nn => nn.i == n.i ) &&
-						( abstractNode.a.e = abstractNode.a.e.filter( nn => nn.i != n.i ) ).length == 0
-						// remove duplicated item from abstraction
-						} )
+						let c = abstractNode.a.c.length , e = abstractNode.a.e.length
+						abstractNode.a.c = abstractNode.a.c.filter( nn => nn.i != n.i )
+						abstractNode.a.e = abstractNode.a.e.filter( nn => nn.i != n.i )
+						if( c != abstractNode.a.c.length || e != abstractNode.a.e.length ){ // duplicate removed
+							// remove links too
+							links = links.filter(nn => nn.s != n.i && nn.t != abstractNode.i );
+							return false
+						} return true
+					} )
 
 
 					// add back the expanded
