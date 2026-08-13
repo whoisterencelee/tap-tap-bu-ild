@@ -457,6 +457,8 @@
 		  sounds[ effect ].currentTime = 0
 	  }
 
+</script><script>
+
     // Layering
     svg.append("g").attr("class", "links-layer")
     svg.append("g").attr("class", "nodes-layer")
@@ -729,7 +731,7 @@
 		      selectedDOM.classed("shake", true);
 
 		      let selectedItems = Array.from( selectedNodes )
-		      selectedNodes = [];
+		      selectedNodes = []
 		      let selectedLast = selectedItems[ selectedItems.length - 1 ]
 
 		      // loading
@@ -740,29 +742,62 @@
 		      // abstraction
 		      if( selectedLast.n.match( /^@/ ) ){
 		      		var abstractNode = selectedLast
-				if( !abstractNode.a ) abstractNode.a = []
 
-				// in order to make the abstraction the z-highest node
-				// we need to remove it and add it back to nodes and links
-		      		nodes = nodes.filter( n => n !== abstractNode )
-				var priorId = abstractNode.i
-				abstractNode.i = ++nodeID
-				nodes.push( abstractNode )
-				links = links.forEach( n => {
-					if( n.t == priorId ) n.t == abstractNode.i
-					else if( n.s == priorId ) n.s == abstractNode.i 
-				})
+				// abstraction is implement using condense and expand
+				if( !abstractNode.a ) abstractNode.a = { c: [] , e: [] }
 
-				// take all other nodes and put it behind last node
-				selectedItems.filter( n => n !== abstractNode )
-				selectedItems.forEach( n => {
-					abstractNode.a.push( { i: n.i , x: n.x - abstractNode.x , y: n.y - abstractNode.y } )  // make them relative
-					n.x = abstractNode.x
-					n.y = abstractNode.y
+				// put the abstraction into z-higher layer if condense
+				// or drop down if expand, as it is only ever in these two states
+				// and if an abstraction is in the condense of another abstraction 
+				// the former is also dropped down
 
-				} )	
+
+				if( selectedItems.length == 1 && abstractNode.a.c.length != 0 ){	// condense => expand
+
+					// put nodes back to their original position
+					// and repair expand list if node was somehow removed
+					abstractNode.a.e = abstractNode.a.c.filter( n => {
+						orig = nodes.find( nn => nn.i == n.i )
+						if( !orig ) return false
+						orig.x = n.x + abstractNode.x
+						orig.y = n.y + abstractNode.y
+						delete n.x
+						delete n.y
+						return true
+					} )
+					abstractNode.a.c = []
+
+				} else {								// condense
+
+					selectedItems.pop()
+
+					// remove duplicate
+					selectedItems = selectedItems.filter( n => !abstractNode.a.c.includes( nn => nn.i == n.i ) )
+
+					// TODO maybe allow remove item from abstraction
+
+					// add back the expanded
+					abstractNode.a.e.forEach( n => {
+						if( selectedItems.find( nn => nn.i == n.i ) ) return
+						let addback = nodes.find( nn => nn.i == n.i )
+						if( !addback ) return  // skip deleted nodes
+						selectedItems.push( addback )
+					} )
+
+					selectedItems.forEach( n => {
+						// store as relative positioned
+						abstractNode.a.c.push( { i: n.i , x: n.x - abstractNode.x , y: n.y - abstractNode.y } )  
+						// take all other nodes and put it behind last node
+						n.x = abstractNode.x
+						n.y = abstractNode.y - 1
+					} )	
+
+					abstractNode.a.e = []
+				}  // condense
+
 				stopShaking()
-				changeGraph()
+				updateGraph()
+				//changeGraph()
 		      		return
 			}
 		      
