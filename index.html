@@ -90,6 +90,7 @@
 		<div style=position:absolute;width:100vw;top:2vh;left:0;display:none;flex-direction:row;align-items:center;justify-content:center; display-value=flex>
 			how&emsp;
 			<a href=https://particiate.org/taptap.build.paper target=_blank>why</a>&emsp;
+			<a href=https://github.com/whoisterencelee/tap-tap-bu-ild/tree/main/boards target=_blank>boards</a>&emsp;
 			<a href=./survey/survey_usability.html target=_blank onclick="checkLessonCompletion(lesson_feedback=true)">feedback</a>
 		</div>
 		<div style=position:absolute;width:100vw;top:3vh;left:0;display:none;flex-direction:column;align-items:center;z-index:-1; display-value=flex>
@@ -122,9 +123,9 @@
 			<tr style=height:1em;></tr>
 			<tr> <td colspan=2 style=text-align:center;> <u> tap activated commands </u> </td> </tr>
 			<!--<tr> <td> :remix ... </td>	<td> change layout ...how... </td> </tr>-->
-			<tr> <td> :board ... </td>	<td> toogle background to <a href=https://github.com/whoisterencelee/tap-tap-bu-ild/tree/main/boards>...https://...</a> </td> </tr>
+			<tr> <td> :board ... </td>	<td> toggle background to ...https://... </td> </tr>
 			<tr> <td> :whatif ... </td>	<td> chain-able to imagine ...a different layout... </td> </tr>
-			<tr> <td> @ ... </td>           <td> tap last to collect into a group </td> </tr>
+			<tr> <td> + ... </td>           <td> tap last to collect into or out of a group </td> </tr>
 		</table>
 
 						<p> tap "taptap.build" to close </p>
@@ -740,7 +741,7 @@
 		      for( var d = 0 ; d < loading.length ; d++ ){ loading[ d ].classList.add( 'blink' ) }
 
 		      // abstraction
-		      if( selectedLast.n.match( /^@/ ) ){
+		      if( selectedLast.n.match( /^[+]/ ) ){
 		      		var abstractNode = selectedLast
 
 				// abstraction is implement using condense and expand
@@ -772,9 +773,12 @@
 					selectedItems.pop()
 
 					// remove duplicate
-					selectedItems = selectedItems.filter( n => !abstractNode.a.c.includes( nn => nn.i == n.i ) )
+					selectedItems = selectedItems.filter( n => {
+						return !abstractNode.a.c.includes( nn => nn.i == n.i ) &&
+						( abstractNode.a.e = abstractNode.a.e.filter( nn => nn.i != n.i ) ).length == 0
+						// remove duplicated item from abstraction
+						} )
 
-					// TODO maybe allow remove item from abstraction
 
 					// add back the expanded
 					abstractNode.a.e.forEach( n => {
@@ -790,14 +794,18 @@
 						// take all other nodes and put it behind last node
 						n.x = abstractNode.x
 						n.y = abstractNode.y - 1
+
+						links.push( {
+							s: n.i ,
+							t: abstractNode.i,
+						} )
 					} )	
 
 					abstractNode.a.e = []
 				}  // condense
 
 				stopShaking()
-				updateGraph()
-				//changeGraph()
+				changeGraph()
 		      		return
 			}
 		      
