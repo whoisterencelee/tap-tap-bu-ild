@@ -745,12 +745,6 @@
 				// abstraction is implement using condense and expand
 				if( !abstractNode.a ) abstractNode.a = { c: [] , e: [] }
 
-				// put the abstraction into z-higher layer if condense
-				// or drop down if expand, as it is only ever in these two states
-				// and if an abstraction is in the condense of another abstraction 
-				// the former is also dropped down
-
-
 				if( selectedItems.length == 1 && abstractNode.a.c.length != 0 ){	// condense => expand
 
 					// put nodes back to their original position
@@ -805,6 +799,13 @@
 					} )	
 
 					abstractNode.a.e = []
+
+					// to raise the z-index up for the abstractNode
+					// we just need to remove it from nodes and put it in the end
+					let z = nodes.findIndex( n => n === abstractNode )
+					nodes.splice( z , 1 )
+					nodes.push( abstractNode )
+
 				}  // condense
 
 				stopShaking()
