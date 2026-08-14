@@ -125,6 +125,8 @@
 			<!--<tr> <td> :remix ... </td>	<td> change layout ...how... </td> </tr>-->
 			<tr> <td> :board ... </td>	<td> toggle background to ...https://... </td> </tr>
 			<tr> <td> :whatif ... </td>	<td> chain-able to imagine ...a different layout... </td> </tr>
+			<tr style=height:1em;></tr>
+			<tr> <td colspan=2 style=text-align:center;> <u> experimental commands </u> </td> </tr>
 			<tr> <td> + ... </td>           <td> tap last to collect into or out of a group </td> </tr>
 		</table>
 
@@ -788,23 +790,27 @@
 					selectedItems.forEach( n => {
 						// store as relative positioned
 						abstractNode.a.c.push( { i: n.i , x: n.x - abstractNode.x , y: n.y - abstractNode.y } )  
-						// take all other nodes and put it behind last node
-						n.x = abstractNode.x
-						n.y = abstractNode.y - 1
+						links.push( { s: n.i , t: abstractNode.i, } )
+					} )
 
-						links.push( {
-							s: n.i ,
-							t: abstractNode.i,
-						} )
+					abstractNode.a.c.forEach( ( n , c ) => {
+						// like a file cabinet
+						acn = nodes.find( nn => nn.i == n.i )
+						acn.x = abstractNode.x
+						acn.y = abstractNode.y - toPercent( 3 * c + 3 , height )
 					} )	
+					// TODO implement hover to raise the acn
+					// TODO implement drag together
 
 					abstractNode.a.e = []
 
 					// to raise the z-index up for the abstractNode
-					// we just need to remove it from nodes and put it in the end
-					let z = nodes.findIndex( n => n === abstractNode )
-					nodes.splice( z , 1 )
-					nodes.push( abstractNode )
+					// we just need to remove it from nodes and put it just above the highest condense
+					// note that condense is a simplified version actual node, they are not the same
+					let zmax = nodes.findIndex( n => n === abstractNode )
+					nodes.splice( zmax , 1 )  // first remove itself
+					abstractNode.a.c.forEach( c => { zmax = Math.max( nodes.findIndex( nn => nn.i === c.i ) + 1 , zmax ) } )
+					nodes.splice( zmax , 0 , abstractNode )
 
 				}  // condense
 
