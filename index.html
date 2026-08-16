@@ -485,8 +485,13 @@
 		    .join("g")
 		    .classed( "node-group" , true )
 		    .call(drag)
+		    .on( "mouseenter" , function( event , d ) { d3.select(this).raise() } ) 
+		    .on( "mouseleave" , function( event, d ) { 
+			var origOrder = nodes.findIndex( n => n.i == d.i )
+			this.parentNode.insertBefore( this , this.parentNode.children[ origOrder ] )
+			} )
 
-	nodeGroups.transition().duration( duration )
+    	    nodeGroups.transition().duration( duration )
 		    .attr("transform", d => {
 				    const px = toPixel(d.x , width);
 				    const py = toPixel(d.y , height);
@@ -598,18 +603,13 @@
 		    const wasSelected = nodeGroup.classed("selected");
 		    nodeGroup.classed("selected", !wasSelected);
 
-		    // Update array (no ID needed - uses object reference)
-		    if (wasSelected) {
-			    selectedNodes = selectedNodes.filter(n => n !== d); // Remove by reference
-		    } else {
-			    selectedNodes.push(d); // Add by reference
-		    }
+		    selectedNodes = svg.selectAll(".node-group.selected").data()
 
 		    if( selectedNodes.length < 1 ){
 			    clearTimeout(selectionTimer) // all selections removed
 			    stopSound()
 		    } else resetSelectionTimer(); // Reset 3-second clear
-	    });
+	    })
 
     }  // updateGraph
 
@@ -731,7 +731,7 @@
 
 		      selectedDOM.classed("shake", true);
 
-		      let selectedItems = Array.from( selectedNodes )
+		      let selectedItems = Array.from( selectedNodes )  // clone
 		      selectedNodes = []
 		      let selectedLast = selectedItems[ selectedItems.length - 1 ]
 
@@ -799,7 +799,6 @@
 						acn.x = abstractNode.x
 						acn.y = abstractNode.y - toPercent( 3 * c + 3 , height )
 					} )	
-					// TODO implement hover to raise the acn
 					// TODO implement drag together
 
 					abstractNode.a.e = []
