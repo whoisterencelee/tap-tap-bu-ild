@@ -391,6 +391,15 @@
 		    } else {
 			    d.x = newX;
 			    d.y = newY;
+			    if( d.a && d.a.c ){  // move condense
+			    	d.a.c.forEach( ( c , ci ) => {
+					cNode = nodes.find( n => n.i == c.i )
+					if( cNode ){
+						cNode.x = newX
+						cNode.y = newY - toPercent( 3 * ci + 3 , height )
+					}
+				})
+			    }
 		    }
 
 		    changeGraph()
@@ -766,7 +775,7 @@
 
 					selectedItems.pop()
 
-					// remove duplicate from abstraction and selectedItems
+					// remove selected from abstraction and selectedItems
 					selectedItems = selectedItems.filter( n => {
 						let c = abstractNode.a.c.length , e = abstractNode.a.e.length
 						abstractNode.a.c = abstractNode.a.c.filter( nn => nn.i != n.i )
@@ -778,38 +787,39 @@
 						} return true
 					} )
 
-
 					// add back the expanded
 					abstractNode.a.e.forEach( n => {
 						if( selectedItems.find( nn => nn.i == n.i ) ) return
 						let addback = nodes.find( nn => nn.i == n.i )
 						if( !addback ) return  // skip deleted nodes
-						selectedItems.push( addback )
+						selectedItems.unshift( addback )
 					} )
 
 					selectedItems.forEach( n => {
 						// store as relative positioned
-						abstractNode.a.c.push( { i: n.i , x: n.x - abstractNode.x , y: n.y - abstractNode.y } )  
+						abstractNode.a.c.unshift( { i: n.i , x: n.x - abstractNode.x , y: n.y - abstractNode.y } )  
 						links.push( { s: n.i , t: abstractNode.i, } )
 					} )
 
+					let zmax = nodes.findIndex( n => n === abstractNode )
+					nodes.splice( zmax , 1 )  // first remove itself
+					nodes.push( abstractNode )  // put it at the top
+					zmax = nodes.length - 1
+
 					abstractNode.a.c.forEach( ( n , c ) => {
 						// like a file cabinet
-						acn = nodes.find( nn => nn.i == n.i )
+						acn = nodes.splice( nodes.findIndex( nn => nn.i == n.i ) , 1 )[ 0 ]
 						acn.x = abstractNode.x
 						acn.y = abstractNode.y - toPercent( 3 * c + 3 , height )
+						nodes.splice( zmax - c - 1 , 0 , acn )
 					} )	
-					// TODO implement drag together
 
 					abstractNode.a.e = []
 
 					// to raise the z-index up for the abstractNode
 					// we just need to remove it from nodes and put it just above the highest condense
 					// note that condense is a simplified version actual node, they are not the same
-					let zmax = nodes.findIndex( n => n === abstractNode )
-					nodes.splice( zmax , 1 )  // first remove itself
-					abstractNode.a.c.forEach( c => { zmax = Math.max( nodes.findIndex( nn => nn.i === c.i ) + 1 , zmax ) } )
-					nodes.splice( zmax , 0 , abstractNode )
+
 
 				}  // condense
 
